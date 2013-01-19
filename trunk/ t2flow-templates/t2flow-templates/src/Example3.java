@@ -8,9 +8,9 @@ import org.stringtemplate.v4.*;
 public class Example3 {
 	public static void main(String[] args) {
 		// pre-prepared inputs 
-		String first_workflow_file="C:\\Users\\NASSAR\\taverna_workflows\\addition.t2flow";
-		String sec_workflow_file="C:\\Users\\NASSAR\\taverna_workflows\\multiplication.t2flow";
-		String output_file="C:\\Users\\NASSAR\\taverna_workflows\\expression-recomposed.t2flow";
+		String first_workflow_file="workflows/addition.t2flow";
+		String sec_workflow_file="workflows/multiplication.t2flow";
+		String output_file="workflows/expression-recomposed.t2flow";
 		// should be extract by an XML Parser 
 		String first_workflow_name="Workflow3"; 
 		String sec_workflow_name="Workflow55"; 
@@ -36,7 +36,7 @@ public class Example3 {
 			}
 			BufferedReader br2 = 
 					new BufferedReader(new FileReader(sec_workflow_file));
-			System.out.println("reading addition workflow\n" + br2.readLine());
+			System.out.println("reading the multiplication workflow\n" + br2.readLine());
 			System.out.println();
 			while (!(strLine = br2.readLine()).endsWith("</workflow>"))   {		
 				dataflow2+=strLine+"\n";
@@ -45,15 +45,6 @@ public class Example3 {
 			br2.close();
 			dataflow1=dataflow1.replace( "role=\"top\"",  "role=\"nested\"");
 			dataflow2=dataflow2.replace( "role=\"top\"",  "role=\"nested\"");
-			//dataflow1=dataflow1.replace( "<depth>0</depth>",  "<depth>1</depth>");
-			//dataflow2=dataflow2.replace( "<depth>0</depth>",  "<depth>1</depth>");
-			//dataflow1=dataflow1.replace( "<granularDepth>0</granularDepth>",  "<granularDepth>1</granularDepth>");
-			//dataflow2=dataflow2.replace( "<granularDepth>0</granularDepth>",  "<granularDepth>1</granularDepth>");
-			
-			//System.out.println(dataflow1);
-			//System.out.println();
-			//System.out.println();
-			//System.out.println(dataflow2);
 			
 			// create the template and add the arguments
 			STGroup group = new STGroupDir("templates/",'$','$');
@@ -78,8 +69,5 @@ public class Example3 {
 		catch (IOException e){
 			System.err.println("Error: " + e.getMessage());
 		}
-
-	
 	}
-
 }
