@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" xmlns:prop="http://docs.oasis-open.org/wsbpel/2.0/varprop" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://corr.ex.tps" xmlns:xsd="http://www.w3.org/2001/XMLSchema" name="CorrProcess" targetNamespace="http://corr.ex.tps">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     TYPE DEFINITION - List of types participating in this BPEL process 
+     The BPEL Designer will generate default request and response types
+     but you can define or import any XML Schema type and use them as part 
+     of the message types.
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->    
+    <types>
+        <xsd:schema attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://corr.ex.tps">
+
+        	<xsd:element name="CorrProcessRequest">
+        		<xsd:complexType>
+        			<xsd:sequence>
+        				<xsd:element name="input" type="xsd:int"/>
+        			</xsd:sequence>
+        		</xsd:complexType>
+        	</xsd:element>
+
+        	<xsd:element name="CorrProcessResponse">
+        		<xsd:complexType>
+        			<xsd:sequence>
+        				<xsd:element name="result" type="xsd:int"/>
+        			</xsd:sequence>
+        		</xsd:complexType>
+        	</xsd:element>
+
+        	
+        </xsd:schema>
+    </types>
+
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     MESSAGE TYPE DEFINITION - Definition of the message types used as 
+     part of the port type defintions
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->    
+    <message name="CorrProcessRequestMessage">
+        <part element="tns:CorrProcessRequest" name="payload"/>
+    </message>
+    <message name="CorrProcessResponseMessage">
+        <part element="tns:CorrProcessResponse" name="payload"/>
+    </message>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     PORT TYPE DEFINITION - A port type groups a set of operations into
+     a logical service unit.
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->    
+
+    <!-- portType implemented by the CorrProcess BPEL process -->
+    <portType name="CorrProcess">
+        <operation name="process">
+            <input message="tns:CorrProcessRequestMessage"/>
+            <output message="tns:CorrProcessResponseMessage"/>
+        </operation>
+    </portType>   
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     PARTNER LINK TYPE DEFINITION
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->    
+    <plnk:partnerLinkType name="CorrProcess">
+        <plnk:role name="CorrProcessProvider" portType="tns:CorrProcess"/>
+    </plnk:partnerLinkType>
+    
+<prop:property name="MyCS" type="xsd:int"/>
+<prop:propertyAlias messageType="tns:CorrProcessRequestMessage" part="payload" propertyName="tns:MyCS">
+</prop:propertyAlias>
+<prop:propertyAlias messageType="tns:CorrProcessResponseMessage" part="payload" propertyName="tns:MyCS">
+</prop:propertyAlias>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     BINDING DEFINITION - Defines the message format and protocol details
+     for a web service.
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <binding name="CorrProcessBinding" type="tns:CorrProcess">
+    	<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    	<operation name="process">
+    		<soap:operation soapAction="http://corr.ex.tps/process"/>
+    		<input>
+    			<soap:body use="literal"/>
+    		</input>
+    		<output>
+    			<soap:body use="literal"/>
+    		</output>
+    	</operation>
+    </binding>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     SERVICE DEFINITION - A service groups a set of ports into
+     a service unit.
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <service name="CorrProcessService">
+    	<port binding="tns:CorrProcessBinding" name="CorrProcessPort">
+    		<soap:address location="http://localhost:8080/ode/processes/CorrProcess"/>
+    	</port>
+    </service>
+</definitions>
