@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<deploy xmlns="http://www.apache.org/ode/schemas/dd/2007/03" xmlns:corr.ex.tps="http://corr.ex.tps">
+  <process name="corr.ex.tps:CorrProcess">
+    <active>true</active>
+    <retired>false</retired>
+    <process-events generate="all"/>
+    <provide partnerLink="client">
+      <service name="corr.ex.tps:CorrProcessService" port="CorrProcessPort"/>
+    </provide>
+  </process>
+</deploy>
