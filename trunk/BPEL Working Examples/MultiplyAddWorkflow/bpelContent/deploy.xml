@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<deploy xmlns="http://www.apache.org/ode/schemas/dd/2007/03" xmlns:MatrixService="http://www.example.org/MatrixService/" xmlns:matrixop.tps="http://matrixop.tps">
+  <process name="matrixop.tps:multaddProcess">
+    <active>true</active>
+    <retired>false</retired>
+    <process-events generate="all"/>
+    <provide partnerLink="client">
+      <service name="matrixop.tps:multaddProcessService" port="multaddProcessPort"/>
+    </provide>
+    <invoke partnerLink="client">
+      <service name="matrixop.tps:multaddProcessServiceCallback" port="multaddProcessPortCallbackPort"/>
+    </invoke>
+    <invoke partnerLink="MatrixOP_PL">
+      <service name="MatrixService:MatrixService" port="MatrixServiceHTTP"/>
+    </invoke>
+  </process>
+</deploy>

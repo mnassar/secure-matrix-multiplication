@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" xmlns:prop="http://docs.oasis-open.org/wsbpel/2.0/varprop" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://matrixop.tps" xmlns:wsdl="http://www.example.org/MatrixService/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" name="multaddProcess" targetNamespace="http://matrixop.tps">
+
+<!-- xmlns:wsdl="http://www.example.org/MatrixService/" -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     TYPE DEFINITION - List of services participating in this BPEL process 
+     The default output of the BPEL designer uses strings as input and 
+     output to the BPEL Process. But you can define or import any XML 
+     Schema type and us them as part of the message types.
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->    
+    
+    <plnk:partnerLinkType name="MatrixOP_PLT">
+    <plnk:role name="MatrixOP_Role" portType="wsdl:MatrixService"/>
+  </plnk:partnerLinkType>
+    <import location="MatrixService.wsdl" namespace="http://www.example.org/MatrixService/"/>
+    <types>  
+        <xsd:schema attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://matrixop.tps">
+                
+            <xsd:element name="multaddProcessRequest">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="input" type="xsd:string"/>
+                        <xsd:element name="corr_id" type="xsd:int"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+                  
+            <xsd:element name="multaddProcessResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="result" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            
+        
+        </xsd:schema>
+    </types>
+  
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     MESSAGE TYPE DEFINITION - Definition of the message types used as 
+     part of the port type defintions
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->    
+    <message name="multaddProcessRequestMessage">
+        <part element="tns:multaddProcessRequest" name="payload"/>
+    </message>
+    
+    <message name="multaddProcessResponseMessage">
+        <part element="tns:multaddProcessResponse" name="payload"/>
+    </message>
+
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     PORT TYPE DEFINITION - A port type groups a set of operations into
+     a logical service unit.
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- portType implemented by the multaddProcess BPEL process -->
+    
+    <portType name="multaddProcess">
+        <operation name="initiate">
+            <input message="tns:multaddProcessRequestMessage"/>
+        </operation>
+    </portType>
+
+    <!-- portType implemented by the requester of multaddProcess BPEL process 
+         for asynchronous callback purposes
+         -->
+    <portType name="multaddProcessCallback">
+        <operation name="onResult">
+            <input message="tns:multaddProcessResponseMessage"/>
+        </operation>
+    </portType>
+
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     PARTNER LINK TYPE DEFINITION
+         the multaddProcess partnerLinkType binds the provider and
+         requester portType into an asynchronous conversation.
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->    
+    <plnk:partnerLinkType name="multaddProcess">
+        <plnk:role name="multaddProcessProvider" portType="tns:multaddProcess"/>
+        <plnk:role name="multaddProcessRequester" portType="tns:multaddProcessCallback"/>
+    </plnk:partnerLinkType>   
+
+<prop:property name="MyCS" type="xsd:int"/>
+<prop:propertyAlias messageType="tns:multaddProcessRequestMessage" part="payload" propertyName="tns:MyCS">
+<prop:query>tns:corr_id
+</prop:query>
+    </prop:propertyAlias>
+
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     BINDING DEFINITION - Defines the message format and protocol details
+     for a web service.
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <binding name="multaddProcessBinding" type="tns:multaddProcess">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <operation name="initiate">
+            <soap:operation soapAction="http://matrixop.tps/initiate"/>
+            <input>
+                <soap:body use="literal"/>
+            </input>
+        </operation>
+    </binding>
+
+    <binding name="multaddProcessCallbackBinding" type="tns:multaddProcessCallback">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <operation name="onResult">
+            <soap:operation soapAction="http://matrixop.tps/onResult"/>
+            <input>
+                <soap:body use="literal"/>
+            </input>
+        </operation>
+    </binding>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     SERVICE DEFINITION - A service groups a set of ports into
+     a service unit.
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <service name="multaddProcessService">
+        <port binding="tns:multaddProcessBinding" name="multaddProcessPort">
+    		<soap:address location="http://localhost:8080/ode/processes/multaddProcess"/>
+        </port>
+    </service>
+
+    <service name="multaddProcessServiceCallback">
+        <port binding="tns:multaddProcessCallbackBinding" name="multaddProcessPortCallbackPort">
+    		<soap:address location="http://localhost:8080/ode/processes/multaddProcessCallback"/>
+        </port>
+    </service>
+</definitions>
