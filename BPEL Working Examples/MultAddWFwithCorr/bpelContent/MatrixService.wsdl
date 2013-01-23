@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<wsdl:definitions name="MatrixService" targetNamespace="http://www.example.org/MatrixService/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:odex="http://www.apache.org/ode/type/extension/http" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://www.example.org/MatrixService/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:whttp="http://www.w3.org/ns/wsdl/http">
+  <wsdl:message name="doMatrixOpRequest">
+  <wsdl:part name="payload" type="xsd:string" />
+  </wsdl:message>
+  <wsdl:message name="doMatrixOpResponse">
+  <wsdl:part name="payload" type="xsd:string"/>
+  </wsdl:message>
+  <wsdl:portType name="MatrixService">
+    <wsdl:operation name="doMatrixOp">
+      <wsdl:input message="tns:doMatrixOpRequest" name="mat_operation"/>
+      <wsdl:output message="tns:doMatrixOpResponse" name="op_status"/>
+    </wsdl:operation>
+  </wsdl:portType>
+
+
+  <wsdl:binding name="RestBinding" type="tns:MatrixService">
+  	<http:binding verb="POST" />
+  	<wsdl:operation name="doMatrixOp">
+  		<http:operation location="/postmatrixoperation" />
+  		<wsdl:input name="mat_operation">
+  			<mime:content part="payload" type="application/json" />
+  		</wsdl:input>
+  		<wsdl:output name="op_status">
+  			<mime:content part="payload" type="application/json" />
+  		</wsdl:output>
+  	</wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="MatrixOperationService">
+  	<wsdl:port name="matrixPort" binding="tns:RestBinding">
+            <http:address location="http://localhost:8080/SecureOutsourcingProject/rest/matrix"/>
+        </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>
