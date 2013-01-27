@@ -40,6 +40,8 @@
                   messageType="tns:MatrixBPELResponseMessage"/>
         <bpel:variable name="MatService_PLResponse" messageType="ns:getMatrixOpResponse"></bpel:variable>
         <bpel:variable name="MatService_PLRequest" messageType="ns:getMatrixOpRequest"></bpel:variable>
+        <bpel:variable name="MatService_PLResponse1" messageType="ns:postMatrixOPResponse"></bpel:variable>
+        <bpel:variable name="MatService_PLRequest1" messageType="ns:postMatrixOPRequest"></bpel:variable>
     </bpel:variables>
 
     <!-- ================================================================= -->         
@@ -117,6 +119,24 @@
                operation="process" 
                variable="output"
                />
+        <bpel:assign validate="no" name="Assign2">
+            <bpel:copy>
+                <bpel:from><bpel:literal><impl:postMatrixOP xmlns:impl="http://securepckg" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <impl:m>impl:m</impl:m>
+</impl:postMatrixOP>
+</bpel:literal></bpel:from>
+                <bpel:to variable="MatService_PLRequest1" part="parameters"></bpel:to>
+            </bpel:copy>
+            <bpel:copy>
+                <bpel:from part="payload" variable="output">
+                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:result]]></bpel:query>
+                </bpel:from>
+                <bpel:to part="parameters" variable="MatService_PLRequest1">
+                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns:m]]></bpel:query>
+                </bpel:to>
+            </bpel:copy>
+        </bpel:assign>
+        <bpel:invoke name="Invoke1" partnerLink="MatService_PL" operation="postMatrixOP" portType="ns:MatrixService" inputVariable="MatService_PLRequest1" outputVariable="MatService_PLResponse1"></bpel:invoke>
     </bpel:sequence>
 </bpel:process>
 
