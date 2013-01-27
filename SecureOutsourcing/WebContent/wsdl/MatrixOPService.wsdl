@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions targetNamespace="http://securerest" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:impl="http://securerest" xmlns:intf="http://securerest" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<!--WSDL created by Apache Axis version: 1.4
+Built on Apr 22, 2006 (06:55:48 PDT)-->
+ <wsdl:types>
+  <schema elementFormDefault="qualified" targetNamespace="http://securerest" xmlns="http://www.w3.org/2001/XMLSchema">
+   <element name="getMatrixOp">
+    <complexType/>
+   </element>
+   <element name="getMatrixOpResponse">
+    <complexType>
+     <sequence>
+      <element name="getMatrixOpReturn" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="doMatrixOp">
+    <complexType>
+     <sequence>
+      <element name="op" type="xsd:string"/>
+     </sequence>
+    </complexType>
+   </element>
+   <element name="doMatrixOpResponse">
+    <complexType/>
+   </element>
+  </schema>
+ </wsdl:types>
+
+   <wsdl:message name="doMatrixOpRequest">
+
+      <wsdl:part element="impl:doMatrixOp" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="doMatrixOpResponse">
+
+      <wsdl:part element="impl:doMatrixOpResponse" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="getMatrixOpRequest">
+
+      <wsdl:part element="impl:getMatrixOp" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:message name="getMatrixOpResponse">
+
+      <wsdl:part element="impl:getMatrixOpResponse" name="parameters">
+
+      </wsdl:part>
+
+   </wsdl:message>
+
+   <wsdl:portType name="MatrixOPService">
+
+      <wsdl:operation name="getMatrixOp">
+
+         <wsdl:input message="impl:getMatrixOpRequest" name="getMatrixOpRequest">
+
+       </wsdl:input>
+
+         <wsdl:output message="impl:getMatrixOpResponse" name="getMatrixOpResponse">
+
+       </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="doMatrixOp">
+
+         <wsdl:input message="impl:doMatrixOpRequest" name="doMatrixOpRequest">
+
+       </wsdl:input>
+
+         <wsdl:output message="impl:doMatrixOpResponse" name="doMatrixOpResponse">
+
+       </wsdl:output>
+
+      </wsdl:operation>
+
+   </wsdl:portType>
+
+   <wsdl:binding name="MatrixOPServiceSoapBinding" type="impl:MatrixOPService">
+
+      <wsdlsoap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+      <wsdl:operation name="getMatrixOp">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getMatrixOpRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getMatrixOpResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="doMatrixOp">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="doMatrixOpRequest">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="doMatrixOpResponse">
+
+            <wsdlsoap:body use="literal"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+   </wsdl:binding>
+
+   <wsdl:service name="MatrixOPServiceService">
+
+      <wsdl:port binding="impl:MatrixOPServiceSoapBinding" name="MatrixOPService">
+
+         <wsdlsoap:address location="http://localhost:8080/SecureOutsourcing/services/MatrixOPService"/>
+
+      </wsdl:port>
+
+   </wsdl:service>
+
+</wsdl:definitions>
