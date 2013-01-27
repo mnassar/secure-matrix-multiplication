@@ -42,46 +42,28 @@ public class MatrixOPService {
 	protected final static ObjectMapper defaultMapper = new ObjectMapper();
 	protected static Broker br= new Broker();
 
-@POST
-@Path("/postmatrixmeta")
-@Consumes(MediaType.APPLICATION_JSON)
-public Response storeMatrix(MatrixMeta m) {
-
-		System.out.println(m.toString());	  	
-			/////////////////// Read Matrix from file and store it to the broker store
-/*			
-			try {
-				br.storeMatrix(m);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				System.out.println("Unable to read from file!!");
-			}
-				    
-	*/	
-			return Response.status(201).entity(m.toString()).build();
-		}
-
 @GET
 @Path("/get")
-@Produces(MediaType.APPLICATION_JSON)
-public MatrixOP getMatrixOp() {
+@Produces(MediaType.APPLICATION_XML)
+public String getMatrixOp() {
   	MatrixOP op = new MatrixOP("multiply","A","B","callback");
-  	return op;
+  	System.out.println("Operation get : " + op.toString());
+  	return op.toString();
 }
 
 
 @POST
 @Path("/postoperation")
-@Consumes(MediaType.APPLICATION_JSON)
-public Response doMatrixOp(MatrixOP op) throws IOException {
+@Consumes(MediaType.APPLICATION_XML)
+public void doMatrixOp(String op) throws IOException {
 
 	
-		System.out.println(op.toString());	  	
-		String matrix_job = op.getName();
-		String pathA = op.getPathA();
-		String pathB = op.getPathB();
-		String callBack = op.getCallBack();
+		System.out.println("Operation posted: " +op);	  	
+		MatrixOP opObj = new MatrixOP(op); 
+		String matrix_job = opObj.getName();
+		String pathA = opObj.getPathA();
+		String pathB = opObj.getPathB();
+		String callBack = opObj.getCallBack();
 		//CALL the corresponding mapreduce job should be here
 		if(matrix_job.equals("multiply"))
 		//	; //call the matrix mult job on A and B
@@ -97,7 +79,7 @@ public Response doMatrixOp(MatrixOP op) throws IOException {
 		{
 			br.copy(pathA,pathB, callBack);
 		}
-		return Response.status(201).entity(op.toString()).build();
+		
 	}
   
 

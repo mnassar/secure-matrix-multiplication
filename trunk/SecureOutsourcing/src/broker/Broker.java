@@ -62,9 +62,9 @@ public class Broker {
 			   
 			   C =  X.times(Y);
 			   MatrixWriter writeCSV= new MatrixWriter(A.getnRows(), B.getnCols(), C);
-			   writeCSV.writeToCSV("/home/mo_usr/Matrices/"+A.getID()+B.getID()+"output");
+			   writeCSV.writeToCSV(A.getPath()+B.getID()+"output");
 			   
-			   System.out.println("Result saved to: "+"/home/mo_usr/Matrices/"+A.getID()+B.getID()+"output");
+			   System.out.println("Result saved to: "+A.getPath()+B.getID()+"output");
 			    long end1 = System.currentTimeMillis();
 			    times_single[i]=end1-start1;
 			    System.out.println(size+"/single:"+times_single[i]);
@@ -101,14 +101,14 @@ public class Broker {
  			   			   
  			   C =  X.plus(Y);
  			   MatrixWriter writeCSV= new MatrixWriter(A.getnRows(), B.getnCols(), C);
- 			   writeCSV.writeToCSV("/home/mo_usr/Matrices/"+A.getID()+B.getID()+"addoutput");
+ 			   writeCSV.writeToCSV(A.getPath()+B.getID()+"addoutput");
  			   System.out.println("Matrices added successfuly!!");
- 			  System.out.println("Result saved to: "+"/home/mo_usr/Matrices/"+A.getID()+B.getID()+"addoutput");
+ 			  System.out.println("Result saved to: "+A.getPath()+B.getID()+"addoutput");
    }
       public void copy(String inpath, String outpath, String callBackAddress) throws IOException {
 
     	  int start_of_filename= outpath.lastIndexOf("/")+1;
-    	  String newfile = "/home/mo_usr/Matrices/"+ outpath.substring(start_of_filename);
+    	  String newfile = "/home/farida/Documents/"+ outpath.substring(start_of_filename);
     	  System.out.println("File copied to: "+newfile);
        MatrixMeta A = new MatrixMeta("A",inpath, 10, 10);
     		MatrixReader reader= new MatrixReader(A.getnRows(), A.getnCols());
