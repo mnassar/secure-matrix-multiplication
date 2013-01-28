@@ -26,6 +26,7 @@ import Jama.Matrix;
 import broker.Broker;
 
 import java.net.URI;
+import java.util.Random;
 
 // POJO, no interface no extends
 
@@ -51,11 +52,25 @@ public String getMatrixOp() {
   	return op.toString();
 }
 
+@POST
+@Path("/post")
+@Consumes(MediaType.APPLICATION_XML)
+@Produces(MediaType.TEXT_PLAIN)
+public String Compute(String op) throws IOException {
+
+	
+		System.out.println("Operation posted: " +op);	  	
+		Random r = new Random();
+		System.out.println("Random job ID " +r.nextInt());
+		return "job"+r.nextInt();
+	}
+
 
 @POST
 @Path("/postoperation")
 @Consumes(MediaType.APPLICATION_XML)
-public void doMatrixOp(String op) throws IOException {
+@Produces(MediaType.TEXT_PLAIN)
+public String doMatrixOp(String op) throws IOException {
 
 	
 		System.out.println("Operation posted: " +op);	  	
@@ -80,6 +95,7 @@ public void doMatrixOp(String op) throws IOException {
 			br.copy(pathA,pathB, callBack);
 		}
 		
+		return "Operation Started!";
 	}
   
 
