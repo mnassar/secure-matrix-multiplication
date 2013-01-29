@@ -56,7 +56,7 @@ public String getMatrixOp() {
 @Path("/post")
 @Consumes(MediaType.APPLICATION_XML)
 @Produces(MediaType.TEXT_PLAIN)
-public String Compute(String op) throws IOException {
+public String compute(String op) throws IOException {
 
 	
 		System.out.println("Operation posted: " +op);	  	
