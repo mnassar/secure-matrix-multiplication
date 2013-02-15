@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions name="MatServ" targetNamespace="http://www.example.org/MatServ/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="http://www.example.org/MatServ/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/">
+  <wsdl:types>
+    <xsd:schema targetNamespace="http://www.example.org/MatServ/">
+    	<xsd:element name="compute">
+    		<xsd:complexType>
+    			<xsd:sequence>
+    				<xsd:element name="in" type="xsd:string"/>
+    			</xsd:sequence>
+    		</xsd:complexType>
+    	</xsd:element>
+
+    	<xsd:element name="onFinishResponse">
+    		<xsd:complexType>
+    			<xsd:sequence>
+    				<xsd:element name="out" type="xsd:string"/>
+    			</xsd:sequence>
+    		</xsd:complexType>
+    	</xsd:element>
+    	<xsd:element name="onFinish">
+    		<xsd:complexType>
+    			<xsd:sequence>
+    				<xsd:element name="in" type="xsd:string"/>
+    			</xsd:sequence>
+    		</xsd:complexType>
+    	</xsd:element>
+    </xsd:schema>
+  </wsdl:types>
+  <wsdl:message name="onFinishResponse">
+    <wsdl:part name="parameters" element="tns:onFinishResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="computeRequest">
+    <wsdl:part name="parameters" element="tns:compute">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="onFinishRequest">
+    <wsdl:part name="parameters" element="tns:onFinish">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:portType name="MatServ">
+    <wsdl:operation name="compute">
+      <wsdl:input message="tns:computeRequest">
+    </wsdl:input>
+    </wsdl:operation>
+    <wsdl:operation name="onFinish">
+      <wsdl:input message="tns:onFinishRequest">
+    </wsdl:input>
+      <wsdl:output message="tns:onFinishResponse">
+    </wsdl:output>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="MatServSOAP" type="tns:MatServ">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="compute">
+      <soap:operation soapAction="http://www.example.org/MatServ/compute"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+    </wsdl:operation>
+    <wsdl:operation name="onFinish">
+      <soap:operation soapAction="http://www.example.org/MatServ/onFinish"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="MatServ">
+    <wsdl:port name="MatServSOAP" binding="tns:MatServSOAP">
+      <soap:address location="http://localhost:8080/AsynchMahoutWS/services/MatServ"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

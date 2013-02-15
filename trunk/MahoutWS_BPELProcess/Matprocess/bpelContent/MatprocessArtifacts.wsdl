@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/" 
+xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" 
+xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+xmlns:tns="http://bpelprocess.org/Matprocess" 
+xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop"
+xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+xmlns:wsdl="http://www.example.org/MatServ/" name="Matprocess" targetNamespace="http://bpelprocess.org/Matprocess" xmlns:p="http://www.w3.org/2001/XMLSchema">
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     TYPE DEFINITION - List of types participating in this BPEL process 
+     The BPEL Designer will generate default request and response types
+     but you can define or import any XML Schema type and use them as part 
+     of the message types.
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->    
+    <plnk:partnerLinkType name="WSInvoke_PLT">
+    <plnk:role name="Provider" portType="wsdl:MatServ"/>
+  </plnk:partnerLinkType>
+    <import location="MatServ.wsdl" namespace="http://www.example.org/MatServ/"/>
+    <types>
+        <xsd:schema attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://bpelprocess.org/Matprocess">
+
+            <xsd:element name="MatprocessRequest">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="input" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="MatprocessResponse">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="result" type="xsd:string"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="onCallback">
+            	<xsd:complexType>
+            		<xsd:sequence>
+            			<xsd:element name="input" type="xsd:string"/>
+            		</xsd:sequence>
+            	</xsd:complexType>
+            </xsd:element>
+          </xsd:schema>
+    </types>
+
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     MESSAGE TYPE DEFINITION - Definition of the message types used as 
+     part of the port type defintions
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->    
+    <message name="MatprocessRequestMessage">
+        <part element="tns:MatprocessRequest" name="payload"/>
+    </message>
+    <message name="MatprocessResponseMessage">
+        <part element="tns:MatprocessResponse" name="payload"/>
+    </message>
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     PORT TYPE DEFINITION - A port type groups a set of operations into
+     a logical service unit.
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->    
+
+    <!-- portType implemented by the Matprocess BPEL process -->
+    <message name="onCallbackRequest">
+    	<part name="payload" element="tns:onCallback"></part>
+    </message>
+  
+    <portType name="Matprocess">
+        <operation name="process">
+            <input message="tns:MatprocessRequestMessage"/>
+            <output message="tns:MatprocessResponseMessage"/>
+        </operation>
+        <operation name="onCallback">
+        	<input message="tns:onCallbackRequest"></input>
+        </operation>
+    </portType>   
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     PARTNER LINK TYPE DEFINITION
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->    
+    <plnk:partnerLinkType name="Matprocess">
+        <plnk:role name="MatprocessProvider" portType="tns:Matprocess"/>
+    </plnk:partnerLinkType>
+    
+<vprop:property name="MyCS" type="xsd:string"/>
+<vprop:propertyAlias messageType="tns:MatprocessRequestMessage" part="payload" propertyName="tns:MyCS">
+
+</vprop:propertyAlias>
+<vprop:propertyAlias messageType="tns:onCallbackRequest" part="payload" propertyName="tns:MyCS">
+
+</vprop:propertyAlias>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     BINDING DEFINITION - Defines the message format and protocol details
+     for a web service.
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <binding name="MatprocessBinding" type="tns:Matprocess">
+    	<soap:binding style="document"
+    		transport="http://schemas.xmlsoap.org/soap/http" />
+    	<operation name="process">
+    		<soap:operation
+    			soapAction="http://bpelprocess.org/Matprocess/process" />
+    		<input>
+    			<soap:body use="literal" />
+    		</input>
+    		<output>
+    			<soap:body use="literal" />
+    		</output>
+    	</operation>
+
+    	<operation name="onCallback">
+    		<soap:operation
+    			soapAction="http://bpelprocess.org/Matprocess/onCallback" />
+    		<input>
+    			<soap:body use="literal" />
+    		</input>
+    	</operation>
+    </binding>
+
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     SERVICE DEFINITION - A service groups a set of ports into
+     a service unit.
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <service name="MatprocessService">
+    	<port binding="tns:MatprocessBinding" name="MatprocessPort">
+    		<soap:address location="http://localhost:8080/ode/processes/Matprocess"/>
+    	</port>
+    </service>
+</definitions>
