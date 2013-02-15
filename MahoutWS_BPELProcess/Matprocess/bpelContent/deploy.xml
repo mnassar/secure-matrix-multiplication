@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<deploy xmlns="http://www.apache.org/ode/schemas/dd/2007/03" xmlns:MatServ="http://www.example.org/MatServ/" xmlns:Matprocess="http://bpelprocess.org/Matprocess">
+  <process name="Matprocess:Matprocess">
+    <active>true</active>
+    <retired>false</retired>
+    <process-events generate="all"/>
+    <provide partnerLink="client">
+      <service name="Matprocess:MatprocessService" port="MatprocessPort"/>
+    </provide>
+    <provide partnerLink="Back_PL">
+      <service name="Matprocess:MatprocessService" port="MatprocessPort"/>
+    </provide>
+    <invoke partnerLink="WS_PL">
+      <service name="MatServ:MatServ" port="MatServSOAP"/>
+    </invoke>
+  </process>
+</deploy>
