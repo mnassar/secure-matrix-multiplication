@@ -1,19 +1,13 @@
 
 
 import Jama.*; 
-
-
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Random; 
 
-public class Broker {
 
-	/**
-	 * @param args
-	 */
+public class Broker {
 	
 	static Server [] sv;
 	static Matrix R; //current result for protocol
@@ -31,8 +25,8 @@ public class Broker {
 
 		System.out.println("Hello World");
 		
-		int [] sizes = {3000};
-		//int [] sizes = {3};
+		//int [] sizes = {3000};
+		int [] sizes = {3};
 		long[] avg_times_single=new long[sizes.length];
 		long[] avg_times_protocol=new long[sizes.length];
 		int s=0; 
@@ -43,13 +37,14 @@ public class Broker {
 			for (int i=0; i<nb_trials; i++){
 				Broker br = new Broker();
 				Matrix A= Matrix.random(size, size).times(br.r.nextInt(100));
+				A.print(1, 1);
 				Matrix B= Matrix.random(size, size).times(br.r.nextInt(100));
 				br.storeMatrix("A",A);
 			    br.storeMatrix("B",B);
-			  //  long start = System.currentTimeMillis();
-			   // br.multiplyTwoMatrices("A","B", size);
-			   // long end = System.currentTimeMillis();
-			   // times_protocol[i]=end-start;
+			    long start = System.currentTimeMillis();
+			    br.multiplyTwoMatrices("A","B", size);
+			    long end = System.currentTimeMillis();
+			    times_protocol[i]=end-start;
 			    System.out.println(size+"/protocol:"+times_protocol[i]);
 			    //A.times(B).print(1, 1);
 			    long start1 = System.currentTimeMillis();
@@ -57,6 +52,7 @@ public class Broker {
 			    long end1 = System.currentTimeMillis();
 			    times_single[i]=end1-start1;
 			    System.out.println(size+"/single:"+times_single[i]);
+			    
 			}
 			avg_times_single[s]=calculate_average(times_single);
 			avg_times_protocol[s]=calculate_average(times_protocol); 
