@@ -11,7 +11,7 @@ public class AdditiveSplittingMultiplication {
 	 * @param args
 	 * n where size of square matrix is n*n 
 	 */
-	static int n= 10; 
+	static int n= 1000; 
 	static Random r = new Random(); 
 	public static void main(String[] args) {
 		// Generate two random matrices A and B
@@ -45,11 +45,13 @@ public class AdditiveSplittingMultiplication {
 		Matrix A1B2= A1.times(B2); 
 		Matrix A2B1= A2.times(B1); 
 		Matrix A2B2= A2.times(B2); 
+		long stopm = System.currentTimeMillis();
 		// add 
 		Matrix R = A1B1.plus(A1B2).plus(A2B2).plus(A2B1); 
 		R.print(3, 1);
-		long stopm = System.currentTimeMillis();
+		
 		A.times(B).print(3, 1); 
+		System.out.println("n "+n);
 		System.out.println("Storage time(ms): "+(stop-start));
 		System.out.println("Servers Time (ms): " + (stopm-startm));
 		// output: protocol time 
