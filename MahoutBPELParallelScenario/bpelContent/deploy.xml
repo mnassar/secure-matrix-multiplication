@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<deploy xmlns="http://www.apache.org/ode/schemas/dd/2007/03" xmlns:MatServ="http://www.example.org/MatServ/" xmlns:matrix.bpelprocess="http://matrix.bpelprocess">
+  <process name="matrix.bpelprocess:WF_Process">
+    <active>true</active>
+    <retired>false</retired>
+    <process-events generate="all"/>
+    <provide partnerLink="client">
+      <service name="matrix.bpelprocess:WF_ProcessService" port="WF_ProcessPort"/>
+    </provide>
+    <provide partnerLink="mult1_PL">
+      <service name="matrix.bpelprocess:WF_ProcessService" port="WF_ProcessPort"/>
+    </provide>
+    <provide partnerLink="mult2_PL">
+      <service name="matrix.bpelprocess:WF_ProcessService" port="WF_ProcessPort"/>
+    </provide>
+    <provide partnerLink="add_PL">
+      <service name="matrix.bpelprocess:WF_ProcessService" port="WF_ProcessPort"/>
+    </provide>
+    <invoke partnerLink="A1B1_PL">
+      <service name="MatServ:MatServ" port="MatServSOAP"/>
+    </invoke>
+    <invoke partnerLink="A2B2_PL">
+      <service name="MatServ:MatServ" port="MatServSOAP"/>
+    </invoke>
+    <invoke partnerLink="Add_PL">
+      <service name="MatServ:MatServ" port="MatServSOAP"/>
+    </invoke>
+  </process>
+</deploy>
