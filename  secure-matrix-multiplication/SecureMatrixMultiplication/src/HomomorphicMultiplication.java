@@ -5,6 +5,7 @@ import Jama.Matrix;
 /* This class implements matrix multiplication  
  * using Homomorphic encryption protocol
  * This protocol only works with integer matrix (all values of matrix are integers)
+ *  * TODO: put REFERENCE
  */
 public class HomomorphicMultiplication {
 	
@@ -12,7 +13,7 @@ public class HomomorphicMultiplication {
 	 * @param args
 	 * n, size of matrix is n*n   
 	 */
-	static int n=10; 
+	static int n=1000; 
 	public static void main(String[] args) {
 		Paillier paillier = new Paillier();
 		// Generate two random matrices A and B
@@ -126,6 +127,7 @@ public class HomomorphicMultiplication {
 		// output: protocol time 
 		long stopp = System.currentTimeMillis();
 		A.times(B).print(3, 1); 
+		System.out.println("n "+n);
 		System.out.println("Storage time(ms): "+(stop-start));
 		System.out.println("Servers Time (ms): " + (stopp-startp));
 	}

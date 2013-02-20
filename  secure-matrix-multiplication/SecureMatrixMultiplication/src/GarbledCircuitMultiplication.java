@@ -1,5 +1,5 @@
 /* This class implements matrix multiplication  
- * using garbled circuit protocol 
+ * using a garbled circuit protocol 
  */
 public class GarbledCircuitMultiplication {
 
