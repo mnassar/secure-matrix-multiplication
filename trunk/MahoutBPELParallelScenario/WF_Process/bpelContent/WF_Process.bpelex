@@ -18,7 +18,7 @@
   </extensions>
   <extensions>
     <extendedObject href="WF_Process.bpel#/"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ProcessExtension" modificationStamp="1361429061000"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ProcessExtension" modificationStamp="1361695237000"/>
   </extensions>
   <extensions>
     <extendedObject href="WF_Process.bpel#//@activity/@activities.1"/>

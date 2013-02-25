@@ -109,7 +109,7 @@
   <job_id>0</job_id>
   <matA_ID>A1</matA_ID>
   <matB_ID>B1</matB_ID>
-  <callback>http://localhost:8080/ode/processes/WF_Process</callback>
+  <callback>multResult1</callback>
 </tns:compute></bpel:literal></bpel:from>
                         <bpel:to variable="A1B1_PLRequest" part="parameters"></bpel:to>
                     </bpel:copy>
@@ -146,7 +146,7 @@
   <job_id>0</job_id>
   <matA_ID>A2</matA_ID>
   <matB_ID>B2</matB_ID>
-  <callback>http://localhost:8080/ode/processes/WF_Process</callback>
+  <callback>multResult2</callback>
 </tns:compute></bpel:literal></bpel:from>
                         <bpel:to variable="A2B2_PLRequest" part="parameters"></bpel:to>
                     
@@ -189,7 +189,7 @@
   <job_id>0</job_id>
   <matA_ID>A1</matA_ID>
   <matB_ID>B2</matB_ID>
-  <callback>http://localhost:8080/ode/processes/WF_Process</callback>
+  <callback>multResult3</callback>
 </tns:compute></bpel:literal></bpel:from>
                         <bpel:to variable="A1B2_PLRequest" part="parameters"></bpel:to>
                     </bpel:copy>
@@ -216,7 +216,7 @@
   <job_id>0</job_id>
   <matA_ID>A2</matA_ID>
   <matB_ID>B1</matB_ID>
-  <callback>http://localhost:8080/ode/processes/WF_Process</callback>
+  <callback>multResult4</callback>
 </tns:compute></bpel:literal></bpel:from>
                         <bpel:to variable="A2B1_PLRequest" part="parameters"></bpel:to>
                     </bpel:copy>
@@ -248,7 +248,7 @@
   <job_id>0</job_id>
   <matA_ID>A1</matA_ID>
   <matB_ID>A2</matB_ID>
-  <callback>http://localhost:8080/ode/processes/WF_Process</callback>
+  <callback>addResult</callback>
 </tns:compute></bpel:literal></bpel:from>
                         <bpel:to variable="C1C2_PLRequest" part="parameters"></bpel:to>
                     </bpel:copy>
