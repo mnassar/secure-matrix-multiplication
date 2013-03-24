@@ -1,0 +1,2 @@
+META_DIR= /home/farida/Documents/META
+MATRIX_DIR = /home/farida/Documents/Matrix
