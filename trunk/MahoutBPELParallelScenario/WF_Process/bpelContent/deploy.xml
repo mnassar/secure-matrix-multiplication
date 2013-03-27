@@ -22,6 +22,9 @@
     <provide partnerLink="mult4_PL">
       <service name="matrix.bpelprocess:WF_ProcessService" port="WF_ProcessPort"/>
     </provide>
+    <provide partnerLink="copy1_PL">
+      <service name="matrix.bpelprocess:WF_ProcessService" port="WF_ProcessPort"/>
+    </provide>
     <invoke partnerLink="A1B1_PL">
       <service name="MatServ:MatServ" port="MatServSOAP"/>
     </invoke>
