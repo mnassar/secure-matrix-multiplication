@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<deploy xmlns="http://www.apache.org/ode/schemas/dd/2007/03" xmlns:MatServ="http://www.example.org/MatServ/" xmlns:matrix.bpelprocess="http://matrix.bpelprocess">
+<deploy xmlns="http://www.apache.org/ode/schemas/dd/2007/03" xmlns:MatServ24="http://www.example.org/MatServ24/" xmlns:MatServ25="http://www.example.org/MatServ25/" xmlns:MatServ26="http://www.example.org/MatServ26/" xmlns:MatServ27="http://www.example.org/MatServ27/" xmlns:MatServ33="http://www.example.org/MatServ33/" xmlns:matrix.bpelprocess="http://matrix.bpelprocess">
   <process name="matrix.bpelprocess:WF_Process">
     <active>true</active>
     <retired>false</retired>
@@ -26,19 +26,19 @@
       <service name="matrix.bpelprocess:WF_ProcessService" port="WF_ProcessPort"/>
     </provide>
     <invoke partnerLink="A1B1_PL">
-      <service name="MatServ:MatServ" port="MatServSOAP"/>
+      <service name="MatServ24:MatServ" port="MatServSOAP24"/>
     </invoke>
     <invoke partnerLink="A2B2_PL">
-      <service name="MatServ:MatServ" port="MatServSOAP"/>
+      <service name="MatServ25:MatServ" port="MatServSOAP25"/>
     </invoke>
     <invoke partnerLink="Add_PL">
-      <service name="MatServ:MatServ" port="MatServSOAP"/>
+      <service name="MatServ27:MatServ" port="MatServSOAP27"/>
     </invoke>
     <invoke partnerLink="A1B2_PL">
-      <service name="MatServ:MatServ" port="MatServSOAP"/>
+      <service name="MatServ26:MatServ" port="MatServSOAP26"/>
     </invoke>
     <invoke partnerLink="A2B1_PL">
-      <service name="MatServ:MatServ" port="MatServSOAP"/>
+      <service name="MatServ33:MatServ" port="MatServSOAP33"/>
     </invoke>
   </process>
 </deploy>

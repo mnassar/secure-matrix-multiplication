@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <definitions xmlns="http://schemas.xmlsoap.org/wsdl/" 
-xmlns:ns="http://www.example.org/MatServ/" 
+xmlns:ns="http://www.example.org/MatServ24/" 
+xmlns:ns1="http://www.example.org/MatServ25/"
+xmlns:ns2="http://www.example.org/MatServ26/"
+xmlns:ns3="http://www.example.org/MatServ33/"
+xmlns:ns4="http://www.example.org/MatServ27/"
 xmlns:p="http://www.w3.org/2001/XMLSchema" 
 xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
@@ -14,12 +18,27 @@ xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
      but you can define or import any XML Schema type and use them as part 
      of the message types.
      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->    
-    <plnk:partnerLinkType name="Mahout_PL">
-    <plnk:role name="ServiceProvider" portType="ns:MatServ"/>
+    <plnk:partnerLinkType name="Mahout_PL24">
+    <plnk:role name="ServiceProvider24" portType="ns:MatServ"/>
   </plnk:partnerLinkType>
-    
-    <import location="MatServ.wsdl" namespace="http://www.example.org/MatServ/"/>
+    <plnk:partnerLinkType name="Mahout_PL25">
+    <plnk:role name="ServiceProvider25" portType="ns1:MatServ"/>
+  </plnk:partnerLinkType>
+  <plnk:partnerLinkType name="Mahout_PL26">
+    <plnk:role name="ServiceProvider26" portType="ns2:MatServ"/>
+  </plnk:partnerLinkType>
+  <plnk:partnerLinkType name="Mahout_PL33">
+    <plnk:role name="ServiceProvider33" portType="ns3:MatServ"/>
+  </plnk:partnerLinkType>
+  <plnk:partnerLinkType name="Mahout_PL27">
+    <plnk:role name="ServiceProvider27" portType="ns4:MatServ"/>
+  </plnk:partnerLinkType>
   
+    <import location="MatServ24.wsdl" namespace="http://www.example.org/MatServ24/"/>
+  	<import location="MatServ25.wsdl" namespace="http://www.example.org/MatServ25/"/>
+  	<import location="MatServ26.wsdl" namespace="http://www.example.org/MatServ26/"/>
+  	<import location="MatServ33.wsdl" namespace="http://www.example.org/MatServ33/"/>
+  	<import location="MatServ27.wsdl" namespace="http://www.example.org/MatServ27/"/>
     <types>
         <schema xmlns="http://www.w3.org/2001/XMLSchema" attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://matrix.bpelprocess">
 
@@ -292,7 +311,7 @@ xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
 </vprop:propertyAlias>
 
 <vprop:property name="op2_CS" type="p:int"/>
-<vprop:propertyAlias messageType="ns:computeRequest" part="parameters" element="ns:op_id" propertyName="tns:op2_CS">
+<vprop:propertyAlias messageType="ns1:computeRequest" part="parameters" element="ns1:op_id" propertyName="tns:op2_CS">
 
 </vprop:propertyAlias>
 
@@ -301,7 +320,7 @@ xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
 </vprop:propertyAlias>
 
 <vprop:property name="op3_CS" type="p:int"/>
-<vprop:propertyAlias messageType="ns:computeRequest" part="parameters" element="ns:op_id" propertyName="tns:op3_CS">
+<vprop:propertyAlias messageType="ns4:computeRequest" part="parameters" element="ns4:op_id" propertyName="tns:op3_CS">
 
 </vprop:propertyAlias>
 <vprop:propertyAlias messageType="tns:addResultRequest" part="parameters" propertyName="tns:op3_CS">
@@ -385,7 +404,7 @@ xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
     <service name="WF_ProcessService">
     	<port binding="tns:WF_ProcessBinding" name="WF_ProcessPort">
-    		<soap:address location="http://localhost:8080/ode/processes/WF_Process"/>
+    		<soap:address location="http://10.160.2.27:8080/ode/processes/WF_Process"/>
     	</port>
     </service>
 </definitions>
