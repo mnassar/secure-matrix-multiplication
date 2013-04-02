@@ -15,19 +15,22 @@ public class MatrixGenerator {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
+		
 
 		Configuration conf =new Configuration();
 		MatrixMeta meta =null;
-		int nsize = 10000;
+		int nsize = 5000;
 		 if(args.length != 0)
-		    meta = new MatrixMeta(args[0],null,Integer.parseInt(args[1]),Integer.parseInt(args[2]));
-			
-		else
-		{
-			System.out.println("If you want different size or name use: java MatrixGenerator ID nRows nCols");
-			meta = new MatrixMeta("A_10000", null, nsize, nsize);
-		}
+		 {
+			 meta = new MatrixMeta(args[0],null,Integer.parseInt(args[1]),Integer.parseInt(args[2]));
+			 nsize = Integer.parseInt(args[3]);
+			 Configuration.MATRIX_DIR = args[4];		 
+		 }
+		 else
+		 {
+			System.out.println("If you want different size or name use: java MatrixGenerator ID nRows nCols nsize mat_directory");
+			meta = new MatrixMeta("A_"+nsize, null, nsize, nsize);
+		 }
 		 
 		CSVGenerator.MIN =-100;
 		CSVGenerator.MAX = 100;
@@ -36,7 +39,7 @@ public class MatrixGenerator {
 		System.out.println(filesaved);
 		
 		
-		meta = new MatrixMeta("B_10000", null, nsize, nsize);
+		meta = new MatrixMeta("B_"+nsize, null, nsize, nsize);
 		
 		gen = new CSVGenerator(meta, conf);
 		filesaved= gen.generateRandom();

@@ -15,10 +15,13 @@ public class MatrixConverter {
 
 		Configuration conf =new Configuration();
 		MatrixMeta meta =null;
-		int nsize = 10000;
+		int nsize = 5000;
 		 if(args.length != 0)
-		    meta = new MatrixMeta(args[0],null,Integer.parseInt(args[1]),Integer.parseInt(args[2]));
-			
+		 {
+			 meta = new MatrixMeta(args[0],null,Integer.parseInt(args[1]),Integer.parseInt(args[2]));
+			 nsize = Integer.parseInt(args[3]);
+			 Configuration.MATRIX_DIR = args[4];
+		 }	
 		else
 		{
 			System.out.println("If you want custom size or name use: java MatrixConverter ID path nRows nCols");
