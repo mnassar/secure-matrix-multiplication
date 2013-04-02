@@ -19,7 +19,7 @@
         implements org.apache.axis2.databinding.ADBBean{
         
                 public static final javax.xml.namespace.QName MY_QNAME = new javax.xml.namespace.QName(
-                "http://www.example.org/MatServ/",
+                "http://www.example.org/MatServ27/",
                 "compute",
                 "ns1");
 
@@ -250,7 +250,7 @@
                   if (serializeType){
                
 
-                   java.lang.String namespacePrefix = registerPrefix(xmlWriter,"http://www.example.org/MatServ/");
+                   java.lang.String namespacePrefix = registerPrefix(xmlWriter,"http://www.example.org/MatServ27/");
                    if ((namespacePrefix != null) && (namespacePrefix.trim().length() > 0)){
                        writeAttribute("xsi","http://www.w3.org/2001/XMLSchema-instance","type",
                            namespacePrefix+":compute",
@@ -368,7 +368,7 @@
         }
 
         private static java.lang.String generatePrefix(java.lang.String namespace) {
-            if(namespace.equals("http://www.example.org/MatServ/")){
+            if(namespace.equals("http://www.example.org/MatServ27/")){
                 return "ns1";
             }
             return org.apache.axis2.databinding.utils.BeanUtil.getUniquePrefix();

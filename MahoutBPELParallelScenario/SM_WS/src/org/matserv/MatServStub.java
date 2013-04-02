@@ -3,7 +3,7 @@
  * MatServStub.java
  *
  * This file was auto-generated from WSDL
- * by the Apache Axis2 version: 1.6.2  Built on : Apr 17, 2012 (05:33:49 IST)
+ * by the Apache Axis2 version: 1.6.2  Built on : Apr 17, 2012 (05:27:49 IST)
  */
         package org.matserv;
 
@@ -49,7 +49,7 @@
                     __operation = new org.apache.axis2.description.OutOnlyAxisOperation();
                 
 
-            __operation.setName(new javax.xml.namespace.QName("http://www.example.org/MatServ/", "compute"));
+            __operation.setName(new javax.xml.namespace.QName("http://www.example.org/MatServ27/", "compute"));
 	    _service.addOperation(__operation);
 	    
 
@@ -103,7 +103,7 @@
      */
     public MatServStub(org.apache.axis2.context.ConfigurationContext configurationContext) throws org.apache.axis2.AxisFault {
         
-                    this(configurationContext,"http://localhost:8080/SM_WS/services/MatServ" );
+                    this(configurationContext,"http://10.160.2.27:8080/SM_WS/services/MatServ" );
                 
     }
 
@@ -112,7 +112,7 @@
      */
     public MatServStub() throws org.apache.axis2.AxisFault {
         
-                    this("http://localhost:8080/SM_WS/services/MatServ" );
+                    this("http://10.160.2.27:8080/SM_WS/services/MatServ" );
                 
     }
 
@@ -142,7 +142,7 @@
 
                 
                 org.apache.axis2.client.OperationClient _operationClient = _serviceClient.createClient(_operations[0].getName());
-                _operationClient.getOptions().setAction("http://www.example.org/MatServ/compute");
+                _operationClient.getOptions().setAction("http://www.example.org/MatServ27/compute");
                 _operationClient.getOptions().setExceptionToBeThrownOnSOAPFault(true);
 
                 
@@ -158,8 +158,8 @@
                                                                     
                                                                     env = toEnvelope(getFactory(_operationClient.getOptions().getSoapVersionURI()),
                                                                     compute7,
-                                                                    optimizeContent(new javax.xml.namespace.QName("http://www.example.org/MatServ/",
-                                                                    "compute")),new javax.xml.namespace.QName("http://www.example.org/MatServ/",
+                                                                    optimizeContent(new javax.xml.namespace.QName("http://www.example.org/MatServ27/",
+                                                                    "compute")),new javax.xml.namespace.QName("http://www.example.org/MatServ27/",
                                                                     "compute"));
                                                                 
 
@@ -213,7 +213,7 @@
         }
         return false;
     }
-     //http://localhost:8080/MatrixMahoutService/services/MatServ
+     //http://10.160.2.27:8080/SM_WS/services/MatServ
             private  org.apache.axiom.om.OMElement  toOM(org.example.www.matserv.Compute param, boolean optimizeContent)
             throws org.apache.axis2.AxisFault {
 

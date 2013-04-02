@@ -95,7 +95,7 @@ public class ProcessConnection extends org.apache.axis2.client.Stub
      */
     public ProcessConnection(org.apache.axis2.context.ConfigurationContext configurationContext, String bpelnamespace, String op_name) throws org.apache.axis2.AxisFault {
         
-                    this(configurationContext,"http://localhost:8080/ode/processes/WF_Process", bpelnamespace, op_name);
+                    this(configurationContext,"http://10.160.2.27:8080/ode/processes/WF_Process", bpelnamespace, op_name);
                 
     }
 
@@ -104,7 +104,7 @@ public class ProcessConnection extends org.apache.axis2.client.Stub
      */
     public ProcessConnection(String bpelnamespace, String op_name) throws org.apache.axis2.AxisFault {
         
-                    this("http://localhost:8080/ode/processes/WF_Process" , bpelnamespace, op_name);
+                    this("http://10.160.2.27:8080/ode/processes/WF_Process" , bpelnamespace, op_name);
                 
     }
 
