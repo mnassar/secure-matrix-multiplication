@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<process
+    xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+    name="WF_Process" targetNamespace="http://matrix.bpelprocess"
+    xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+    xmlns:tns="http://matrix.bpelprocess" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <import importType="http://schemas.xmlsoap.org/wsdl/"
+        location="WF_ProcessArtifacts.wsdl" namespace="http://matrix.bpelprocess"/>
+    <import importType="http://schemas.xmlsoap.org/wsdl/"
+        location="WF_ProcessArtifacts.wsdl" namespace="http://www.example.org/MatServ/"/>
+    <partnerLinks>
+        <partnerLink myRole="WF_ProcessProvider" name="client" partnerLinkType="tns:WF_Process"/>
+        <partnerLink name="A1B1_PL" partnerLinkType="tns:Mahout_PL" partnerRole="ServiceProvider"/>
+        <partnerLink name="A2B2_PL" partnerLinkType="tns:Mahout_PL" partnerRole="ServiceProvider"/>
+        <partnerLink name="A1B2_PL" partnerLinkType="tns:Mahout_PL" partnerRole="ServiceProvider"/>
+        <partnerLink name="A2B1_PL" partnerLinkType="tns:Mahout_PL" partnerRole="ServiceProvider"/>
+        <partnerLink name="Add_PL" partnerLinkType="tns:Mahout_PL" partnerRole="ServiceProvider"/>
+        <partnerLink myRole="WF_ProcessProvider" name="mult1_PL" partnerLinkType="tns:WF_Process"/>
+        <partnerLink myRole="WF_ProcessProvider" name="mult2_PL" partnerLinkType="tns:WF_Process"/>
+        <partnerLink myRole="WF_ProcessProvider" name="mult3_PL" partnerLinkType="tns:WF_Process"/>
+        <partnerLink myRole="WF_ProcessProvider" name="mult4_PL" partnerLinkType="tns:WF_Process"/>
+        <partnerLink myRole="WF_ProcessProvider" name="add_PL" partnerLinkType="tns:WF_Process"/>
+        <partnerLink myRole="WF_ProcessProvider" name="copy1_PL" partnerLinkType="tns:WF_Process"/>
+    </partnerLinks>
+    <variables>
+        <variable messageType="tns:WF_ProcessRequestMessage" name="input"/>
+        <variable messageType="tns:WF_ProcessResponseMessage" name="output"/>
+    </variables>
+    <sequence>
+        <receive createInstance="yes" name="ReceiveInput"
+            operation="initiate" partnerLink="client"
+            portType="tns:WF_Process" variable="input"/>
+        <assign name="concatInputMsg">
+            <copy>
+                <from part="payload" variable="input">
+                    <query>tns:input</query>
+                </from>
+                <to part="payload" variable="output">
+                    <query>tns:payload</query>
+                </to>
+            </copy>
+        </assign>
+        <reply name="ReplyToClient" operation="initiate"
+            partnerLink="client" portType="tns:WF_Process" variable="output"/>
+    </sequence>
+</process>
