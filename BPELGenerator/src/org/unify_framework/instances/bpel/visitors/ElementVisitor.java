@@ -23,6 +23,7 @@ import org.unify_framework.instances.bpel.BpelProcess;
 import org.unify_framework.instances.bpel.BpelReceiveActivity;
 import org.unify_framework.instances.bpel.BpelReplyActivity;
 import org.unify_framework.instances.bpel.BpelScopeActivity;
+import org.unify_framework.instances.bpel.BpelSequence;
 import org.unify_framework.instances.bpel.BpelThrowActivity;
 import org.unify_framework.instances.bpel.BpelToExpression;
 import org.unify_framework.instances.bpel.BpelToVariable;
@@ -54,6 +55,7 @@ public interface ElementVisitor {
 	public void visit(BpelProcess process);
 	public void visit(BpelReceiveActivity receiveActivity);
 	
+	public void visit(BpelSequence sequence);
 	public void visit(BpelReplyActivity replyActivity);
 	public void visit(BpelScopeActivity scopeActivity);
 	public void visit(BpelThrowActivity throwActivity);

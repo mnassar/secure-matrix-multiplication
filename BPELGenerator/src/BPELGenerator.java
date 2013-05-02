@@ -10,6 +10,8 @@ import org.unify_framework.abstract_syntax.data_perspective.Expression;
 import org.unify_framework.abstract_syntax.data_perspective.impl.ExpressionImpl;
 import org.unify_framework.abstract_syntax.data_perspective.impl.XpathExpressionImpl;
 import org.unify_framework.abstract_syntax.impl.CompositeActivityImpl;
+import org.unify_framework.instances.bpel.BpelAndJoin;
+import org.unify_framework.instances.bpel.BpelAndSplit;
 import org.unify_framework.instances.bpel.BpelAssignActivity;
 import org.unify_framework.instances.bpel.BpelCompositeActivity;
 import org.unify_framework.instances.bpel.BpelCompositeReceiveActivity;
@@ -27,6 +29,7 @@ import org.unify_framework.instances.bpel.BpelProcess;
 import org.unify_framework.instances.bpel.BpelReceiveActivity;
 import org.unify_framework.instances.bpel.BpelReplyActivity;
 import org.unify_framework.instances.bpel.BpelScope;
+import org.unify_framework.instances.bpel.BpelScopeActivity;
 import org.unify_framework.instances.bpel.BpelToVariable;
 import org.unify_framework.instances.bpel.BpelVariable;
 import org.unify_framework.instances.bpel.BpelVariableMessageType;
@@ -45,18 +48,33 @@ public class BPELGenerator {
 
 		BpelProcess process = new BpelProcess("WF_Process", "http://matrix.bpelprocess");
 		process.addNamespaceDeclaration("bpel", "http://docs.oasis-open.org/wsbpel/2.0/process/executable");
-		//process.addNamespaceDeclaration("ns", "http://www.example.org/MatServ/");
-		process.addNamespaceDeclaration("tns", "http://matrix.bpelprocess");
+		process.addNamespaceDeclaration("ns", "http://www.example.org/MatServ24/");
+		process.addNamespaceDeclaration("ns1", "http://www.example.org/MatServ25/");
+		process.addNamespaceDeclaration("ns2", "http://www.example.org/MatServ26/");
+		process.addNamespaceDeclaration("ns3", "http://www.example.org/MatServ33/");
+		process.addNamespaceDeclaration("ns4", "http://www.example.org/MatServ27/");
+ 	    process.addNamespaceDeclaration("tns", "http://matrix.bpelprocess");
 		process.addNamespaceDeclaration("xsd", "http://www.w3.org/2001/XMLSchema");
+		process.addNamespaceDeclaration("ode", "http://www.apache.org/ode/type/extension");
+		
+		process.setExitOnStandardFault("yes");
+		process.setSuppressJoinFailure("yes");
 		    
-	        try {
+	   
+	    		   
+	    	    
+	    	   try {
 	              //create resource
 	            File file = new File("WF_Process.bpel");
 	            
 	            BpelImport imp  = new BpelImport("http://matrix.bpelprocess", "WF_ProcessArtifacts.wsdl", "http://schemas.xmlsoap.org/wsdl/");
-	            BpelImport imp2  = new BpelImport("http://www.example.org/MatServ/", "WF_ProcessArtifacts.wsdl", "http://schemas.xmlsoap.org/wsdl/");
+	            BpelImport imp2  = new BpelImport("http://www.example.org/MatServ24/", "MatServ24.wsdl", "http://schemas.xmlsoap.org/wsdl/");
+	            BpelImport imp3  = new BpelImport("http://www.example.org/MatServ25/", "MatServ25.wsdl", "http://schemas.xmlsoap.org/wsdl/");
+	            BpelImport imp4  = new BpelImport("http://www.example.org/MatServ26/", "MatServ26.wsdl", "http://schemas.xmlsoap.org/wsdl/");
+	            BpelImport imp5  = new BpelImport("http://www.example.org/MatServ33/", "MatServ33.wsdl", "http://schemas.xmlsoap.org/wsdl/");
+	            BpelImport imp6  = new BpelImport("http://www.example.org/MatServ27/", "MatServ27.wsdl", "http://schemas.xmlsoap.org/wsdl/");
 	            
-	            
+		    	    
 	            BpelPartnerLink PL = new BpelPartnerLink("client", "tns:WF_Process", "WF_ProcessProvider", null);
 	            BpelPartnerLink  PL1 = new BpelPartnerLink("A1B1_PL", "tns:Mahout_PL", null, "ServiceProvider"); 
 	            BpelPartnerLink  PL2 = new BpelPartnerLink("A2B2_PL", "tns:Mahout_PL", null, "ServiceProvider");
@@ -79,11 +97,16 @@ public class BPELGenerator {
 	            process.addPartnerLink(CB_PL5);process.addPartnerLink(CB_PL6);
 	            process.addImport(imp);
 	            process.addImport(imp2);
+	            process.addImport(imp3);
+	            process.addImport(imp4);
+	            process.addImport(imp5);
+	            process.addImport(imp6);
 	            
 	            BpelCorrelationSet JOB_CS = new BpelCorrelationSet("JOB_CS", "tns:jobid_CS");
 	            process.addCorrelationSet(JOB_CS);
 	            BpelCompositeActivity bpelCompositeActivity= (BpelCompositeActivity) process ;
 	            
+	            //BpelScopeActivity scope_activ = new BpelScopeActivity("main");
 	    		BpelScope scope = bpelCompositeActivity.getScope();
 	    		
 	    		BpelVariable variable = new BpelVariableMessageType("input", "tns:WF_ProcessRequestMessage");
@@ -137,6 +160,7 @@ public class BPELGenerator {
 	            receive.setVariable("input");
 	            receive.setCreateInstance("yes");
 	            */
+	    	
 	    		BpelCompositeReceiveActivity receive = new BpelCompositeReceiveActivity("ReceiveWithCorr");
 	    		receive.setOperation("initiate");
 	            receive.setPartnerLink("client");
@@ -190,12 +214,26 @@ public class BPELGenerator {
 	            reply.setVariable("output");
 	            reply.setPortType("tns:WF_Process");
 	          
+	            BpelAndSplit split = new BpelAndSplit("Flow_split");
+	            BpelAndJoin join = new BpelAndJoin("Flow_join");
+	            
+	           
+	            split.setCorrespondingAndJoin(join);
+	            join.setCorrespondingAndSplit(split);
+	            
 	            bpelCompositeActivity.addChild(receive);
+	            bpelCompositeActivity.addChild(assign);
 	            bpelCompositeActivity.addChild(reply);
+	            bpelCompositeActivity.addControlNode(split);
+	            bpelCompositeActivity.addControlNode(join);
+	            
 	            bpelCompositeActivity.connect(bpelCompositeActivity.getStartEvent(), receive);
 	            bpelCompositeActivity.connect(receive,assign);
 	            bpelCompositeActivity.connect(assign, reply);
-	            bpelCompositeActivity.connect(reply, bpelCompositeActivity.getEndEvent());
+	            //bpelCompositeActivity.connect(reply, bpelCompositeActivity.getEndEvent());
+	            bpelCompositeActivity.connect(reply.getControlOutputPort(), split.getControlInputPort());
+	            
+	            bpelCompositeActivity.connect(join.getControlOutputPort(), bpelCompositeActivity.getEndEvent().getControlInputPort());
 	            //process.addActivity(receive);
 	            //process.addActivity(reply);
 	            process.setScope(scope);

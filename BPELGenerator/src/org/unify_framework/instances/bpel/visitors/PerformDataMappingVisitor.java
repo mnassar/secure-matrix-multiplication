@@ -33,6 +33,7 @@ import org.unify_framework.instances.bpel.BpelProcess;
 import org.unify_framework.instances.bpel.BpelReceiveActivity;
 import org.unify_framework.instances.bpel.BpelReplyActivity;
 import org.unify_framework.instances.bpel.BpelScopeActivity;
+import org.unify_framework.instances.bpel.BpelSequence;
 import org.unify_framework.instances.bpel.BpelThrowActivity;
 import org.unify_framework.instances.bpel.BpelToExpression;
 import org.unify_framework.instances.bpel.BpelToVariable;
@@ -328,6 +329,12 @@ public class PerformDataMappingVisitor implements ElementVisitor {
 
 	@Override
 	public void visit(BpelCorrelation bpelCorrelation) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void visit(BpelSequence sequence) {
 		// TODO Auto-generated method stub
 		
 	}

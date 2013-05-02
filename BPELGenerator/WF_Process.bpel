@@ -1,13 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <process
     xmlns="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
-    name="WF_Process" targetNamespace="http://matrix.bpelprocess"
+    exitOnStandardFault="yes" name="WF_Process"
+    suppressJoinFailure="yes"
+    targetNamespace="http://matrix.bpelprocess"
     xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+    xmlns:ns="http://www.example.org/MatServ24/"
+    xmlns:ns1="http://www.example.org/MatServ25/"
+    xmlns:ns2="http://www.example.org/MatServ26/"
+    xmlns:ns3="http://www.example.org/MatServ33/"
+    xmlns:ns4="http://www.example.org/MatServ27/"
+    xmlns:ode="http://www.apache.org/ode/type/extension"
     xmlns:tns="http://matrix.bpelprocess" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
     <import importType="http://schemas.xmlsoap.org/wsdl/"
         location="WF_ProcessArtifacts.wsdl" namespace="http://matrix.bpelprocess"/>
     <import importType="http://schemas.xmlsoap.org/wsdl/"
-        location="WF_ProcessArtifacts.wsdl" namespace="http://www.example.org/MatServ/"/>
+        location="MatServ24.wsdl" namespace="http://www.example.org/MatServ24/"/>
+    <import importType="http://schemas.xmlsoap.org/wsdl/"
+        location="MatServ25.wsdl" namespace="http://www.example.org/MatServ25/"/>
+    <import importType="http://schemas.xmlsoap.org/wsdl/"
+        location="MatServ26.wsdl" namespace="http://www.example.org/MatServ26/"/>
+    <import importType="http://schemas.xmlsoap.org/wsdl/"
+        location="MatServ33.wsdl" namespace="http://www.example.org/MatServ33/"/>
+    <import importType="http://schemas.xmlsoap.org/wsdl/"
+        location="MatServ27.wsdl" namespace="http://www.example.org/MatServ27/"/>
     <partnerLinks>
         <partnerLink myRole="WF_ProcessProvider" name="client" partnerLinkType="tns:WF_Process"/>
         <partnerLink name="A1B1_PL" partnerLinkType="tns:Mahout_PL" partnerRole="ServiceProvider"/>
@@ -64,5 +80,6 @@
         </assign>
         <reply name="ReplyToClient" operation="initiate"
             partnerLink="client" portType="tns:WF_Process" variable="output"/>
+        <flow name="Flow"/>
     </sequence>
 </process>
