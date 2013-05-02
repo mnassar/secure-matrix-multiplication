@@ -45,6 +45,7 @@ import org.unify_framework.instances.bpel.BpelProcess;
 import org.unify_framework.instances.bpel.BpelReceiveActivity;
 import org.unify_framework.instances.bpel.BpelReplyActivity;
 import org.unify_framework.instances.bpel.BpelScopeActivity;
+import org.unify_framework.instances.bpel.BpelSequence;
 import org.unify_framework.instances.bpel.BpelThrowActivity;
 import org.unify_framework.instances.bpel.BpelToExpression;
 import org.unify_framework.instances.bpel.BpelToVariable;
@@ -968,6 +969,10 @@ public class BpelSerializer implements ElementVisitor {
 		processElement.setAttribute("targetNamespace", process.getTargetNamespace());
 		if (process.getQueryLanguage() != null) processElement.setAttribute("queryLanguage", process.getQueryLanguage());
 		if (process.getExpressionLanguage() != null) processElement.setAttribute("expressionLanguage", process.getExpressionLanguage());
+		//Added for suppressJoinFailure and exitOnStandardFault
+		
+		if (process.getSuppressJoinFailure() != null) processElement.setAttribute("suppressJoinFailure", process.getSuppressJoinFailure());
+		if (process.getExitOnStandardFault() != null) processElement.setAttribute("exitOnStandardFault", process.getExitOnStandardFault());
 		
 		// Serialize the BPEL process's namespace declarations:
 		for (Map.Entry<String, String> entry : process.getNamespaceDeclarations().entrySet()) {
@@ -1059,6 +1064,12 @@ public class BpelSerializer implements ElementVisitor {
 		corrElement.setAttribute("direction", bpelCorrelation.getDirection());
 		
 		this.currentElement.appendChild(corrElement);
+		
+	}
+
+	@Override
+	public void visit(BpelSequence sequence) {
+		// TODO Auto-generated method stub
 		
 	}
 	

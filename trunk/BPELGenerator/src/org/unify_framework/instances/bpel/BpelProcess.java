@@ -24,6 +24,8 @@ public class BpelProcess extends BpelCompositeActivity {
 	private String targetNamespace;
 	private String queryLanguage;
 	private String expressionLanguage;
+	private String exitOnStandardFault;  //="yes"
+	private String suppressJoinFailure; //="yes"
 	
 	private Map<String, String> namespaceDeclarations = new HashMap<String, String>();
 	
@@ -60,6 +62,14 @@ public class BpelProcess extends BpelCompositeActivity {
 		return this.expressionLanguage;
 	}
 	
+	public String getSuppressJoinFailure() {
+		
+		return this.suppressJoinFailure;
+	}
+	public String getExitOnStandardFault() {
+	
+		return this.exitOnStandardFault;
+	}
 	public Map<String, String> getNamespaceDeclarations() {
 		
 		return this.namespaceDeclarations;
@@ -80,6 +90,15 @@ public class BpelProcess extends BpelCompositeActivity {
 	public void setExpressionLanguage(String expressionLanguage) {
 		
 		this.expressionLanguage = expressionLanguage;
+	}
+	
+	public void setSuppressJoinFailure(String supressJoinFail) {
+		
+		this.suppressJoinFailure = supressJoinFail;
+	}
+	public void setExitOnStandardFault(String exitOnFail) {
+	
+		this.exitOnStandardFault = exitOnFail;
 	}
 	
 	/* PUBLIC METHODS *********************************************************/
