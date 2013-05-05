@@ -17,7 +17,7 @@ any meaningful operation of the underlying plaintext data (2), making the comput
 In this project, a prototype for secure outsourcing of scientific computations using multiple clouds and without using cryptography is implemented. We address the issues of a real deployment in terms of distributed, reliable and secure storage, secure data transfer and computation. In our approach, the user communicates with a trusted broker which manages secure parallel computations on untrusted commodity clouds. The broker performs data distribution and coordination of secure computations, while the commodity clouds perform expensive parallel computations. We start with matrix multiplication which is an expensive operation (e.g. takes 𝑂(𝑛3) using the brute force approach), and needs to be outsourced. It is also included in various and more complex computations across different domains. 
 
 
-= System Description =
+= System Design =
 
 
 ==Use Case Diagram==
@@ -30,7 +30,7 @@ http://secure-matrix-multiplication.googlecode.com/files/usecase.png
 --------------------
 ==Block Diagram==
 
-he broker has web-services exposed that are used to start the client services. The computation service calls protocol setup to choose and set parameters of the secure protocol/mechanism to use (e.g. additive splitting, homomorphic encryption, secret sharing and randomization ….). Depending on the protocol the way the data or matrices are uploaded to the cloud providers differ whether encrypted or split. The number of clouds to be used also differs. The Data Placement Controller is responsible to save metadata about which matrix have been uploaded to which server. Depending also on the protocol setup, the services to call differ; so a work flow is generated that coordinates which services to invoke and how. We use ODE work flow engine that executes work flows in BPEL (Business Process Execution Language). The actual steps of computations used by the protocol are done by services offered by the clouds and by services existing on the broker and they are invoked by the workflow as shown in Figure 2. 
+The broker has web-services exposed that are used to start the client services. The computation service calls protocol setup to choose and set parameters of the secure protocol/mechanism to use (e.g. additive splitting, homomorphic encryption, secret sharing and randomization ….). Depending on the protocol the way the data or matrices are uploaded to the cloud providers differ whether encrypted or split. The number of clouds to be used also differs. The Data Placement Controller is responsible to save metadata about which matrix have been uploaded to which server. Depending also on the protocol setup, the services to call differ; so a work flow is generated that coordinates which services to invoke and how. We use ODE work flow engine that executes work flows in BPEL (Business Process Execution Language). The actual steps of computations used by the protocol are done by services offered by the clouds and by services existing on the broker and they are invoked by the workflow as shown in Figure 2. 
 
 http://secure-matrix-multiplication.googlecode.com/files/blockdiagram.png
 
