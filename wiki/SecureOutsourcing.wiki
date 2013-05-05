@@ -45,10 +45,15 @@ Details to be added soon
 Details to be added ...
 
 ===Workflow Generation===
-Details to be added soon
+
+Workflow generation module generates BPEL files dynamically based on different protocol scenarios. The source code can be checked out [http://code.google.com/p/secure-matrix-multiplication/source/browse/#svn%2Ftrunk%2FBPELGenerator here]. In this task we made use of unify framework developed by Vrije University in Brussels (http://soft.vub.ac.be/soft/).  But this framework is not complete for all BPEL specification and structures, it doesn't provide means for correlation sets definition and binding, and some others features. So we have updated it with the new features we need.
+
+===Workflow Execution===
+Generated WS-BPEL workflow is then deployed using Apache ODE (Orchestration Director Engine) [http://ode.apache.org/index.html] on our broker Apache Tomcat web server. It coordinates the invocation of cloud and broker web services and their callbacks.
 
 
 
+---------------
 
 ==Cloud Services==
 Details to be added soon
