@@ -1,0 +1,25 @@
+#summary Introduction and summary of secure outsourcing of computations to the cloud
+
+= Introduction =
+
+Cloud Computing has the advantage of on-demand network access to a shared pool of configurable computing resources that requires minimal management overhead. So the computational power of cloud customers is not limited by their resource-constraint devices. They can outsource their computations into the cloud with unlimited computing resources in a pay-per-use manner.
+
+However the cloud computing paradigm is subject to many threats due to the sharing of physical infrastructure and the use of virtualization. Examples of these threats include but not limited to malicious code installation, impersonation, data leaks, denial of service, repudiation of virtual machine launches, exploits of virtual machine resets and interference with virtual machines or data belonging to other customers ..etc. That's why *secure* outsourcing of data and computation is challenging in this emerging computing model in terms of input privacy and cheating detection. Other security properties that should be preserved when outsourcing computations to public cloud providers: 
+# Confidentiality to avoid the risk of data leakage. The cloud provider should not be able to learn anything from the input data nor the result data. 
+# Integrity to ensure no tampering with the data during the transmission and on storage. 
+# Verifiability to ensure that the outsourced computation is done correctly to protect against cloud provider cheating. 
+# Efficiency to minimize response time and lower latency. 
+
+Some approaches tend to encrypt sensitive data before outsourcing [1] so as to
+provide end-to-end data confidentiality assurance in the cloud and beyond. However, ordinary data encryption techniques in essence prevent cloud from performing
+any meaningful operation of the underlying plaintext data [2], making the computation over encrypted data a very hard problem. Beside it is not efficient enough for practical applications nor secure tamper-proof hardware that are expensive and not scalable.
+
+In this project, a prototype for secure outsourcing of scientific computations using multiple clouds and without using cryptography is implemented. We address the issues of a real deployment in terms of distributed, reliable and secure storage, secure data transfer and computation. In our approach, the user communicates with a trusted broker which manages secure parallel computations on untrusted commodity clouds. The broker performs data distribution and coordination of secure computations, while the commodity clouds perform expensive parallel computations. We start with matrix multiplication which is an expensive operation (e.g. takes 𝑂(𝑛3) using the brute force approach), and needs to be outsourced. It is also included in various and more complex computations across different domains. 
+
+
+= 
+= Reference =
+
+# Cloud Security Alliance, “Security guidance for critical areas of focus in cloud computing,” 2009, online at http://www.cloudsecurityalliance.org.
+# C. Gentry, “Computing arbitrary functions of encrypted data,”
+Commun. ACM, vol. 53, no. 3, pp. 97–105, 2010
