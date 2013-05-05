@@ -10,9 +10,9 @@ However the cloud computing paradigm is subject to many threats due to the shari
   # Verifiability to ensure that the outsourced computation is done correctly to protect against cloud provider cheating. 
   # Efficiency to minimize response time and lower latency. 
 
-Some approaches tend to encrypt sensitive data before outsourcing [1] so as to
+Some approaches tend to encrypt sensitive data before outsourcing (1) so as to
 provide end-to-end data confidentiality assurance in the cloud and beyond. However, ordinary data encryption techniques in essence prevent cloud from performing
-any meaningful operation of the underlying plaintext data [2], making the computation over encrypted data a very hard problem. Beside it is not efficient enough for practical applications nor secure tamper-proof hardware that are expensive and not scalable.
+any meaningful operation of the underlying plaintext data (2), making the computation over encrypted data a very hard problem. Beside it is not efficient enough for practical applications nor secure tamper-proof hardware that are expensive and not scalable.
 
 In this project, a prototype for secure outsourcing of scientific computations using multiple clouds and without using cryptography is implemented. We address the issues of a real deployment in terms of distributed, reliable and secure storage, secure data transfer and computation. In our approach, the user communicates with a trusted broker which manages secure parallel computations on untrusted commodity clouds. The broker performs data distribution and coordination of secure computations, while the commodity clouds perform expensive parallel computations. We start with matrix multiplication which is an expensive operation (e.g. takes 𝑂(𝑛3) using the brute force approach), and needs to be outsourced. It is also included in various and more complex computations across different domains. 
 
@@ -20,6 +20,6 @@ In this project, a prototype for secure outsourcing of scientific computations u
 = 
 = Reference =
 
-  [#] Cloud Security Alliance, “Security guidance for critical areas of focus in cloud computing,” 2009, online at http://www.cloudsecurityalliance.org.
-  [#] C. Gentry, “Computing arbitrary functions of encrypted data,”
-Commun. ACM, vol. 53, no. 3, pp. 97–105, 2010
+  # Cloud Security Alliance, “Security guidance for critical areas of focus in cloud computing,” 2009, online at http://www.cloudsecurityalliance.org
+
+  # C. Gentry, “Computing arbitrary functions of encrypted data,” Commun. ACM, vol. 53, no. 3, pp. 97–105, 2010
