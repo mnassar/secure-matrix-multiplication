@@ -24,6 +24,7 @@ import org.unify_framework.instances.bpel.BpelFrom;
 import org.unify_framework.instances.bpel.BpelFromExpression;
 import org.unify_framework.instances.bpel.BpelFromVariable;
 import org.unify_framework.instances.bpel.BpelImport;
+import org.unify_framework.instances.bpel.BpelInvokeActivity;
 import org.unify_framework.instances.bpel.BpelPartnerLink;
 import org.unify_framework.instances.bpel.BpelProcess;
 import org.unify_framework.instances.bpel.BpelReceiveActivity;
@@ -217,15 +218,135 @@ public class BPELGenerator {
 	            BpelAndSplit split = new BpelAndSplit("Flow_split");
 	            BpelAndJoin join = new BpelAndJoin("Flow_join");
 	            
-	           
+	         
 	            split.setCorrespondingAndJoin(join);
 	            join.setCorrespondingAndSplit(split);
+	          
+	            BpelAssignActivity assignA1B1 = new BpelAssignActivity("Assign1");
+	            BpelCopy copy_1 = new BpelCopy();
+	            XpathExpressionImpl express= new XpathExpressionImpl("<bpel:literal><tns:compute"
++                                "xmlns:tns=\"http://www.example.org/MatServ24/\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">"
+ +                               "<operation>multiply</operation>"
++								"<op_id>1</op_id>"
++                                "<job_id>0</job_id>"
++                                "<matA_ID>A1</matA_ID>"
++                                "<matB_ID>B1</matB_ID>"
++                                "<callback>multResult1</callback>"
++                            "</tns:compute>"
++                        "</bpel:literal>");
+	            //BpelFromExpression from1 = new BpelFromExpression(new express);
+	            /*
+	            <bpel:assign name="Assign1" validate="no">
+                <bpel:copy>
+                    <bpel:from>
+                        <bpel:literal>
+                            <tns:compute
+                                xmlns:tns="http://www.example.org/MatServ24/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                                <operation>multiply</operation>
+                                <op_id>1</op_id>
+                                <job_id>0</job_id>
+                                <matA_ID>A1</matA_ID>
+                                <matB_ID>B1</matB_ID>
+                                <callback>multResult1</callback>
+                            </tns:compute>
+                        </bpel:literal>
+                    </bpel:from>
+                    <bpel:to part="parameters" variable="A1B1_PLRequest"/>
+                </bpel:copy>
+                <bpel:copy>
+                    <bpel:from variable="JOB"/>
+                    <bpel:to part="parameters" variable="A1B1_PLRequest">
+                        <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[job_id]]></bpel:query>
+                    </bpel:to>
+                </bpel:copy>
+                <bpel:copy>
+                    <bpel:from>
+                        
+                    <![CDATA[concat($input.payload/tns:matA, "_1")]]>
+                    </bpel:from>
+                    <bpel:to part="parameters" variable="A1B1_PLRequest">
+                        <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[matA_ID]]></bpel:query>
+                    </bpel:to>
+                </bpel:copy>
+                <bpel:copy>
+                    <bpel:from>
+                        <![CDATA[concat($input.payload/tns:matB,"_1")]]>
+                    </bpel:from>
+                    <bpel:to part="parameters" variable="A1B1_PLRequest">
+                        <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[matB_ID]]></bpel:query>
+                    </bpel:to>
+                </bpel:copy>
+            </bpel:assign>
+            */       
+	            BpelInvokeActivity A1B1 = new BpelInvokeActivity("Mult_A1B1");
+	            A1B1.setInputVariable("A1B1_PLRequest");
+	            A1B1.setOperation("compute");
+	            A1B1.setPartnerLink("A1B1_PL");
+	            A1B1.setPortType("ns:MatServ24");
+	            
+	            BpelInvokeActivity A2B2 = new BpelInvokeActivity("Mult_A2B2");
+	            A2B2.setInputVariable("A2B2_PLRequest");
+	            A2B2.setOperation("compute");
+	            A2B2.setPartnerLink("A2B2_PL");
+	            A2B2.setPortType("ns:MatServ25");
+	            
+	            BpelCompositeReceiveActivity CB_A1_B1= new BpelCompositeReceiveActivity("CB_A1_B1");
+	            CB_A1_B1.setOperation("multResult1");
+	            CB_A1_B1.setPartnerLink("mult1_PL");
+	            CB_A1_B1.setPortType("tns:WF_Process");
+	            CB_A1_B1.setVariable("mult1_PLRequest");
+	            BpelCorrelation corr2 = new BpelCorrelation("no", "JOB_CS");
+	            CB_A1_B1.addCorrelation(corr2);
+	          
+	            BpelCompositeReceiveActivity CB_A2_B2= new BpelCompositeReceiveActivity("CB_A2_B2");
+	            CB_A2_B2.setOperation("multResult2");
+	            CB_A2_B2.setPartnerLink("mult2_PL");
+	            CB_A2_B2.setPortType("tns:WF_Process");
+	            CB_A2_B2.setVariable("mult2_PLRequest");
+	            BpelCorrelation corr3 = new BpelCorrelation("no", "JOB_CS");
+	            CB_A2_B2.addCorrelation(corr3);
+	           
+	            
+	            BpelInvokeActivity A1B2 = new BpelInvokeActivity("Mult_A1B2");
+	            A1B2.setInputVariable("A1B2_PLRequest");
+	            A1B2.setOperation("compute");
+	            A1B2.setPartnerLink("A1B2_PL");
+	            A1B2.setPortType("ns:MatServ26");
+	            
+	            BpelInvokeActivity A2B1 = new BpelInvokeActivity("Mult_A2B1");
+	            A2B1.setInputVariable("A2B1_PLRequest");
+	            A2B1.setOperation("compute");
+	            A2B1.setPartnerLink("A2B1_PL");
+	            A2B1.setPortType("ns:MatServ33");
+	            
+	            BpelCompositeReceiveActivity CB_A1_B2= new BpelCompositeReceiveActivity("CB_A1_B2");
+	            CB_A1_B2.setOperation("multResult3");
+	            CB_A1_B2.setPartnerLink("mult3_PL");
+	            CB_A1_B2.setPortType("tns:WF_Process");
+	            CB_A1_B2.setVariable("mult3_PLRequest");
+	            BpelCorrelation corr4 = new BpelCorrelation("no", "JOB_CS");
+	            CB_A1_B2.addCorrelation(corr4);
+	          
+	            BpelCompositeReceiveActivity CB_A2_B1= new BpelCompositeReceiveActivity("CB_A2_B1");
+	            CB_A2_B1.setOperation("multResult4");
+	            CB_A2_B1.setPartnerLink("mult4_PL");
+	            CB_A2_B1.setPortType("tns:WF_Process");
+	            CB_A2_B1.setVariable("mult4_PLRequest");
+	            BpelCorrelation corr5 = new BpelCorrelation("no", "JOB_CS");
+	            CB_A2_B1.addCorrelation(corr5);
+	           
 	            
 	            bpelCompositeActivity.addChild(receive);
 	            bpelCompositeActivity.addChild(assign);
 	            bpelCompositeActivity.addChild(reply);
-	            bpelCompositeActivity.addControlNode(split);
-	            bpelCompositeActivity.addControlNode(join);
+	           
+	            
+	            bpelCompositeActivity.addChild(split);
+	            bpelCompositeActivity.addChild(A1B1);
+	            bpelCompositeActivity.addChild(A2B2);
+	            bpelCompositeActivity.addChild(CB_A1_B1);
+	            bpelCompositeActivity.addChild(CB_A2_B2);
+	            bpelCompositeActivity.addChild(join);
 	            
 	            bpelCompositeActivity.connect(bpelCompositeActivity.getStartEvent(), receive);
 	            bpelCompositeActivity.connect(receive,assign);
@@ -233,7 +354,23 @@ public class BPELGenerator {
 	            //bpelCompositeActivity.connect(reply, bpelCompositeActivity.getEndEvent());
 	            bpelCompositeActivity.connect(reply.getControlOutputPort(), split.getControlInputPort());
 	            
+	            bpelCompositeActivity.connect(split.getNewControlOutputPort(), A1B1.getControlInputPort());
+	            bpelCompositeActivity.connect(split.getNewControlOutputPort(), A2B2.getControlInputPort());
+	            bpelCompositeActivity.connect(split.getNewControlOutputPort(), A1B2.getControlInputPort());
+	            bpelCompositeActivity.connect(split.getNewControlOutputPort(), A2B1.getControlInputPort());
+	            
+	            bpelCompositeActivity.connect(A1B1, CB_A1_B1);
+	            bpelCompositeActivity.connect(A2B2, CB_A2_B2);
+	            bpelCompositeActivity.connect(A1B2, CB_A1_B2);
+	            bpelCompositeActivity.connect(A2B1, CB_A2_B1);
+	            
+	            bpelCompositeActivity.connect(CB_A1_B1.getControlOutputPort(), join.getNewControlInputPort());
+	            bpelCompositeActivity.connect(CB_A2_B2.getControlOutputPort(), join.getNewControlInputPort());
+	            bpelCompositeActivity.connect(CB_A1_B2.getControlOutputPort(), join.getNewControlInputPort());
+	            bpelCompositeActivity.connect(CB_A2_B1.getControlOutputPort(), join.getNewControlInputPort());
+	            
 	            bpelCompositeActivity.connect(join.getControlOutputPort(), bpelCompositeActivity.getEndEvent().getControlInputPort());
+	            //bpelCompositeActivity.getEndEvent().getControlInputPort()
 	            //process.addActivity(receive);
 	            //process.addActivity(reply);
 	            process.setScope(scope);

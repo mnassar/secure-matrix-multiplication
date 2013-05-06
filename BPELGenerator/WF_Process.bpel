@@ -80,6 +80,51 @@
         </assign>
         <reply name="ReplyToClient" operation="initiate"
             partnerLink="client" portType="tns:WF_Process" variable="output"/>
-        <flow name="Flow"/>
+        <flow name="Flow">
+            <sequence>
+                <invoke inputVariable="A1B1_PLRequest" name="Mult_A1B1"
+                    operation="compute" partnerLink="A1B1_PL" portType="ns:MatServ24"/>
+                <receive createInstance="" name="CB_A1_B1"
+                    operation="multResult1" partnerLink="mult1_PL"
+                    portType="tns:WF_Process" variable="mult1_PLRequest">
+                    <correlations>
+                        <correlation direction="Receive" initiate="no" set="JOB_CS"/>
+                    </correlations>
+                </receive>
+            </sequence>
+            <sequence>
+                <invoke inputVariable="A2B2_PLRequest" name="Mult_A2B2"
+                    operation="compute" partnerLink="A2B2_PL" portType="ns:MatServ25"/>
+                <receive createInstance="" name="CB_A2_B2"
+                    operation="multResult2" partnerLink="mult2_PL"
+                    portType="tns:WF_Process" variable="mult2_PLRequest">
+                    <correlations>
+                        <correlation direction="Receive" initiate="no" set="JOB_CS"/>
+                    </correlations>
+                </receive>
+            </sequence>
+            <sequence>
+                <invoke inputVariable="A1B2_PLRequest" name="Mult_A1B2"
+                    operation="compute" partnerLink="A1B2_PL" portType="ns:MatServ26"/>
+                <receive createInstance="" name="CB_A1_B2"
+                    operation="multResult3" partnerLink="mult3_PL"
+                    portType="tns:WF_Process" variable="mult3_PLRequest">
+                    <correlations>
+                        <correlation direction="Receive" initiate="no" set="JOB_CS"/>
+                    </correlations>
+                </receive>
+            </sequence>
+            <sequence>
+                <invoke inputVariable="A2B1_PLRequest" name="Mult_A2B1"
+                    operation="compute" partnerLink="A2B1_PL" portType="ns:MatServ33"/>
+                <receive createInstance="" name="CB_A2_B1"
+                    operation="multResult4" partnerLink="mult4_PL"
+                    portType="tns:WF_Process" variable="mult4_PLRequest">
+                    <correlations>
+                        <correlation direction="Receive" initiate="no" set="JOB_CS"/>
+                    </correlations>
+                </receive>
+            </sequence>
+        </flow>
     </sequence>
 </process>
