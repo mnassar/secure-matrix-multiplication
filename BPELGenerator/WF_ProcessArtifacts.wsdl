@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <definitions xmlns="http://schemas.xmlsoap.org/wsdl/" 
+xmlns:ns="http://www.example.org/MatServ24/" 
+xmlns:ns1="http://www.example.org/MatServ25/"
+xmlns:ns2="http://www.example.org/MatServ26/"
+xmlns:ns3="http://www.example.org/MatServ33/"
+xmlns:ns4="http://www.example.org/MatServ27/"
 xmlns:p="http://www.w3.org/2001/XMLSchema" 
-xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" 
-xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
-xmlns:tns="http://matrix.bpelprocess" 
-xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop" 
-xmlns:ns="http://www.example.org/MatServ/" 
-xmlns:wsdl2="http://schemas.xmlsoap.org/wsdl/" name="WF_Process" targetNamespace="http://matrix.bpelprocess">
+xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
+ xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
+ xmlns:tns="http://matrix.bpelprocess" 
+ xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop" 
+  name="WF_Process" targetNamespace="http://matrix.bpelprocess">
 
 <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      TYPE DEFINITION - List of types participating in this BPEL process 
@@ -14,17 +18,36 @@ xmlns:wsdl2="http://schemas.xmlsoap.org/wsdl/" name="WF_Process" targetNamespace
      but you can define or import any XML Schema type and use them as part 
      of the message types.
      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->    
-    <plnk:partnerLinkType name="Mahout_PL">
-    <plnk:role name="ServiceProvider" portType="ns:MatServ"/>
+    <plnk:partnerLinkType name="Mahout_PL24">
+    <plnk:role name="ServiceProvider24" portType="ns:MatServ"/>
   </plnk:partnerLinkType>
-    <wsdl2:import location="MatServ.wsdl" namespace="http://www.example.org/MatServ/"/>
+    <plnk:partnerLinkType name="Mahout_PL25">
+    <plnk:role name="ServiceProvider25" portType="ns1:MatServ"/>
+  </plnk:partnerLinkType>
+  <plnk:partnerLinkType name="Mahout_PL26">
+    <plnk:role name="ServiceProvider26" portType="ns2:MatServ"/>
+  </plnk:partnerLinkType>
+  <plnk:partnerLinkType name="Mahout_PL33">
+    <plnk:role name="ServiceProvider33" portType="ns3:MatServ"/>
+  </plnk:partnerLinkType>
+  <plnk:partnerLinkType name="Mahout_PL27">
+    <plnk:role name="ServiceProvider27" portType="ns4:MatServ"/>
+  </plnk:partnerLinkType>
+  
+    <import location="MatServ24.wsdl" namespace="http://www.example.org/MatServ24/"/>
+  	<import location="MatServ25.wsdl" namespace="http://www.example.org/MatServ25/"/>
+  	<import location="MatServ26.wsdl" namespace="http://www.example.org/MatServ26/"/>
+  	<import location="MatServ33.wsdl" namespace="http://www.example.org/MatServ33/"/>
+  	<import location="MatServ27.wsdl" namespace="http://www.example.org/MatServ27/"/>
     <types>
         <schema xmlns="http://www.w3.org/2001/XMLSchema" attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://matrix.bpelprocess">
 
             <element name="WF_ProcessRequest">
                 <complexType>
                     <sequence>
-                        <element name="input" type="int"/>
+                    	<element name="input" type="int" />
+                    	<element name="matA" type="string"></element>
+                    	<element name="matB" type="string"></element>
                     </sequence>
                 </complexType>
             </element>
@@ -32,7 +55,8 @@ xmlns:wsdl2="http://schemas.xmlsoap.org/wsdl/" name="WF_Process" targetNamespace
             <element name="WF_ProcessResponse">
                 <complexType>
                     <sequence>
-                        <element name="result" type="string"/>
+                    	<element name="result" type="string" />
+                    	<element name="instanceID" type="string"></element>
                     </sequence>
                 </complexType>
             </element>
@@ -87,41 +111,41 @@ xmlns:wsdl2="http://schemas.xmlsoap.org/wsdl/" name="WF_Process" targetNamespace
             <element name="multResult3">
             	<complexType>
             		<sequence>
-            			<element name="in" type="string"></element>
-            			<element name="job_id" type="int"></element>
-            			<element name="op_id" type="int"></element>
+            			<element name="in" type="string"/>
+            			<element name="job_id" type="int"/>
+            			<element name="op_id" type="int"/>
             		</sequence>
             	</complexType>
             </element>
             <element name="multResult3Response">
             	<complexType>
             		<sequence>
-            			<element name="out" type="string"></element>
+            			<element name="out" type="string"/>
             		</sequence>
             	</complexType>
             </element>
             <element name="multResult4">
             	<complexType>
             		<sequence>
-            			<element name="in" type="string"></element>
-            			<element name="job_id" type="int"></element>
-            			<element name="op_id" type="int"></element>
+            			<element name="in" type="string"/>
+            			<element name="job_id" type="int"/>
+            			<element name="op_id" type="int"/>
             		</sequence>
             	</complexType>
             </element>
             <element name="multResult4Response">
             	<complexType>
             		<sequence>
-            			<element name="out" type="string"></element>
+            			<element name="out" type="string"/>
             		</sequence>
             	</complexType>
             </element>
             <element name="cpCallback1">
             	<complexType>
             		<sequence>
-            			<element name="in" type="string"></element>
-            			<element name="op_id" type="int"></element>
-            			<element name="job_id" type="int"></element>
+            			<element name="in" type="string"/>
+            			<element name="op_id" type="int"/>
+            			<element name="job_id" type="int"/>
             		</sequence>
             	</complexType>
             </element>
@@ -129,9 +153,9 @@ xmlns:wsdl2="http://schemas.xmlsoap.org/wsdl/" name="WF_Process" targetNamespace
             <element name="cpCallback2">
             	<complexType>
             		<sequence>
-            			<element name="in" type="string"></element>
-            			<element name="op_id" type="int"></element>
-            			<element name="job_id" type="int"></element>
+            			<element name="in" type="string"/>
+            			<element name="op_id" type="int"/>
+            			<element name="job_id" type="int"/>
             		</sequence>
             	</complexType>
             </element>
@@ -139,9 +163,9 @@ xmlns:wsdl2="http://schemas.xmlsoap.org/wsdl/" name="WF_Process" targetNamespace
             <element name="cpCallback3">
             	<complexType>
             		<sequence>
-            			<element name="in" type="string"></element>
-            			<element name="op_id" type="int"></element>
-            			<element name="job_id" type="int"></element>
+            			<element name="in" type="string"/>
+            			<element name="op_id" type="int"/>
+            			<element name="job_id" type="int"/>
             		</sequence>
             	</complexType>
             </element>
@@ -149,9 +173,9 @@ xmlns:wsdl2="http://schemas.xmlsoap.org/wsdl/" name="WF_Process" targetNamespace
             <element name="cpCallback4">
             	<complexType>
             		<sequence>
-            			<element name="in" type="string"></element>
-            			<element name="op_id" type="int"></element>
-            			<element name="job_id" type="int"></element>
+            			<element name="in" type="string"/>
+            			<element name="op_id" type="int"/>
+            			<element name="job_id" type="int"/>
             		</sequence>
             	</complexType>
             </element>
@@ -186,25 +210,25 @@ xmlns:wsdl2="http://schemas.xmlsoap.org/wsdl/" name="WF_Process" targetNamespace
     <message name="addResultRequest">
     	<part element="tns:addResult" name="parameters"/>
     </message>
-    <wsdl2:message name="multResult3Request">
-    	<wsdl2:part name="parameters" element="tns:multResult3"></wsdl2:part>
-    </wsdl2:message>
+    <message name="multResult3Request">
+    	<part element="tns:multResult3" name="parameters"/>
+    </message>
     
-    <wsdl2:message name="multResult4Request">
-    	<wsdl2:part name="parameters" element="tns:multResult4"></wsdl2:part>
-    </wsdl2:message>
-    <wsdl2:message name="cpCallback1Request">
-    	<wsdl2:part name="parameters" element="tns:cpCallback1"></wsdl2:part>
-    </wsdl2:message>
-    <wsdl2:message name="cpCallback2Request">
-    	<wsdl2:part name="parameters" element="tns:cpCallback2"></wsdl2:part>
-    </wsdl2:message>
-    <wsdl2:message name="cpCallback3Request">
-    	<wsdl2:part name="parameters" element="tns:cpCallback3"></wsdl2:part>
-    </wsdl2:message>
-    <wsdl2:message name="cpCallback4Request">
-    	<wsdl2:part name="parameters" element="tns:cpCallback4"></wsdl2:part>
-    </wsdl2:message>
+    <message name="multResult4Request">
+    	<part element="tns:multResult4" name="parameters"/>
+    </message>
+    <message name="cpCallback1Request">
+    	<part element="tns:cpCallback1" name="parameters"/>
+    </message>
+    <message name="cpCallback2Request">
+    	<part element="tns:cpCallback2" name="parameters"/>
+    </message>
+    <message name="cpCallback3Request">
+    	<part element="tns:cpCallback3" name="parameters"/>
+    </message>
+    <message name="cpCallback4Request">
+    	<part element="tns:cpCallback4" name="parameters"/>
+    </message>
     <portType name="WF_Process">
         <operation name="process">
             <input message="tns:WF_ProcessRequestMessage"/>
@@ -219,24 +243,12 @@ xmlns:wsdl2="http://schemas.xmlsoap.org/wsdl/" name="WF_Process" targetNamespace
         <operation name="addResult">
         	<input message="tns:addResultRequest"/>
         </operation>
-        <wsdl2:operation name="multResult3">
-        	<wsdl2:input message="tns:multResult3Request"></wsdl2:input>
-        </wsdl2:operation>
-        <wsdl2:operation name="multResult4">
-        	<wsdl2:input message="tns:multResult4Request"></wsdl2:input>
-        </wsdl2:operation>
-        <wsdl2:operation name="cpCallback1">
-        	<wsdl2:input message="tns:cpCallback1Request"></wsdl2:input>
-        </wsdl2:operation>
-        <wsdl2:operation name="cpCallback2">
-        	<wsdl2:input message="tns:cpCallback2Request"></wsdl2:input>
-        </wsdl2:operation>
-        <wsdl2:operation name="cpCallback3">
-        	<wsdl2:input message="tns:cpCallback3Request"></wsdl2:input>
-        </wsdl2:operation>
-        <wsdl2:operation name="cpCallback4">
-        	<wsdl2:input message="tns:cpCallback4Request"></wsdl2:input>
-        </wsdl2:operation>
+        <operation name="multResult3">
+        	<input message="tns:multResult3Request"/>
+        </operation>
+        <operation name="multResult4">
+        	<input message="tns:multResult4Request"/>
+        </operation>
     </portType>   
 <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      PARTNER LINK TYPE DEFINITION
@@ -287,7 +299,7 @@ xmlns:wsdl2="http://schemas.xmlsoap.org/wsdl/" name="WF_Process" targetNamespace
 </vprop:propertyAlias>
 
 <vprop:property name="op2_CS" type="p:int"/>
-<vprop:propertyAlias messageType="ns:computeRequest" part="parameters" element="ns:op_id" propertyName="tns:op2_CS">
+<vprop:propertyAlias messageType="ns1:computeRequest" part="parameters" element="ns1:op_id" propertyName="tns:op2_CS">
 
 </vprop:propertyAlias>
 
@@ -296,7 +308,7 @@ xmlns:wsdl2="http://schemas.xmlsoap.org/wsdl/" name="WF_Process" targetNamespace
 </vprop:propertyAlias>
 
 <vprop:property name="op3_CS" type="p:int"/>
-<vprop:propertyAlias messageType="ns:computeRequest" part="parameters" element="ns:op_id" propertyName="tns:op3_CS">
+<vprop:propertyAlias messageType="ns4:computeRequest" part="parameters" element="ns4:op_id" propertyName="tns:op3_CS">
 
 </vprop:propertyAlias>
 <vprop:propertyAlias messageType="tns:addResultRequest" part="parameters" propertyName="tns:op3_CS">
@@ -308,81 +320,71 @@ xmlns:wsdl2="http://schemas.xmlsoap.org/wsdl/" name="WF_Process" targetNamespace
      for a web service.
      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
     <binding name="WF_ProcessBinding" type="tns:WF_Process">
-    	<soap:binding style="document"
-    		transport="http://schemas.xmlsoap.org/soap/http" />
+    	<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
     	<operation name="process">
-    		<soap:operation
-    			soapAction="http://matrix.bpelprocess/process" />
+    		<soap:operation soapAction="http://matrix.bpelprocess/process"/>
     		<input>
-    			<soap:body use="literal" />
+    			<soap:body use="literal"/>
     		</input>
     		<output>
-    			<soap:body use="literal" />
+    			<soap:body use="literal"/>
     		</output>
     	</operation>
     	<operation name="multResult1">
-    		<soap:operation
-    			soapAction="http://matrix.bpelprocess/multResult1" />
+    		<soap:operation soapAction="http://matrix.bpelprocess/multResult1"/>
     		<input>
-    			<soap:body use="literal" />
+    			<soap:body use="literal"/>
     		</input>
     	</operation>
     	<operation name="multResult2">
-    		<soap:operation
-    			soapAction="http://matrix.bpelprocess/multResult2" />
+    		<soap:operation soapAction="http://matrix.bpelprocess/multResult2"/>
     		<input>
-    			<soap:body use="literal" />
+    			<soap:body use="literal"/>
     		</input>
     	</operation>
     	<operation name="addResult">
-    		<soap:operation
-    			soapAction="http://matrix.bpelprocess/addResult" />
+    		<soap:operation soapAction="http://matrix.bpelprocess/addResult"/>
     		<input>
-    			<soap:body use="literal" />
+    			<soap:body use="literal"/>
     		</input>
     	</operation>
-    	<wsdl2:operation name="multResult3">
-    		<soap:operation
-    			soapAction="http://matrix.bpelprocess/multResult3" />
-    		<wsdl2:input>
-    			<soap:body use="literal" />
-    		</wsdl2:input>
-    	</wsdl2:operation>
-    	<wsdl2:operation name="multResult4">
-    		<soap:operation
-    			soapAction="http://matrix.bpelprocess/multResult4" />
-    		<wsdl2:input>
-    			<soap:body use="literal" />
-    		</wsdl2:input>
-    	</wsdl2:operation>
-    	<wsdl2:operation name="cpCallback1">
-    		<soap:operation
-    			soapAction="http://matrix.bpelprocess/cpCallback1" />
-    		<wsdl2:input>
-    			<soap:body use="literal" />
-    		</wsdl2:input>
-    	</wsdl2:operation>
-    	<wsdl2:operation name="cpCallback2">
-    		<soap:operation
-    			soapAction="http://matrix.bpelprocess/cpCallback2" />
-    		<wsdl2:input>
-    			<soap:body use="literal" />
-    		</wsdl2:input>
-    	</wsdl2:operation>
-    	<wsdl2:operation name="cpCallback3">
-    		<soap:operation
-    			soapAction="http://matrix.bpelprocess/cpCallback3" />
-    		<wsdl2:input>
-    			<soap:body use="literal" />
-    		</wsdl2:input>
-    	</wsdl2:operation>
-    	<wsdl2:operation name="cpCallback4">
-    		<soap:operation
-    			soapAction="http://matrix.bpelprocess/cpCallback4" />
-    		<wsdl2:input>
-    			<soap:body use="literal" />
-    		</wsdl2:input>
-    	</wsdl2:operation>
+    	<operation name="multResult3">
+    		<soap:operation soapAction="http://matrix.bpelprocess/multResult3"/>
+    		<input>
+    			<soap:body use="literal"/>
+    		</input>
+    	</operation>
+    	<operation name="multResult4">
+    		<soap:operation soapAction="http://matrix.bpelprocess/multResult4"/>
+    		<input>
+    			<soap:body use="literal"/>
+    		</input>
+    	</operation>
+<!--    	<operation name="cpCallback1">
+    		<soap:operation soapAction="http://matrix.bpelprocess/cpCallback1"/>
+    		<input>
+    			<soap:body use="literal"/>
+    		</input>
+    	</operation>
+    	<operation name="cpCallback2">
+    		<soap:operation soapAction="http://matrix.bpelprocess/cpCallback2"/>
+    		<input>
+    			<soap:body use="literal"/>
+    		</input>
+    	</operation>
+    	<operation name="cpCallback3">
+    		<soap:operation soapAction="http://matrix.bpelprocess/cpCallback3"/>
+    		<input>
+    			<soap:body use="literal"/>
+    		</input>
+    	</operation>
+    	<operation name="cpCallback4">
+    		<soap:operation soapAction="http://matrix.bpelprocess/cpCallback4"/>
+    		<input>
+    			<soap:body use="literal"/>
+    		</input>
+    	</operation>
+    	-->
     </binding>
 
     <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -391,7 +393,7 @@ xmlns:wsdl2="http://schemas.xmlsoap.org/wsdl/" name="WF_Process" targetNamespace
      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
     <service name="WF_ProcessService">
     	<port binding="tns:WF_ProcessBinding" name="WF_ProcessPort">
-    		<soap:address location="http://localhost:8080/ode/processes/WF_Process"/>
+    		<soap:address location="http://10.160.2.27:8080/ode/processes/WF_Process"/>
     	</port>
     </service>
 </definitions>

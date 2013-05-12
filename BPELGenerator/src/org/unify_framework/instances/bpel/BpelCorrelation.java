@@ -7,7 +7,7 @@ public class BpelCorrelation implements Element {
 
 	
 	private String initiate;
-	private String direction ="Receive";
+	private String direction =null;
 	private String set;
 	
 	public BpelCorrelation(String init, String direction, String corr_set) {

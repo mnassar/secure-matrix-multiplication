@@ -12,11 +12,21 @@ public class BpelAssignActivity extends BpelAtomicActivity {
 	
 	private List<BpelCopy> copies = new ArrayList<BpelCopy>();
 	
+	private String validate = "no";
 	public BpelAssignActivity(String name) {
 		
 		super(name);
 	}
+	
+	public String getValidate()
+	{
+		return validate;
+	}
 
+	public void setValidate(String valid)
+	{
+		validate = new String(valid);
+	}
 	@Override
 	public void accept(ElementVisitor visitor) {
 		

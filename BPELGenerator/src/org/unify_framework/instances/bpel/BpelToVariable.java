@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.unify_framework.instances.bpel.visitors.ElementVisitor;
+import org.w3c.dom.Node;
 
 public class BpelToVariable extends BpelTo {
 	
@@ -13,6 +14,7 @@ public class BpelToVariable extends BpelTo {
 	private String variable;
 	private String part;
 	private String query;
+	private Node queryNode;
 	
 	private Map<String, String> namespaceDeclarations = new HashMap<String, String>();
 	
@@ -40,6 +42,10 @@ public class BpelToVariable extends BpelTo {
 		return this.query;
 	}
 	
+public Node getQueryNode() {
+		
+		return this.queryNode;
+	}
 	public Map<String, String> getNamespaceDeclarations() {
 		
 		return this.namespaceDeclarations;
@@ -57,6 +63,10 @@ public class BpelToVariable extends BpelTo {
 		this.query = query;
 	}
 	
+public void setQueryNode(Node queryN) {
+		
+		this.queryNode = queryN;
+	}
 	/* PUBLIC METHODS *********************************************************/
 
 	@Override
@@ -76,6 +86,7 @@ public class BpelToVariable extends BpelTo {
 		BpelToVariable copy = new BpelToVariable(this.variable);
 		copy.setPart(this.part);
 		copy.setQuery(this.query);
+		copy.setQueryNode(this.queryNode);
 		for (Entry<String, String> entry : this.namespaceDeclarations.entrySet()) {
 			copy.addNamespaceDeclaration(entry.getKey(), entry.getValue());
 		}
