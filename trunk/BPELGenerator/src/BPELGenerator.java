@@ -446,7 +446,7 @@ public class BPELGenerator {
 	           
 	            String literalText3 ="<bpel:literal><tns:compute "
 +                                "xmlns:tns=\"http://www.example.org/MatServ26/\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">"
- +                               "<operation>multiply</operation>"
++                               "<operation>multiply</operation>"
 +								"<op_id>3</op_id>"
 +                                "<job_id>0</job_id>"
 +                                "<matA_ID>A1</matA_ID>"
