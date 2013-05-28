@@ -5,5 +5,7 @@
 	<classpathentry kind="lib" path="/home/farida/Downloads/JEP/jep-2.4.1-ext-1.1.1-gpl3/lib/Jama-1.0.2.jar"/>
 	<classpathentry kind="lib" path="/home/farida/Downloads/JEP/jep-2.4.1-ext-1.1.1-gpl3/lib/junit.jar"/>
 	<classpathentry kind="lib" path="/home/farida/Documents/bpelgen.jar"/>
+	<classpathentry kind="lib" path="/home/farida/Clean_workspace/BrokerServices/WebContent/WEB-INF/lib/commons-lang-2.4.jar"/>
+	<classpathentry kind="lib" path="/home/farida/Clean_workspace/BrokerServices/WebContent/WEB-INF/lib/commons-logging-1.1.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
