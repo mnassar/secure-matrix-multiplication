@@ -3,6 +3,7 @@ package org.workflow.translate.expression;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -11,7 +12,10 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.bpel.deploy.FolderZipper;
 import org.bpel.deploy.ProcessDeploy;
+import org.unify_framework.abstract_syntax.Node;
 import org.unify_framework.abstract_syntax.data_perspective.impl.XpathExpressionImpl;
+import org.unify_framework.instances.bpel.BpelAndJoin;
+import org.unify_framework.instances.bpel.BpelAndSplit;
 import org.unify_framework.instances.bpel.BpelAssignActivity;
 import org.unify_framework.instances.bpel.BpelCompositeActivity;
 import org.unify_framework.instances.bpel.BpelCompositeReceiveActivity;
@@ -28,6 +32,7 @@ import org.unify_framework.instances.bpel.BpelToVariable;
 import org.unify_framework.instances.bpel.BpelVariable;
 import org.unify_framework.instances.bpel.BpelVariableMessageType;
 import org.unify_framework.instances.bpel.BpelVariableType;
+import org.unify_framework.instances.bpel.parser.BpelParser;
 import org.unify_framework.instances.bpel.serializer.BpelSerializer;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -39,63 +44,92 @@ public class Workflow {
 	private String wf_name;
 	private String folder_Path;
 	private String ODE_PATH;
-	private String additive_splitting_process;
+	private String additive_splitting_url;
 	private	String queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0";
 	private String WSDL_SCHEMA= "http://schemas.xmlsoap.org/wsdl/";
 	
+	private BpelProcess additive_splitting_process;
+	
 	BpelCorrelationSet JOB_CS;
     BpelCompositeActivity bpelCompositeActivity;//= (BpelCompositeActivity) process ;
-    
+    BpelCompositeReceiveActivity initial_receive;
    
 	BpelScope scope;// = bpelCompositeActivity.getScope();
 	
-	List<BpelVariable> variables;
+	ArrayList<BpelVariable> variables;
+	
+	BpelPartnerLink client_PL;
+	BpelPartnerLink AdditiveSplitting_PL;
+	BpelPartnerLink Broker_PL;
 	
 	
 	public Workflow(String process_name, String process_namespace)
 	{
-	
+
 		wf_name = new String(process_name);
-		
+		variables = new ArrayList<BpelVariable>();
 		process = new BpelProcess(process_name, process_namespace);
-	///**************
+		///**************
 		//TODO: Add to the process namespace declarations for the additive splitting and other protocols
 		//and add namespace for the cloud and broker services
 		//process.addNamespaceDeclaration("tns", "http://matrix.bpelprocess");
-	///	
+		///	
 		process.addNamespaceDeclaration("tns", process_namespace);
 		process.addNamespaceDeclaration("xsd", "http://www.w3.org/2001/XMLSchema");
 		process.addNamespaceDeclaration("ode", "http://www.apache.org/ode/type/extension");
+		process.addNamespaceDeclaration("ns1", "http://matrix.bpelprocess");
 		process.setExitOnStandardFault("yes");
 		process.setSuppressJoinFailure("yes");
-		
+
 		///**************
-			//TODO: Add necessary Imports
-			//BpelImport imp  = new BpelImport("http://matrix.bpelprocess", "WF_ProcessArtifacts.wsdl", WSDL_SCHEMA);
-			//process.addImport(imp);
-	    ///
-		
-		///**************
-			//TODO: Add necessary PartnerLinks
-			BpelPartnerLink client_PL = new BpelPartnerLink("client", "tns:"+process_name, process_name+"Provider", null);
-			process.addPartnerLink(client_PL);
-        	//BpelPartnerLink  PL1 = new BpelPartnerLink("A1B1_PL", "tns:Mahout_PL24", null, "ServiceProvider24");
-			// process.addPartnerLink(PL1);
+		//TODO: Add necessary Imports
+		BpelImport imp  = new BpelImport("http://matrix.bpelprocess", ODE_PATH+"/WF_Process/WF_ProcessArtifacts.wsdl", WSDL_SCHEMA);
+		process.addImport(imp);
 		///
-			
-			  JOB_CS= new BpelCorrelationSet("JOB_CS", "tns:jobid_CS");
-			  process.addCorrelationSet(JOB_CS);
-			  bpelCompositeActivity= (BpelCompositeActivity) process ;
-			  scope= bpelCompositeActivity.getScope();
-	
-			  BpelVariable variable = new BpelVariableMessageType("input", "tns:"+wf_name+"RequestMessage");
-	    	  scope.addVariable(variable);
-	    		
-	    	  BpelVariable variable2 = new BpelVariableMessageType("output", "tns:"+wf_name+"ResponseMessage");
-	    	  scope.addVariable(variable2);
-	    	
+
+		///**************
+		//TODO: Add necessary PartnerLinks
+		client_PL = new BpelPartnerLink("client", "tns:"+process_name, process_name+"Provider", null);
+		process.addPartnerLink(client_PL);
+		AdditiveSplitting_PL = new BpelPartnerLink("AdditiveSplitting_PL", "tns:AdditiveSplitting_PLT", null, "AdditiveSplittingServiceProvider");
+		process.addPartnerLink(AdditiveSplitting_PL);
+		Broker_PL  = new BpelPartnerLink("Broker_PL", "tns:Broker_PLT", null, "BrokerServiceProvider");
+		process.addPartnerLink(Broker_PL);
+		
+		///
+		JOB_CS= new BpelCorrelationSet("JOB_CS", "tns:jobid_CS");
+		process.addCorrelationSet(JOB_CS);
+		bpelCompositeActivity= (BpelCompositeActivity) process ;
+		scope= bpelCompositeActivity.getScope();
+
+		BpelVariable variable = new BpelVariableMessageType("input", "tns:"+wf_name+"RequestMessage");
+		scope.addVariable(variable);
+
+		BpelVariable variable2 = new BpelVariableMessageType("output", "tns:"+wf_name+"ResponseMessage");
+		scope.addVariable(variable2);
+
+		//Initial receive to start the workflow
+		initial_receive = new BpelCompositeReceiveActivity("receiveInput");
+		initial_receive.setOperation("start");
+		initial_receive.setPartnerLink("client");
+		initial_receive.setPortType("tns:"+wf_name);
+		initial_receive.setVariable("input");
+		initial_receive.setCreateInstance("yes");
+        BpelCorrelation corr = new BpelCorrelation("yes", "JOB_CS");
+        initial_receive.addCorrelation(corr);
+      
+        bpelCompositeActivity.addChild(initial_receive);
+        bpelCompositeActivity.connect(bpelCompositeActivity.getStartEvent(), initial_receive);
+        
+        process.setScope(scope);
+        
+		 //BpelParser bpelParser = new BpelParser();
+         //additive_splitting_process = bpelParser.parse(ODE_PATH+"/WF_Process/WF_Process.bpel");
+         //((BpelCompositeActivity)additive_splitting_process).getScope().getVariables().
 	    
 	}
+	
+	
 	
 	/**
 	 * @return the folder_Path
@@ -118,14 +152,22 @@ public class Workflow {
 	/**
 	 * @return the additive_splitting_process
 	 */
-	public String getAdditive_splitting_process() {
+	public BpelProcess getAdditive_splitting_process() {
 		return additive_splitting_process;
+	}
+
+	public String getAdditive_splitting_url() {
+		return additive_splitting_url;
+	}
+
+	public void setAdditive_splitting_url(String additive_splitting_url) {
+		this.additive_splitting_url = additive_splitting_url;
 	}
 
 	/**
 	 * @param additive_splitting_process the additive_splitting_process to set
 	 */
-	public void setAdditive_splitting_process(String additive_splitting_process) {
+	public void setAdditive_splitting_process(BpelProcess additive_splitting_process) {
 		this.additive_splitting_process = additive_splitting_process;
 	}
 
@@ -147,14 +189,20 @@ public class Workflow {
 		this.folder_Path = folder_Path;
 	}
 
-	public void addNamespaces()
+	public boolean addNamespace(String prefix, String namespace)
 	{
 		///**************
-				//TODO: Add to the process namespace declarations for the additive splitting and other protocols
+				// Add to the process namespace declarations for the additive splitting and other protocols
 				//and add namespace for broker services
-				//process.addNamespaceDeclaration("tns", "http://matrix.bpelprocess");
-			///	
+		if(!process.getNamespaceDeclarations().containsValue(namespace))
+		{
+			process.addNamespaceDeclaration(prefix, namespace);
+			return true;
+		}
+		return false;
+			
 	}
+	
 	
 	public void addMessageVariable(String var_name, String var_type)
 	{
@@ -168,7 +216,7 @@ public class Workflow {
 		 scope.addVariable(new BpelVariableType(var_name, var_type));
 	}
 	
-	public void addAssign(String activ_name, String message, BpelVariable var) throws ParserConfigurationException, SAXException, IOException
+	public void addAssign(String activ_name, String message, String var) throws ParserConfigurationException, SAXException, IOException
 	{
 		BpelAssignActivity assign = new BpelAssignActivity(activ_name);
         assign.setValidate("no");
@@ -181,7 +229,7 @@ public class Workflow {
 		
 		BpelFromExpression from = new BpelFromExpression(literalElement);
 	    copy.setFrom(from);
-        BpelToVariable to = new BpelToVariable(var.getName());
+        BpelToVariable to = new BpelToVariable(var); 
         to.setPart("payload");
         copy.setTo(to);
         assign.addCopy(copy);
@@ -211,8 +259,25 @@ public class Workflow {
          
          bpelCompositeActivity.addChild(callback);
     }
+	
+	public void connect(String activ1_name, String activ2_name)
+	{
+		Node activ1 = bpelCompositeActivity.getChild(activ1_name);
+		Node activ2 = bpelCompositeActivity.getChild(activ2_name);
+		if(activ1.getClass()== BpelAndSplit.class)
+			bpelCompositeActivity.connect(((BpelAndSplit)activ1).getNewControlOutputPort(), activ2.getNewControlInputPort());
+		else if (activ2.getClass()== BpelAndJoin.class)
+			bpelCompositeActivity.connect(activ1.getNewControlOutputPort(), activ2.getNewControlInputPort());
+		else
+			bpelCompositeActivity.connect(activ1, activ2);
+		
+	}
 	public void serialize()
 	{
+		//just for testing
+		bpelCompositeActivity.connect(initial_receive, bpelCompositeActivity.getChild("Assign0"));
+		bpelCompositeActivity.connect(bpelCompositeActivity.getChild("Callback0"), bpelCompositeActivity.getEndEvent());
+		///////////////////////////////////
 		System.out.println(getFolder_Path());
 		System.out.println(wf_name);
 		File file = new File(getFolder_Path()+"/"+wf_name);
@@ -224,7 +289,7 @@ public class Workflow {
 			}
 		}
 		
-		File bpel_file = new File(wf_name);
+		File bpel_file = new File(folder_Path+"/"+wf_name+"/"+wf_name+".bpel");
 		BpelSerializer bpelSerializer = new BpelSerializer();
         bpelSerializer.serialize(process, bpel_file);
 	}
