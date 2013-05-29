@@ -1,7 +1,12 @@
 package org.workflow.translate.expression;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Random;
+
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.xml.sax.SAXException;
 
 
 
@@ -55,7 +60,18 @@ public class ExpressionTranslator {
 	{
 		ExpressionToWorkflow expWF = new ExpressionToWorkflow(this);
 		expWF.initialise();
-		expWF.convert();
+		try {
+			expWF.convert();
+		} catch (ParserConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SAXException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public static void main()

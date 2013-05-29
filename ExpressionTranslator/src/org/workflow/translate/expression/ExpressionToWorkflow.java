@@ -10,10 +10,13 @@ import java.util.HashMap;
 import java.util.Random;
 import java.util.StringTokenizer;
 
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.bpel.deploy.FolderZipper;
 import org.bpel.deploy.ProcessDeploy;
 import org.lsmp.djep.matrixJep.MatrixJep;
 import org.nfunk.jep.Node;
+import org.xml.sax.SAXException;
 
 public class ExpressionToWorkflow {
 
@@ -25,6 +28,11 @@ public class ExpressionToWorkflow {
 	private String broker_url;
 	private MatrixMeta left_operand;
 	private MatrixMeta right_operand;
+	private Random sub_wf_job;
+	private int assign_counter;
+	private int invoke_counter;
+	private int receive_counter;
+	private int namespace_counter;
 	
 	public ExpressionToWorkflow(ExpressionTranslator translator)
 	{
@@ -33,6 +41,12 @@ public class ExpressionToWorkflow {
 		String expwf_process= "exp"+job_ID;
 		exp_wf = new Workflow(expwf_process, "http://soc."+expwf_process+".workflow");
 		this.translator = new ExpressionTranslator(translator);
+		
+		sub_wf_job = new Random();
+		assign_counter = 0;
+		invoke_counter = 0;
+		receive_counter = 0;
+		namespace_counter = 0;
 		
 		File conf = new File("/etc/soc/soc.conf");
 		BufferedReader br = null;
@@ -50,10 +64,8 @@ public class ExpressionToWorkflow {
 			
 				if(variable.equals("ODE_PATH")) exp_wf.setODE_PATH(path.substring(1,path.length()-1));
 				if(variable.equals("WORKFLOWS_PATH")) exp_wf.setFolder_Path(path.substring(1,path.length()-1));
-				if(variable.equals("ADDITIVE_SPLITTING_PROCESS"))  exp_wf.setAdditive_splitting_process( new String(path.substring(1,path.length()-1)));
+				if(variable.equals("ADDITIVE_SPLITTING_PROCESS"))  exp_wf.setAdditive_splitting_url( new String(path.substring(1,path.length()-1)));
 				if(variable.equals("BROKER_URL"))  broker_url = new String(path.substring(1,path.length()-1));
-				
-				 
 			}
  
 		} catch (IOException e) {
@@ -78,12 +90,9 @@ public class ExpressionToWorkflow {
 		j.setAllowAssignment(true);
 		((MatrixJep) j).addStandardDiffRules();
 		
-		
-		
-		
 	}
 	
-	public void convert()
+	public void convert() throws ParserConfigurationException, SAXException, IOException
 	{
 		Node exp_tree = j.parseExpression(expression);
 		//// Traverse the expression tree to create the workflow
@@ -155,10 +164,21 @@ public class ExpressionToWorkflow {
 				
 		ExpressionToWorkflow expTowf = new ExpressionToWorkflow(translator);
 		expTowf.initialise();
-		expTowf.convert();
+		try {
+			expTowf.convert();
+		} catch (ParserConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SAXException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
-	public  void traverse(Node tree)
+	public  void traverse(Node tree) throws ParserConfigurationException, SAXException, IOException
 	{
 		Node curr_node=  tree;
 		Node left_node= null;
@@ -240,23 +260,48 @@ public class ExpressionToWorkflow {
 				//<q0:matA/>
 				//<q0:matB/>
 				//</q0:WF_ProcessRequest>
-				/*
-				 * "<bpel:literal><tns:WF_ProcessResponse xmlns:tns=\"http://matrix.bpelprocess\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">"+
-				  "<tns:result>tns:result</tns:result>"+
-				  "<tns:instanceID>tns:instanceID</tns:instanceID>"+
-				  "</tns:WF_ProcessResponse></bpel:literal>"
-				 */
+				
 				//ADD INVOKE and Callback RECEIVE activities
 				if(curr_node.toString().contains("*"))
 				{
 					if(left_operand.getProtocol()== MatrixMeta.ADDITIVE_SPLITTING)
 					{
+						//boolean added =exp_wf.addNamespace("ns"+namespace_counter, exp_wf.getAdditive_splitting_process().getTargetNamespace());
+						//if(added== true) namespace_counter++;
 					//assign additive splitting message request
+						String request_str= "<bpel:literal><tns:WF_ProcessRequest xmlns:tns=\"http://matrix.bpelprocess\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">"+
+								  "<tns:input>"+sub_wf_job.nextInt()+"</tns:input>"+
+								  "<tns:matA>"+left_operand.getId()+"</tns:matA>"+
+								  "<tns:matB>"+right_operand.getId()+"</tns:matB>"+
+								  "</tns:WF_ProcessRequest></bpel:literal>";
+						
+						exp_wf.addMessageVariable("var"+assign_counter, "ns1:WF_ProcessRequestMessage"); // reading variable type may be done from parsing the additive splitting bpel file and getting the variable type but this would be complicated and would take time, while they are not supposed to change 
+						exp_wf.addAssign("Assign"+assign_counter, request_str, "var"+assign_counter);
 						
 					//Invoke additive splitting process  
+						
+						exp_wf.addInvokeActivity("Invoke"+invoke_counter, "process", exp_wf.AdditiveSplitting_PL.getName(), "ns1:WF_Process", "var"+assign_counter);
+						
 					}
 					//else OTHER PROTOCOLS
+					
+					
+					
+					exp_wf.addMessageVariable("var"+assign_counter, "tns:callback"+receive_counter+"Request");   
+					
 					//receive callback
+					exp_wf.addCallbackActivity("Callback"+receive_counter, "callback"+receive_counter, "CB_"+receive_counter+"_PL", "tns:"+exp_wf.getWf_name(), "var"+assign_counter);
+					
+					
+					exp_wf.connect("Assign"+assign_counter, "Invoke"+invoke_counter);
+					exp_wf.connect("Invoke"+invoke_counter, "Callback"+receive_counter );
+					
+					assign_counter++;
+					invoke_counter++;
+					receive_counter++;
+					
+					//if(curr_node.jjtGetParent().jjtGetChild(0)== left_node) //I am the left hand side of the another expression
+						//CHECK EVALUATION CODE IN THE LIBRARY .. NEARLY SAME LOGIC
 				}
 				else if(curr_node.toString().contains("+"))
 				{
