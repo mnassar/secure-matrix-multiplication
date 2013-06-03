@@ -14,6 +14,8 @@ import org.bpel.deploy.FolderZipper;
 import org.bpel.deploy.ProcessDeploy;
 import org.unify_framework.abstract_syntax.Node;
 import org.unify_framework.abstract_syntax.data_perspective.impl.XpathExpressionImpl;
+import org.unify_framework.abstract_syntax.impl.ActivityImpl;
+import org.unify_framework.abstract_syntax.impl.TransitionImpl;
 import org.unify_framework.instances.bpel.BpelAndJoin;
 import org.unify_framework.instances.bpel.BpelAndSplit;
 import org.unify_framework.instances.bpel.BpelAssignActivity;
@@ -45,6 +47,7 @@ public class Workflow {
 	private String folder_Path;
 	private String ODE_PATH;
 	private String additive_splitting_url;
+	private String broker_services_url;
 	private	String queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0";
 	private String WSDL_SCHEMA= "http://schemas.xmlsoap.org/wsdl/";
 	
@@ -59,9 +62,11 @@ public class Workflow {
 	ArrayList<BpelVariable> variables;
 	
 	BpelPartnerLink client_PL;
-	BpelPartnerLink AdditiveSplitting_PL;
-	BpelPartnerLink Broker_PL;
 	
+	BpelPartnerLink AdditiveSplitting_PL;
+	String AdditiveSplitting_namespace;
+	BpelPartnerLink Broker_PL;
+	String Broker_namespace;
 	
 	public Workflow(String process_name, String process_namespace)
 	{
@@ -69,6 +74,8 @@ public class Workflow {
 		wf_name = new String(process_name);
 		variables = new ArrayList<BpelVariable>();
 		process = new BpelProcess(process_name, process_namespace);
+		AdditiveSplitting_namespace = "http://matrix.bpelprocess";
+		Broker_namespace = "http://bpel.broker.services";
 		///**************
 		//TODO: Add to the process namespace declarations for the additive splitting and other protocols
 		//and add namespace for the cloud and broker services
@@ -77,14 +84,17 @@ public class Workflow {
 		process.addNamespaceDeclaration("tns", process_namespace);
 		process.addNamespaceDeclaration("xsd", "http://www.w3.org/2001/XMLSchema");
 		process.addNamespaceDeclaration("ode", "http://www.apache.org/ode/type/extension");
-		process.addNamespaceDeclaration("ns1", "http://matrix.bpelprocess");
+		process.addNamespaceDeclaration("ns1", AdditiveSplitting_namespace);
+		process.addNamespaceDeclaration("ns2", Broker_namespace);
 		process.setExitOnStandardFault("yes");
 		process.setSuppressJoinFailure("yes");
 
 		///**************
 		//TODO: Add necessary Imports
-		BpelImport imp  = new BpelImport("http://matrix.bpelprocess", ODE_PATH+"/WF_Process/WF_ProcessArtifacts.wsdl", WSDL_SCHEMA);
+		BpelImport imp  = new BpelImport(AdditiveSplitting_namespace, ODE_PATH+"/WF_Process/WF_ProcessArtifacts.wsdl", WSDL_SCHEMA);
 		process.addImport(imp);
+		BpelImport imp2  = new BpelImport(Broker_namespace, broker_services_url+"?wsdl", WSDL_SCHEMA);
+		process.addImport(imp2);
 		///
 
 		///**************
@@ -160,6 +170,30 @@ public class Workflow {
 		return additive_splitting_url;
 	}
 
+	public String getAdditiveSplitting_namespace() {
+		return AdditiveSplitting_namespace;
+	}
+
+
+
+	public String getBroker_namespace() {
+		return Broker_namespace;
+	}
+
+
+
+	public void setBroker_namespace(String broker_namespace) {
+		Broker_namespace = broker_namespace;
+	}
+
+
+
+	public void setAdditiveSplitting_namespace(String additiveSplitting_namespace) {
+		AdditiveSplitting_namespace = additiveSplitting_namespace;
+	}
+
+
+
 	public void setAdditive_splitting_url(String additive_splitting_url) {
 		this.additive_splitting_url = additive_splitting_url;
 	}
@@ -203,6 +237,26 @@ public class Workflow {
 			
 	}
 	
+	public void addParallelflow(int i)
+	{
+	
+		  BpelAndSplit split = new BpelAndSplit("FlowSplit"+i);
+          BpelAndJoin join = new BpelAndJoin("FlowJoin"+i);
+          
+       
+          split.setCorrespondingAndJoin(join);
+          join.setCorrespondingAndSplit(split);
+          
+          bpelCompositeActivity.addChild(split);
+          bpelCompositeActivity.addChild(join);
+          
+          if(i==1)
+          {
+        	  bpelCompositeActivity.connect(initial_receive.getControlOutputPort(),split.getControlInputPort());
+        	  bpelCompositeActivity.connect(join.getControlOutputPort(), bpelCompositeActivity.getEndEvent().getControlInputPort());
+          }
+          
+	}
 	
 	public void addMessageVariable(String var_name, String var_type)
 	{
@@ -264,19 +318,43 @@ public class Workflow {
 	{
 		Node activ1 = bpelCompositeActivity.getChild(activ1_name);
 		Node activ2 = bpelCompositeActivity.getChild(activ2_name);
-		if(activ1.getClass()== BpelAndSplit.class)
-			bpelCompositeActivity.connect(((BpelAndSplit)activ1).getNewControlOutputPort(), activ2.getNewControlInputPort());
-		else if (activ2.getClass()== BpelAndJoin.class)
-			bpelCompositeActivity.connect(activ1.getNewControlOutputPort(), activ2.getNewControlInputPort());
-		else
-			bpelCompositeActivity.connect(activ1, activ2);
 		
+		bpelCompositeActivity.connect(activ1, activ2);
+		
+	}
+	public void connectToFlow(int i, String start_activ, String end_activ)
+	{
+		Node activ1 = bpelCompositeActivity.getChild(start_activ);
+		Node activ2 = bpelCompositeActivity.getChild(end_activ);
+		
+		bpelCompositeActivity.connect(bpelCompositeActivity.getChild("FlowSplit"+i).getNewControlOutputPort(), ((ActivityImpl)activ1).getControlInputPort());
+		bpelCompositeActivity.connect(((ActivityImpl)activ2).getControlOutputPort(), bpelCompositeActivity.getChild("FlowJoin"+i).getNewControlInputPort());
+		
+	}
+	
+	public void connectBetweenFlow(int i, int j, String start_activ, String end_activ)
+	{
+		Node activ1 = bpelCompositeActivity.getChild(start_activ);
+		Node activ2 = bpelCompositeActivity.getChild(end_activ);
+		
+		//TransitionImpl transition = new TransitionImpl(((BpelAndJoin)bpelCompositeActivity.getChild("FlowJoin"+i)).getControlOutputPort(), ((BpelAndJoin)bpelCompositeActivity.getChild("FlowJoin"+j)).getControlInputPorts().get(0));
+		//bpelCompositeActivity.removeTransition(transition);
+		
+		bpelCompositeActivity.connect(((BpelAndJoin)bpelCompositeActivity.getChild("FlowJoin"+i)).getControlOutputPort(), ((ActivityImpl)activ1).getControlInputPort());
+		bpelCompositeActivity.connect(((ActivityImpl)activ2).getControlOutputPort(), bpelCompositeActivity.getChild("FlowJoin"+j).getNewControlInputPort());
+		
+	}
+	
+	public void connectFlowToFlow(int i, int j)
+	{
+		bpelCompositeActivity.connect(bpelCompositeActivity.getChild("FlowSplit"+j).getNewControlOutputPort(), ((BpelAndSplit)bpelCompositeActivity.getChild("FlowSplit"+i)).getControlInputPort());
+		bpelCompositeActivity.connect(((BpelAndJoin)bpelCompositeActivity.getChild("FlowJoin"+i)).getControlOutputPort(), bpelCompositeActivity.getChild("FlowJoin"+j).getNewControlInputPort());
 	}
 	public void serialize()
 	{
 		//just for testing
-		bpelCompositeActivity.connect(initial_receive, bpelCompositeActivity.getChild("Assign0"));
-		bpelCompositeActivity.connect(bpelCompositeActivity.getChild("Callback0"), bpelCompositeActivity.getEndEvent());
+		//bpelCompositeActivity.connect(initial_receive, bpelCompositeActivity.getChild("Assign0"));
+		//bpelCompositeActivity.connect(bpelCompositeActivity.getChild("Callback0"), bpelCompositeActivity.getEndEvent());
 		///////////////////////////////////
 		System.out.println(getFolder_Path());
 		System.out.println(wf_name);

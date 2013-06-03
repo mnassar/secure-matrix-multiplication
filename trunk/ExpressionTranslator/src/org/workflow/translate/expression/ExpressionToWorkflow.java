@@ -15,7 +15,9 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.bpel.deploy.FolderZipper;
 import org.bpel.deploy.ProcessDeploy;
 import org.lsmp.djep.matrixJep.MatrixJep;
+import org.nfunk.jep.ASTFunNode;
 import org.nfunk.jep.Node;
+import org.nfunk.jep.ParseException;
 import org.xml.sax.SAXException;
 
 public class ExpressionToWorkflow {
@@ -34,6 +36,9 @@ public class ExpressionToWorkflow {
 	private int receive_counter;
 	private int namespace_counter;
 	
+	private int current_flow;
+	private int flow_counter;
+	
 	public ExpressionToWorkflow(ExpressionTranslator translator)
 	{
 		expression = new String(translator.getExpression());
@@ -47,6 +52,8 @@ public class ExpressionToWorkflow {
 		invoke_counter = 0;
 		receive_counter = 0;
 		namespace_counter = 0;
+		current_flow = 0;
+		flow_counter= 0;
 		
 		File conf = new File("/etc/soc/soc.conf");
 		BufferedReader br = null;
@@ -92,15 +99,16 @@ public class ExpressionToWorkflow {
 		
 	}
 	
-	public void convert() throws ParserConfigurationException, SAXException, IOException
+	public void convert() throws ParserConfigurationException, SAXException, IOException, ParseException
 	{
-		Node exp_tree = j.parseExpression(expression);
+		Node exp_tree = j.parse(expression);
 		//// Traverse the expression tree to create the workflow
 		traverse(exp_tree);
 
 		//SERIALIZE BPEL
 		exp_wf.serialize();
 		
+	
 		//**************************
 		// SERIALIZE WSDL 
 		
@@ -118,7 +126,7 @@ public class ExpressionToWorkflow {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 
-		String expression = "A*B+C*D";
+		String expression = "(A*B+C*D)+(A*D+B*C)";
 		ExpressionTranslator translator = new ExpressionTranslator(expression);
 		//**********************
 				//This data should be read from the metadata store
@@ -175,6 +183,9 @@ public class ExpressionToWorkflow {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 	
@@ -193,7 +204,7 @@ public class ExpressionToWorkflow {
 				left_operand = translator.getExpressionVariable(var_key);
 				right_operand = null;
 			}
-			else //Binary operator
+			else //Two operands for the Binary operator
 			{
 				if(curr_node.jjtGetParent().jjtGetChild(1) !=curr_node )
 				{
@@ -220,14 +231,31 @@ public class ExpressionToWorkflow {
 			//exp_wf.addMessageVariable(var_name, var_type);
 			return;
 		}		
-		else if(curr_node.jjtGetNumChildren()==2)
+		else if(curr_node.jjtGetNumChildren()==2) //Binary operator
 		{
 			left_node= curr_node.jjtGetChild(0);
 			right_node= curr_node.jjtGetChild(1);
+			if(curr_node.jjtGetChild(0).getClass() == ASTFunNode.class && curr_node.jjtGetChild(1).getClass() == ASTFunNode.class )
+			{
+				flow_counter += 1;
+			
+				exp_wf.addParallelflow(flow_counter);
+				if(flow_counter>1)
+					exp_wf.connectFlowToFlow(flow_counter, current_flow);
+				current_flow = flow_counter;
+			}
+			
 		}
 		else
 		{
 			left_node= curr_node.jjtGetChild(0);
+			if(curr_node.jjtGetChild(0).getClass() == ASTFunNode.class )
+			{
+				flow_counter += 1;
+				exp_wf.addParallelflow(flow_counter);
+				current_flow = flow_counter;
+			}
+			
 		}
 		
 		if(left_node !=null)
@@ -237,13 +265,19 @@ public class ExpressionToWorkflow {
 		}
 		if(right_node !=null)
 		{
+			
 			traverse(right_node);
+			if(curr_node.jjtGetChild(0).getClass() == ASTFunNode.class  && curr_node.jjtGetChild(1).getClass() == ASTFunNode.class )
+			{
+				current_flow -= 1;
+			}
 			//System.out.println("Visiting Node "+ right_node.toString() );
 		}	
 			System.out.println("Visiting Node "+ curr_node.toString() );
 			
 			//If the children are not leaves i.e. they are not variables but operators
 			//Then create a flow and get children corresponding activities to be added to the flow
+				
 			
 			//SWITCH current_node operator --> binary or unary 
 			
@@ -269,7 +303,7 @@ public class ExpressionToWorkflow {
 						//boolean added =exp_wf.addNamespace("ns"+namespace_counter, exp_wf.getAdditive_splitting_process().getTargetNamespace());
 						//if(added== true) namespace_counter++;
 					//assign additive splitting message request
-						String request_str= "<bpel:literal><tns:WF_ProcessRequest xmlns:tns=\"http://matrix.bpelprocess\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">"+
+						String request_str= "<bpel:literal><tns:WF_ProcessRequest xmlns:tns=\""+exp_wf.getAdditiveSplitting_namespace()+"\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">"+
 								  "<tns:input>"+sub_wf_job.nextInt()+"</tns:input>"+
 								  "<tns:matA>"+left_operand.getId()+"</tns:matA>"+
 								  "<tns:matB>"+right_operand.getId()+"</tns:matB>"+
@@ -284,6 +318,7 @@ public class ExpressionToWorkflow {
 						
 					}
 					//else OTHER PROTOCOLS
+			
 					
 					
 					
@@ -292,24 +327,58 @@ public class ExpressionToWorkflow {
 					//receive callback
 					exp_wf.addCallbackActivity("Callback"+receive_counter, "callback"+receive_counter, "CB_"+receive_counter+"_PL", "tns:"+exp_wf.getWf_name(), "var"+assign_counter);
 					
-					
 					exp_wf.connect("Assign"+assign_counter, "Invoke"+invoke_counter);
 					exp_wf.connect("Invoke"+invoke_counter, "Callback"+receive_counter );
+					exp_wf.connectToFlow(current_flow, "Assign"+assign_counter, "Callback"+receive_counter);
 					
 					assign_counter++;
 					invoke_counter++;
 					receive_counter++;
+				
 					
-					//if(curr_node.jjtGetParent().jjtGetChild(0)== left_node) //I am the left hand side of the another expression
+					//if(curr_node.jjtGetParent().jjtGetChild(0) == left_node) //I am the left hand side of the another expression
 						//CHECK EVALUATION CODE IN THE LIBRARY .. NEARLY SAME LOGIC
 				}
 				else if(curr_node.toString().contains("+"))
 				{
 					//assign add broker message request
-					//Invoke broker webservice
-					//receive callback
-				}
+					
+					String request_str= "<bpel:literal><tns:compute xmlns:tns=\""+exp_wf.getBroker_namespace()+ "\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">"
+                     +"<operation>add</operation>"
+                     +"<op_id>"+current_flow +"</op_id>"
+                     +"<job_id>"+exp_wf.getWf_name().substring(7) +"</job_id>"
+                     + "<matA_ID>"+left_operand.getId()+"</matA_ID>"
+                     +"<matB_ID>"+right_operand.getId()+"</matB_ID>"
+                     +"<callback>addResult</callback>"
+                     +"</tns:compute></bpel:literal>";
+					
 
+					exp_wf.addMessageVariable("var"+assign_counter, "ns2:computeRequest"); // reading variable type may be done from parsing the additive splitting bpel file and getting the variable type but this would be complicated and would take time, while they are not supposed to change 
+					exp_wf.addAssign("Assign"+assign_counter, request_str, "var"+assign_counter);
+			
+					
+					//Invoke broker webservice		
+					exp_wf.addInvokeActivity("Invoke"+invoke_counter, "process", exp_wf.Broker_PL.getName(), "ns2:Broker_Services", "var"+ assign_counter);
+			
+					//receive callback
+					exp_wf.addMessageVariable("var"+assign_counter, "tns:callback"+receive_counter+"Request");   
+					
+					//receive callback
+					exp_wf.addCallbackActivity("Callback"+receive_counter, "callback"+receive_counter, "CB_"+receive_counter+"_PL", "tns:"+exp_wf.getWf_name(), "var"+assign_counter);
+					
+					exp_wf.connect("Assign"+assign_counter, "Invoke"+invoke_counter);
+					exp_wf.connect("Invoke"+invoke_counter, "Callback"+receive_counter );
+					//exp_wf.connectBetweenFlow(current_flow, 1, "Assign"+assign_counter, "Callback"+receive_counter);
+					
+					assign_counter++;
+					invoke_counter++;
+					receive_counter++;
+				
+				}
+			/*	if(curr_node.jjtGetChild(0).getClass() == ASTFunNode.class  && curr_node.jjtGetChild(1).getClass() == ASTFunNode.class )
+				{
+					current_flow -= 1;
+				}*/
 			}
 		
 	}
