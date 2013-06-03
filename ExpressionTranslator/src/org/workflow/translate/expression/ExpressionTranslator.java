@@ -6,6 +6,7 @@ import java.util.Random;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.nfunk.jep.ParseException;
 import org.xml.sax.SAXException;
 
 
@@ -69,6 +70,9 @@ public class ExpressionTranslator {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
