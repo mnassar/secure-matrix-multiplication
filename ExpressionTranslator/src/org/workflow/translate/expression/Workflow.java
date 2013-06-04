@@ -15,10 +15,15 @@ import org.bpel.deploy.ProcessDeploy;
 import org.unify_framework.abstract_syntax.Node;
 import org.unify_framework.abstract_syntax.data_perspective.impl.XpathExpressionImpl;
 import org.unify_framework.abstract_syntax.impl.ActivityImpl;
+import org.unify_framework.abstract_syntax.impl.AndJoinImpl;
+import org.unify_framework.abstract_syntax.impl.AndSplitImpl;
+import org.unify_framework.abstract_syntax.impl.ControlNodeImpl;
+import org.unify_framework.abstract_syntax.impl.NodeImpl;
 import org.unify_framework.abstract_syntax.impl.TransitionImpl;
 import org.unify_framework.instances.bpel.BpelAndJoin;
 import org.unify_framework.instances.bpel.BpelAndSplit;
 import org.unify_framework.instances.bpel.BpelAssignActivity;
+import org.unify_framework.instances.bpel.BpelAtomicActivity;
 import org.unify_framework.instances.bpel.BpelCompositeActivity;
 import org.unify_framework.instances.bpel.BpelCompositeReceiveActivity;
 import org.unify_framework.instances.bpel.BpelCopy;
@@ -36,6 +41,7 @@ import org.unify_framework.instances.bpel.BpelVariableMessageType;
 import org.unify_framework.instances.bpel.BpelVariableType;
 import org.unify_framework.instances.bpel.parser.BpelParser;
 import org.unify_framework.instances.bpel.serializer.BpelSerializer;
+import org.unify_framework.instances.bpel.visitors.Element;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -56,7 +62,8 @@ public class Workflow {
 	BpelCorrelationSet JOB_CS;
     BpelCompositeActivity bpelCompositeActivity;//= (BpelCompositeActivity) process ;
     BpelCompositeReceiveActivity initial_receive;
-   
+    String last_node;
+    
 	BpelScope scope;// = bpelCompositeActivity.getScope();
 	
 	ArrayList<BpelVariable> variables;
@@ -253,7 +260,7 @@ public class Workflow {
           if(i==1)
           {
         	  bpelCompositeActivity.connect(initial_receive.getControlOutputPort(),split.getControlInputPort());
-        	  bpelCompositeActivity.connect(join.getControlOutputPort(), bpelCompositeActivity.getEndEvent().getControlInputPort());
+        	  //bpelCompositeActivity.connect(join.getControlOutputPort(), bpelCompositeActivity.getEndEvent().getControlInputPort());
           }
           
 	}
@@ -331,7 +338,12 @@ public class Workflow {
 		bpelCompositeActivity.connect(((ActivityImpl)activ2).getControlOutputPort(), bpelCompositeActivity.getChild("FlowJoin"+i).getNewControlInputPort());
 		
 	}
-	
+	public void connectToFlow(int i, String end_activ)
+	{
+		Node activ = bpelCompositeActivity.getChild(end_activ);
+		bpelCompositeActivity.connect(((ActivityImpl)activ).getControlOutputPort(), bpelCompositeActivity.getChild("FlowJoin"+i).getNewControlInputPort());
+		
+	}
 	public void connectBetweenFlow(int i, int j, String start_activ, String end_activ)
 	{
 		Node activ1 = bpelCompositeActivity.getChild(start_activ);
@@ -348,8 +360,62 @@ public class Workflow {
 	public void connectFlowToFlow(int i, int j)
 	{
 		bpelCompositeActivity.connect(bpelCompositeActivity.getChild("FlowSplit"+j).getNewControlOutputPort(), ((BpelAndSplit)bpelCompositeActivity.getChild("FlowSplit"+i)).getControlInputPort());
+		last_node = "FlowSplit"+i;
+		//bpelCompositeActivity.connect(((BpelAndJoin)bpelCompositeActivity.getChild("FlowJoin"+i)).getControlOutputPort(), bpelCompositeActivity.getChild("FlowJoin"+j).getNewControlInputPort());
+	}
+	
+	public void connectToEnd(String node)
+	{
+		bpelCompositeActivity.connect(bpelCompositeActivity.getChild(node), bpelCompositeActivity.getEndEvent());
+	}
+	
+	public void connectEndFlowToFlow(int i, int j)
+	{
+		//bpelCompositeActivity.connect(bpelCompositeActivity.getChild("FlowSplit"+j).getNewControlOutputPort(), ((BpelAndSplit)bpelCompositeActivity.getChild("FlowSplit"+i)).getControlInputPort());
+		//last_node = "FlowSplit"+i;
 		bpelCompositeActivity.connect(((BpelAndJoin)bpelCompositeActivity.getChild("FlowJoin"+i)).getControlOutputPort(), bpelCompositeActivity.getChild("FlowJoin"+j).getNewControlInputPort());
 	}
+	public void updateLastNode(String node_name)
+	{
+		last_node = new String(node_name);
+		
+	}
+	
+	public void connectToLastNode(String node_name)
+	{
+		Node node = bpelCompositeActivity.getChild(node_name);
+		Node LastNode =  bpelCompositeActivity.getChild(last_node);
+		
+		//System.out.println("qname for last node:"+bpelCompositeActivity.getChild(last_node).getQualifiedName());
+		//System.out.println("class for last node:"+bpelCompositeActivity.getChild(last_node).getClass().toString());
+		System.out.println("class for current node:"+bpelCompositeActivity.getChild(node_name).getClass().toString());
+		if(bpelCompositeActivity.getChild(last_node).getClass() == BpelAssignActivity.class 
+				|| bpelCompositeActivity.getChild(last_node).getClass() == BpelInvokeActivity.class 
+				|| bpelCompositeActivity.getChild(last_node).getClass() == BpelCompositeReceiveActivity.class )
+		{
+			if(bpelCompositeActivity.getChild(node_name).getClass() == BpelAssignActivity.class 
+					|| bpelCompositeActivity.getChild(node_name).getClass() == BpelInvokeActivity.class 
+					|| bpelCompositeActivity.getChild(node_name).getClass() == BpelCompositeReceiveActivity.class )
+				bpelCompositeActivity.connect(bpelCompositeActivity.getChild(last_node),bpelCompositeActivity.getChild(node_name));
+		}
+		else if (bpelCompositeActivity.getChild(last_node).getClass() == BpelAndJoin.class )
+		{
+			if(bpelCompositeActivity.getChild(node_name).getClass() == BpelAssignActivity.class 
+					|| bpelCompositeActivity.getChild(node_name).getClass() == BpelInvokeActivity.class 
+					|| bpelCompositeActivity.getChild(node_name).getClass() == BpelCompositeReceiveActivity.class )
+			
+				bpelCompositeActivity.connect(((BpelAndJoin)bpelCompositeActivity.getChild(last_node)).getControlOutputPort(),((BpelAssignActivity)bpelCompositeActivity.getChild(node_name)).getControlInputPort());
+		}
+		else if (bpelCompositeActivity.getChild(last_node).getClass() == BpelAndSplit.class )
+		{
+			if(bpelCompositeActivity.getChild(node_name).getClass() == BpelAssignActivity.class 
+					|| bpelCompositeActivity.getChild(node_name).getClass() == BpelInvokeActivity.class 
+					|| bpelCompositeActivity.getChild(node_name).getClass() == BpelCompositeReceiveActivity.class )
+			
+				bpelCompositeActivity.connect(((BpelAndSplit)bpelCompositeActivity.getChild(last_node)).getNewControlOutputPort(),((BpelAssignActivity)bpelCompositeActivity.getChild(node_name)).getControlInputPort());
+		}
+	}
+	
 	public void serialize()
 	{
 		//just for testing

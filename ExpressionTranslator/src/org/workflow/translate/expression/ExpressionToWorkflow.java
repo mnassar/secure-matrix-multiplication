@@ -6,9 +6,12 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.FileSystem;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
 import java.util.StringTokenizer;
+import java.util.UUID;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -35,7 +38,7 @@ public class ExpressionToWorkflow {
 	private int invoke_counter;
 	private int receive_counter;
 	private int namespace_counter;
-	
+	private ArrayList<Integer> flow_stack;
 	private int current_flow;
 	private int flow_counter;
 	
@@ -54,7 +57,7 @@ public class ExpressionToWorkflow {
 		namespace_counter = 0;
 		current_flow = 0;
 		flow_counter= 0;
-		
+		flow_stack = new ArrayList<Integer>();
 		File conf = new File("/etc/soc/soc.conf");
 		BufferedReader br = null;
 		 
@@ -238,11 +241,15 @@ public class ExpressionToWorkflow {
 			if(curr_node.jjtGetChild(0).getClass() == ASTFunNode.class && curr_node.jjtGetChild(1).getClass() == ASTFunNode.class )
 			{
 				flow_counter += 1;
-			
-				exp_wf.addParallelflow(flow_counter);
+			    flow_stack.add(current_flow++, flow_counter);
+			    exp_wf.addParallelflow(flow_counter);
 				if(flow_counter>1)
-					exp_wf.connectFlowToFlow(flow_counter, current_flow);
-				current_flow = flow_counter;
+				{	
+					//current_flow++;
+					exp_wf.connectFlowToFlow(flow_counter, flow_stack.get(current_flow -2 ));
+					
+				}
+				
 			}
 			
 		}
@@ -252,8 +259,15 @@ public class ExpressionToWorkflow {
 			if(curr_node.jjtGetChild(0).getClass() == ASTFunNode.class )
 			{
 				flow_counter += 1;
+				flow_stack.add(current_flow++, flow_counter);
 				exp_wf.addParallelflow(flow_counter);
-				current_flow = flow_counter;
+				if(flow_counter>1)
+				{
+					//current_flow++;
+					exp_wf.connectFlowToFlow(flow_counter, flow_stack.get(current_flow-2));
+					
+				}
+				
 			}
 			
 		}
@@ -267,10 +281,10 @@ public class ExpressionToWorkflow {
 		{
 			
 			traverse(right_node);
-			if(curr_node.jjtGetChild(0).getClass() == ASTFunNode.class  && curr_node.jjtGetChild(1).getClass() == ASTFunNode.class )
-			{
-				current_flow -= 1;
-			}
+			//if(curr_node.jjtGetChild(0).getClass() == ASTFunNode.class  && curr_node.jjtGetChild(1).getClass() == ASTFunNode.class )
+			//{
+			//	current_flow -= 1;
+			//}
 			//System.out.println("Visiting Node "+ right_node.toString() );
 		}	
 			System.out.println("Visiting Node "+ curr_node.toString() );
@@ -288,13 +302,6 @@ public class ExpressionToWorkflow {
 			else
 			{
 				//Create ASSIGN Activity 
-				//Assign 
-				//<q0:WF_ProcessRequest>
-				//<q0:input/>
-				//<q0:matA/>
-				//<q0:matB/>
-				//</q0:WF_ProcessRequest>
-				
 				//ADD INVOKE and Callback RECEIVE activities
 				if(curr_node.toString().contains("*"))
 				{
@@ -304,7 +311,8 @@ public class ExpressionToWorkflow {
 						//if(added== true) namespace_counter++;
 					//assign additive splitting message request
 						String request_str= "<bpel:literal><tns:WF_ProcessRequest xmlns:tns=\""+exp_wf.getAdditiveSplitting_namespace()+"\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">"+
-								  "<tns:input>"+sub_wf_job.nextInt()+"</tns:input>"+
+								  "<tns:jobID>"+exp_wf.getWf_name()+"</tns:jobID>"+
+								  "<tns:sub_jobID>"+UUID.randomUUID().toString()+"</tns:sub_jobID>"+
 								  "<tns:matA>"+left_operand.getId()+"</tns:matA>"+
 								  "<tns:matB>"+right_operand.getId()+"</tns:matB>"+
 								  "</tns:WF_ProcessRequest></bpel:literal>";
@@ -318,7 +326,9 @@ public class ExpressionToWorkflow {
 						
 					}
 					//else OTHER PROTOCOLS
-			
+			///
+					///
+				///	
 					
 					
 					
@@ -329,15 +339,18 @@ public class ExpressionToWorkflow {
 					
 					exp_wf.connect("Assign"+assign_counter, "Invoke"+invoke_counter);
 					exp_wf.connect("Invoke"+invoke_counter, "Callback"+receive_counter );
-					exp_wf.connectToFlow(current_flow, "Assign"+assign_counter, "Callback"+receive_counter);
+					//exp_wf.connectToFlow(current_flow, "Assign"+assign_counter, "Callback"+receive_counter);
+					exp_wf.connectToLastNode("Assign"+assign_counter);
+					if(current_flow >0)
+						exp_wf.connectToFlow(flow_stack.get(current_flow-1), "Callback"+receive_counter );
+					else
+						exp_wf.connectToEnd("Callback"+receive_counter );
 					
 					assign_counter++;
 					invoke_counter++;
 					receive_counter++;
 				
 					
-					//if(curr_node.jjtGetParent().jjtGetChild(0) == left_node) //I am the left hand side of the another expression
-						//CHECK EVALUATION CODE IN THE LIBRARY .. NEARLY SAME LOGIC
 				}
 				else if(curr_node.toString().contains("+"))
 				{
@@ -346,7 +359,7 @@ public class ExpressionToWorkflow {
 					String request_str= "<bpel:literal><tns:compute xmlns:tns=\""+exp_wf.getBroker_namespace()+ "\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">"
                      +"<operation>add</operation>"
                      +"<op_id>"+current_flow +"</op_id>"
-                     +"<job_id>"+exp_wf.getWf_name().substring(7) +"</job_id>"
+                     +"<job_id>"+exp_wf.getWf_name() +"</job_id>"
                      + "<matA_ID>"+left_operand.getId()+"</matA_ID>"
                      +"<matB_ID>"+right_operand.getId()+"</matB_ID>"
                      +"<callback>addResult</callback>"
@@ -370,6 +383,12 @@ public class ExpressionToWorkflow {
 					exp_wf.connect("Invoke"+invoke_counter, "Callback"+receive_counter );
 					//exp_wf.connectBetweenFlow(current_flow, 1, "Assign"+assign_counter, "Callback"+receive_counter);
 					
+					exp_wf.connectToLastNode("Assign"+assign_counter);
+					if(current_flow >0)
+						exp_wf.connectToFlow(flow_stack.get(current_flow-1), "Callback"+receive_counter );
+					else
+						exp_wf.connectToEnd("Callback"+receive_counter );
+					
 					assign_counter++;
 					invoke_counter++;
 					receive_counter++;
@@ -379,6 +398,34 @@ public class ExpressionToWorkflow {
 				{
 					current_flow -= 1;
 				}*/
+				
+				if(curr_node.jjtGetParent().jjtGetChild(0) == curr_node) //I am the left hand side of the another expression
+				{
+					//update left operand with the result  ID returned and get corresponding data from metadata store 
+					
+			//		left_operand = new 
+				}
+				else if(curr_node.jjtGetParent().jjtGetChild(1) == curr_node) //I am the right hand side of the another expression
+				{
+					//update right operand with the result  ID returned and get corresponding data from metadata store 
+					
+			//		right_operand = new 
+					
+					//pop the flow on top of stack
+					if(current_flow >0)
+					{
+						exp_wf.updateLastNode("FlowJoin"+flow_stack.get(current_flow-1));
+						
+						current_flow--;
+					}
+					else
+					{
+						//exp_wf.connec
+					}
+					
+				}
+
+
 			}
 		
 	}

@@ -3,6 +3,7 @@ package org.workflow.translate.expression;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Random;
+import java.util.UUID;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -23,15 +24,16 @@ public class ExpressionTranslator {
 	
 	public ExpressionTranslator(String expression)
 	{
-		Random r = new Random();
-		setJob_ID("job_"+ r.nextInt());
+		UUID uuid = UUID.randomUUID();
+        String randomUUIDString = uuid.toString();
+        System.out.println(":UUID:"+randomUUIDString);
+		setJob_ID("job_"+ randomUUIDString);
 		setExpression(expression);
 		variables_map = new HashMap<String, MatrixMeta>();
 	}
 	
 	public ExpressionTranslator(ExpressionTranslator trans)
 	{
-		Random r = new Random();
 		setJob_ID(trans.getJob_ID());
 		setExpression(trans.getExpression());
 		variables_map = new HashMap<String, MatrixMeta>();
