@@ -388,7 +388,7 @@ public class Workflow {
 		
 		//System.out.println("qname for last node:"+bpelCompositeActivity.getChild(last_node).getQualifiedName());
 		//System.out.println("class for last node:"+bpelCompositeActivity.getChild(last_node).getClass().toString());
-		System.out.println("class for current node:"+bpelCompositeActivity.getChild(node_name).getClass().toString());
+		//System.out.println("class for current node:"+bpelCompositeActivity.getChild(node_name).getClass().toString());
 		if(bpelCompositeActivity.getChild(last_node).getClass() == BpelAssignActivity.class 
 				|| bpelCompositeActivity.getChild(last_node).getClass() == BpelInvokeActivity.class 
 				|| bpelCompositeActivity.getChild(last_node).getClass() == BpelCompositeReceiveActivity.class )

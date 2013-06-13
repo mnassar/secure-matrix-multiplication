@@ -21,6 +21,13 @@ public class ExpressionTranslator {
 	private String additivesplitting_wf;
 	
 	
+	public ExpressionTranslator(String job_id, String expression)
+	{
+
+		setJob_ID("job_"+ job_id);
+		setExpression(expression);
+		variables_map = new HashMap<String, MatrixMeta>();
+	}
 	
 	public ExpressionTranslator(String expression)
 	{
