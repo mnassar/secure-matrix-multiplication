@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="WF_Process" targetNamespace="http://matrix.bpelprocess" xmlns:ns2="http://www.example.org/MatServ26/" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:ns1="http://www.example.org/MatServ25/" xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype" xmlns:ns4="http://www.example.org/MatServ27/" xmlns:ns="http://www.example.org/MatServ24/" xmlns:ns3="http://www.example.org/MatServ33/" xmlns:tns="http://matrix.bpelprocess" xmlns:p="http://www.w3.org/2001/XMLSchema" xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/">
+  <import namespace="http://www.example.org/MatServ27/" location="MatServ27.wsdl">
+    </import>
+  <import namespace="http://www.example.org/MatServ24/" location="MatServ24.wsdl">
+    </import>
+  <import namespace="http://www.example.org/MatServ25/" location="MatServ25.wsdl">
+    </import>
+  <import namespace="http://www.example.org/MatServ26/" location="MatServ26.wsdl">
+    </import>
+  <import namespace="http://www.example.org/MatServ33/" location="MatServ33.wsdl">
+    </import>
+  <types>
+    <schema attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://matrix.bpelprocess" xmlns="http://www.w3.org/2001/XMLSchema"><complexType name="WF_ProcessRequest"><sequence><element name="input" type="int"/><element name="matA" type="string"/><element name="matB" type="string"/></sequence></complexType><complexType name="WF_ProcessResponse"><sequence><element name="result" type="string"/><element name="instanceID" type="string"/></sequence></complexType><complexType name="multResult1"><sequence><element name="op_id" type="int"/><element name="in" type="string"/><element name="job_id" type="int"/></sequence></complexType><complexType name="multResult1Response"><sequence><element name="out" type="string"/></sequence></complexType><complexType name="multResult2"><sequence><element name="op_id" type="int"/><element name="in" type="string"/><element name="job_id" type="int"/></sequence></complexType><complexType name="multResult2Response"><sequence><element name="out" type="string"/></sequence></complexType><complexType name="multResult3"><sequence><element name="op_id" type="int"/><element name="in" type="string"/><element name="job_id" type="int"/></sequence></complexType><complexType name="multResult3Response"><sequence><element name="out" type="string"/></sequence></complexType><complexType name="multResult4"><sequence><element name="op_id" type="int"/><element name="in" type="string"/><element name="job_id" type="int"/></sequence></complexType><complexType name="multResult4Response"><sequence><element name="out" type="string"/></sequence></complexType><complexType name="addResult"><sequence><element name="op_id" type="int"/><element name="in" type="string"/><element name="job_id" type="int"/></sequence></complexType><complexType name="addResultResponse"><sequence><element name="out" type="string"/></sequence></complexType><complexType name="cpCallback1"><sequence><element name="op_id" type="int"/><element name="in" type="string"/><element name="job_id" type="int"/></sequence></complexType><complexType name="cpCallback2"><sequence><element name="op_id" type="int"/><element name="in" type="string"/><element name="job_id" type="int"/></sequence></complexType><complexType name="cpCallback3"><sequence><element name="op_id" type="int"/><element name="in" type="string"/><element name="job_id" type="int"/></sequence></complexType><complexType name="cpCallback4"><sequence><element name="op_id" type="int"/><element name="in" type="string"/><element name="job_id" type="int"/></sequence></complexType></schema>
+  </types>
+  <message name="multResult1Request">
+    <part name="parameters" element="tns:multResult1">
+    </part>
+  </message>
+  <message name="cpCallback1Request">
+    <part name="parameters" element="tns:cpCallback1">
+    </part>
+  </message>
+  <message name="cpCallback3Request">
+    <part name="parameters" element="tns:cpCallback3">
+    </part>
+  </message>
+  <message name="cpCallback2Request">
+    <part name="parameters" element="tns:cpCallback2">
+    </part>
+  </message>
+  <message name="WF_ProcessResponseMessage">
+    <part name="payload" element="tns:WF_ProcessResponse">
+    </part>
+  </message>
+  <message name="multResult3Request">
+    <part name="parameters" element="tns:multResult3">
+    </part>
+  </message>
+  <message name="WF_ProcessRequestMessage">
+    <part name="payload" element="tns:WF_ProcessRequest">
+    </part>
+  </message>
+  <message name="cpCallback4Request">
+    <part name="parameters" element="tns:cpCallback4">
+    </part>
+  </message>
+  <message name="addResultRequest">
+    <part name="parameters" element="tns:addResult">
+    </part>
+  </message>
+  <message name="multResult4Request">
+    <part name="parameters" element="tns:multResult4">
+    </part>
+  </message>
+  <message name="multResult2Request">
+    <part name="parameters" element="tns:multResult2">
+    </part>
+  </message>
+  <portType name="WF_Process">
+    <operation name="process">
+      <input message="tns:WF_ProcessRequestMessage">
+    </input>
+      <output message="tns:WF_ProcessResponseMessage">
+    </output>
+    </operation>
+    <operation name="multResult1">
+      <input message="tns:multResult1Request">
+    </input>
+    </operation>
+    <operation name="multResult2">
+      <input message="tns:multResult2Request">
+    </input>
+    </operation>
+    <operation name="multResult3">
+      <input message="tns:multResult3Request">
+    </input>
+    </operation>
+    <operation name="multResult4">
+      <input message="tns:multResult4Request">
+    </input>
+    </operation>
+    <operation name="cpCallback1">
+      <input message="tns:cpCallback1Request">
+    </input>
+    </operation>
+    <operation name="cpCallback2">
+      <input message="tns:cpCallback2Request">
+    </input>
+    </operation>
+    <operation name="cpCallback3">
+      <input message="tns:cpCallback3Request">
+    </input>
+    </operation>
+    <operation name="cpCallback4">
+      <input message="tns:cpCallback4Request">
+    </input>
+    </operation>
+    <operation name="addResult">
+      <input message="tns:addResultRequest">
+    </input>
+    </operation>
+  </portType>
+  <binding name="WF_ProcessBinding" type="tns:WF_Process">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="process">
+      <soap:operation soapAction="http://matrix.bpelprocess/process"/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+      <output>
+        <soap:body use="literal"/>
+      </output>
+    </operation>
+    <operation name="multResult1">
+      <soap:operation soapAction="http://matrix.bpelprocess/multResult1"/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+    </operation>
+    <operation name="multResult2">
+      <soap:operation soapAction="http://matrix.bpelprocess/multResult2"/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+    </operation>
+    <operation name="multResult3">
+      <soap:operation soapAction="http://matrix.bpelprocess/multResult3"/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+    </operation>
+    <operation name="multResult4">
+      <soap:operation soapAction="http://matrix.bpelprocess/multResult4"/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+    </operation>
+    <operation name="addResult">
+      <soap:operation soapAction="http://matrix.bpelprocess/addResult"/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+    </operation>
+    <operation name="cpCallback1">
+      <soap:operation soapAction="http://matrix.bpelprocess/cpCallback1"/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+    </operation>
+    <operation name="cpCallback2">
+      <soap:operation soapAction="http://matrix.bpelprocess/cpCallback2"/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+    </operation>
+    <operation name="cpCallback3">
+      <soap:operation soapAction="http://matrix.bpelprocess/cpCallback3"/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+    </operation>
+    <operation name="cpCallback4">
+      <soap:operation soapAction="http://matrix.bpelprocess/cpCallback4"/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+    </operation>
+  </binding>
+  <service name="WF_ProcessService">
+    <port name="WF_ProcessPort" binding="tns:WF_ProcessBinding">
+      <soap:address location="http://10.160.2.27:8080/ode/processes/WF_Process"/>
+    </port>
+  </service>
+    <plnk:partnerLinkType name="Mahout_PL24"><plnk:role name="ServiceProvider24" portType="ns:MatServ"/></plnk:partnerLinkType>
+    <plnk:partnerLinkType name="Mahout_PL25"><plnk:role name="ServiceProvider25" portType="ns1:MatServ"/></plnk:partnerLinkType>
+    <plnk:partnerLinkType name="Mahout_PL26"><plnk:role name="ServiceProvider26" portType="ns2:MatServ"/></plnk:partnerLinkType>
+    <plnk:partnerLinkType name="Mahout_PL27"><plnk:role name="ServiceProvider27" portType="ns4:MatServ"/></plnk:partnerLinkType>
+    <plnk:partnerLinkType name="Mahout_PL33"><plnk:role name="ServiceProvider33" portType="ns3:MatServ"/></plnk:partnerLinkType>
+    <plnk:partnerLinkType name="WF_Process"><plnk:role name="WF_ProcessProvider" portType="tns:WF_Process"/></plnk:partnerLinkType>
+    <vprop:property name="jobid_CS" type="p:int"/>
+    <vprop:propertyAlias messageType="tns:WF_ProcessRequestMessage" part="payload" propertyName="tns:jobid_CS"><query>/tns:input</query></vprop:propertyAlias>
+    <vprop:propertyAlias messageType="tns:multResult1Request" part="parameters" propertyName="tns:jobid_CS"><query>/tns:job_id</query></vprop:propertyAlias>
+    <vprop:propertyAlias messageType="tns:multResult2Request" part="parameters" propertyName="tns:jobid_CS"><query>/tns:job_id</query></vprop:propertyAlias>
+    <vprop:propertyAlias messageType="tns:multResult3Request" part="parameters" propertyName="tns:jobid_CS"><query>/tns:job_id</query></vprop:propertyAlias>
+    <vprop:propertyAlias messageType="tns:multResult4Request" part="parameters" propertyName="tns:jobid_CS"><query>/tns:job_id</query></vprop:propertyAlias>
+    <vprop:propertyAlias messageType="tns:addResultRequest" part="parameters" propertyName="tns:jobid_CS"><query>/tns:job_id</query></vprop:propertyAlias>
+    <vprop:propertyAlias messageType="tns:cpCallback1Request" part="parameters" propertyName="tns:jobid_CS"><query>/tns:job_id</query></vprop:propertyAlias>
+    <vprop:propertyAlias messageType="tns:cpCallback2Request" part="parameters" propertyName="tns:jobid_CS"><query>/tns:job_id</query></vprop:propertyAlias>
+    <vprop:propertyAlias messageType="tns:cpCallback3Request" part="parameters" propertyName="tns:jobid_CS"><query>/tns:job_id</query></vprop:propertyAlias>
+    <vprop:propertyAlias messageType="tns:cpCallback4Request" part="parameters" propertyName="tns:jobid_CS"><query>/tns:job_id</query></vprop:propertyAlias>
+</definitions>

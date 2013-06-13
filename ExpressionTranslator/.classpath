@@ -70,5 +70,7 @@
 	<classpathentry kind="lib" path="/home/farida/Downloads/SOA-model_WSDL/lib/slf4j-api-1.7.2.jar"/>
 	<classpathentry kind="lib" path="/home/farida/Downloads/SOA-model_WSDL/lib/soa-model-core-1.3.0.jar"/>
 	<classpathentry kind="lib" path="/home/farida/Downloads/SOA-model_WSDL/lib/soa-model-distribution-1.3.0.jar"/>
+	<classpathentry kind="lib" path="/home/farida/Downloads/wsdl4j-1.6.2.jar"/>
+	<classpathentry kind="lib" path="/home/farida/Downloads/jdom-1.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

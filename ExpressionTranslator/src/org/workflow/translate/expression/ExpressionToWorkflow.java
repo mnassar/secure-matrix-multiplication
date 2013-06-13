@@ -120,7 +120,7 @@ public class ExpressionToWorkflow {
 		
 		
 		//DEPLOY
-		exp_wf.deploy(broker_url);
+//		exp_wf.deploy(broker_url);
 	
 	}
 	/**
@@ -129,7 +129,8 @@ public class ExpressionToWorkflow {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 
-		String expression = "(A*B+C*D)+(A*D+B*C)";
+		String expression = "(A*B+C*D)+(A*D+ B*C)+(A*C+B*D)";
+		//String expression = "-A*B*C";
 		ExpressionTranslator translator = new ExpressionTranslator(expression);
 		//**********************
 				//This data should be read from the metadata store
@@ -418,10 +419,7 @@ public class ExpressionToWorkflow {
 						
 						current_flow--;
 					}
-					else
-					{
-						//exp_wf.connec
-					}
+					
 					
 				}
 
