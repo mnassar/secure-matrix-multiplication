@@ -158,14 +158,14 @@ private void saveToFile(InputStream uploadedInputStream,
 
 @GET
 @Path("/{resourceID}") //+resource_id
-@Consumes(MediaType.TEXT_PLAIN)
 @Produces(MediaType.TEXT_PLAIN)
-public String getResource(@PathParam("resourceID") String resourceID , String downloadPath) {
+public String getResource(@PathParam("resourceID") String resourceID ) {
   	
 	SOCConfiguration conf = new SOCConfiguration();
 	try {
 		MetadataStoreConnection conn = new MetadataStoreConnection(SOCConfiguration.METADATA_STORE_URL);
 		String resource_metadata= conn.getSOCResource(resourceID);
+		conn.close();
 		BrokerSOCResource resource ;
 		Gson gson = new Gson();
 		resource = gson.fromJson(resource_metadata, BrokerSOCResource.class);
@@ -182,7 +182,8 @@ public String getResource(@PathParam("resourceID") String resourceID , String do
 			//Get the splits locations and add them to get the original file
 		}
 		
-		String message = resource.getResource_id() + " saved to "+ downloadPath +"!";
+		String message = resource.getResource_id() + " saved !";
+		
 		return message;
 		
 	} catch (Exception e) {

@@ -12,6 +12,14 @@ public class MatrixMeta extends ResourceMeta {
 		super("matrix");
 	
 	}
+	
+	public MatrixMeta(ResourceMeta meta) {
+		super("matrix");
+		this.nRows = ((MatrixMeta)meta).getnRows();
+		this.nColumns = ((MatrixMeta)meta).getnColumns();
+		this.dataType = ((MatrixMeta)meta).getDataType();
+	
+	}
 	private int nRows;
 	private int nColumns;
 	private String dataType;
@@ -35,6 +43,5 @@ public class MatrixMeta extends ResourceMeta {
 	public void setDataType(String dataType) {
 		this.dataType = dataType;
 	}
-		
 	
 }

@@ -128,7 +128,7 @@ public Response compute(SOCJob job)
 							BrokerSOCResource resourceObj = gson.fromJson(resource, BrokerSOCResource.class);
 							translator.addExpressionVariable(alias,resourceObj);
 						}
-						
+						conn.close();
 						ExpressionToWorkflow workflow_generator = new ExpressionToWorkflow(translator);
 						workflow_generator.initialise();
 						try {
@@ -148,6 +148,10 @@ public Response compute(SOCJob job)
 						}
 						//Execute the workflow
 
+						
+						
+						
+						
 					}
 					else // couldn't connect to database
 					{
@@ -157,7 +161,7 @@ public Response compute(SOCJob job)
    				}
 	
    			}
-		 });
+		 }).start();
 		//return the job id used by the broker  to compute the expression			
 		
 			return Response.status(201).entity(jobOnBroker.getJob_Id()).build();
@@ -168,33 +172,20 @@ public Response compute(SOCJob job)
 
 
 @GET
-@Path("/{resourceID}") //+resource_id
-@Consumes(MediaType.TEXT_PLAIN)
-@Produces(MediaType.TEXT_PLAIN)
-public String getResource(@PathParam("resourceID") String resourceID , String downloadPath) {
+@Path("/{jobID}") //+job_id
+@Produces(MediaType.APPLICATION_JSON)
+public SOCJob getJob(@PathParam("jobID") String jobID) {
   	
 	SOCConfiguration conf = new SOCConfiguration();
 	try {
 		MetadataStoreConnection conn = new MetadataStoreConnection(SOCConfiguration.METADATA_STORE_URL);
-		String resource_metadata= conn.getSOCResource(resourceID);
-		BrokerSOCResource resource ;
+		String job_description= conn.getSOCJob(jobID);
+		conn.close();
+		SOCJob job ;
 		Gson gson = new Gson();
-		resource = gson.fromJson(resource_metadata, BrokerSOCResource.class);
-		
-		String fileLocation = SOCConfiguration.BROKER_STORAGE_PATH +"/"+ resource.getResource_id();
-		
-		File brokerfile = new File(fileLocation);
-		if(brokerfile.exists())
-		{
-			//copy directly to client
-		}
-		else
-		{
-			//Get the splits locations and add them to get the original file
-		}
-		
-		String message = resource.getResource_id() + " saved to "+ downloadPath +"!";
-		return message;
+		job = gson.fromJson(job_description, SOCJob.class);
+
+		return job;
 		
 	} catch (Exception e) {
 		// TODO Auto-generated catch block

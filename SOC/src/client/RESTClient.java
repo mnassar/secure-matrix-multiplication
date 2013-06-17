@@ -74,6 +74,9 @@ public class RESTClient {
         System.out.println("Output of get JSON resource object: "+ getResource(service));
         String resourceA = new String(resourceID);
      
+        addResource(service, resource);
+        String resourceAA = new String(resourceID);
+        
         System.out.println("---------------------------------------------------");
         resource = new SOCResource(StorageProtocol.ADDITIVE_SPLITTING);
 		resource.setUser_token("farida");
@@ -84,18 +87,28 @@ public class RESTClient {
         System.out.println("Output of get JSON resource object: "+ getResource(service));
         String resourceB = new String(resourceID);
         
+        addResource(service, resource);
+        String resourceBB = new String(resourceID);
         
         SOCJob job = new SOCJob();
-        job.setExpression("A*B");
+        job.setExpression("A*B+C*D");
         job.setType(JobType.MATRIX_COMPUTATION);
         ArrayList<SOCResourceAlias> aliases = new ArrayList<SOCResourceAlias>();
         SOCResourceAlias alias = new SOCResourceAlias(); alias.setAlias("A"); alias.setResource_id(resourceA);
         aliases.add(alias);
         alias = new SOCResourceAlias(); alias.setAlias("B"); alias.setResource_id(resourceB);
         aliases.add(alias);
+        alias = new SOCResourceAlias(); alias.setAlias("C"); alias.setResource_id(resourceAA);
+        aliases.add(alias);
+        alias = new SOCResourceAlias(); alias.setAlias("D"); alias.setResource_id(resourceBB);
+        aliases.add(alias);
+        
+        job.setAliases(aliases);
+        job.setUserToken("farida");
+       
         
         addJob(service, job);
-        System.out.println("Output of get JSON Job object: "+ getJob(service));
+  //      System.out.println("Output of get JSON Job object: "+ getJob(service));
      
     }
     
@@ -179,7 +192,7 @@ public class RESTClient {
     		}
      
     	    
-    		System.out.println("JSON Object for matrix upload sent successfully to server .... \n");
+    		System.out.println("JSON Object for job addition sent successfully to server .... \n");
     		
     	  } catch (Exception e) {
      

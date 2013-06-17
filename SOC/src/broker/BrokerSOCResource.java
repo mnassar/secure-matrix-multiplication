@@ -46,7 +46,8 @@ public class BrokerSOCResource extends SOCResource{
 		this.resource_id = resource.getResource_id();
 		this.locations = resource.getLocations();
 		this.setFile_path(resource.getFile_path());
-		this.setResource_meta( (MatrixMeta)resource.getResource_meta());
+		
+		this.setResource_meta( resource.getResource_meta());
 		this.setStorage_protocol(resource.getStorage_protocol());
 		this.setUser_token(resource.getUser_token());
 	}
