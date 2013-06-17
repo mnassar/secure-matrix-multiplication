@@ -81,8 +81,8 @@ public class Workflow {
 		wf_name = new String(process_name);
 		variables = new ArrayList<BpelVariable>();
 		process = new BpelProcess(process_name, process_namespace);
-		AdditiveSplitting_namespace = "http://matrix.bpelprocess";
-		Broker_namespace = "http://bpel.broker.services";
+		AdditiveSplitting_namespace = "http://additivesplitting.bpelprocess";
+		Broker_namespace = "http://brokerservices.service";
 		///**************
 		//TODO: Add to the process namespace declarations for the additive splitting and other protocols
 		//and add namespace for the cloud and broker services
@@ -96,58 +96,81 @@ public class Workflow {
 		process.setExitOnStandardFault("yes");
 		process.setSuppressJoinFailure("yes");
 
-		///**************
-		//TODO: Add necessary Imports
-		BpelImport imp  = new BpelImport(AdditiveSplitting_namespace, ODE_PATH+"/WF_Process/WF_ProcessArtifacts.wsdl", WSDL_SCHEMA);
-		process.addImport(imp);
-		BpelImport imp2  = new BpelImport(Broker_namespace, broker_services_url+"?wsdl", WSDL_SCHEMA);
-		process.addImport(imp2);
-		///
-
-		///**************
-		//TODO: Add necessary PartnerLinks
-		client_PL = new BpelPartnerLink("client", "tns:"+process_name, process_name+"Provider", null);
-		process.addPartnerLink(client_PL);
-		AdditiveSplitting_PL = new BpelPartnerLink("AdditiveSplitting_PL", "tns:AdditiveSplitting_PLT", null, "AdditiveSplittingServiceProvider");
-		process.addPartnerLink(AdditiveSplitting_PL);
-		Broker_PL  = new BpelPartnerLink("Broker_PL", "tns:Broker_PLT", null, "BrokerServiceProvider");
-		process.addPartnerLink(Broker_PL);
 		
-		///
-		JOB_CS= new BpelCorrelationSet("JOB_CS", "tns:jobid_CS");
-		process.addCorrelationSet(JOB_CS);
-		bpelCompositeActivity= (BpelCompositeActivity) process ;
-		scope= bpelCompositeActivity.getScope();
-
-		BpelVariable variable = new BpelVariableMessageType("input", "tns:"+wf_name+"RequestMessage");
-		scope.addVariable(variable);
-
-		BpelVariable variable2 = new BpelVariableMessageType("output", "tns:"+wf_name+"ResponseMessage");
-		scope.addVariable(variable2);
-
-		//Initial receive to start the workflow
-		initial_receive = new BpelCompositeReceiveActivity("receiveInput");
-		initial_receive.setOperation("start");
-		initial_receive.setPartnerLink("client");
-		initial_receive.setPortType("tns:"+wf_name);
-		initial_receive.setVariable("input");
-		initial_receive.setCreateInstance("yes");
-        BpelCorrelation corr = new BpelCorrelation("yes", "JOB_CS");
-        initial_receive.addCorrelation(corr);
-      
-        bpelCompositeActivity.addChild(initial_receive);
-        bpelCompositeActivity.connect(bpelCompositeActivity.getStartEvent(), initial_receive);
-        
-        process.setScope(scope);
-        
-		 //BpelParser bpelParser = new BpelParser();
-         //additive_splitting_process = bpelParser.parse(ODE_PATH+"/WF_Process/WF_Process.bpel");
-         //((BpelCompositeActivity)additive_splitting_process).getScope().getVariables().
-	    
 	}
 	
-	
-	
+	public void initialize()
+	{
+		///**************
+				//TODO: Add necessary Imports
+				BpelImport imp  = new BpelImport(AdditiveSplitting_namespace, ODE_PATH+"/WF_Process/WF_ProcessArtifacts.wsdl", WSDL_SCHEMA);
+				process.addImport(imp);
+				BpelImport imp2  = new BpelImport(Broker_namespace, broker_services_url+"?wsdl", WSDL_SCHEMA);
+				process.addImport(imp2);
+				imp = new BpelImport(process.getTargetNamespace(), folder_Path+"/"+wf_name+"/"+wf_name+"Artifacts.wsdl", WSDL_SCHEMA);
+				process.addImport(imp);
+				
+				///
+
+				///**************
+				//TODO: Add necessary PartnerLinks
+				client_PL = new BpelPartnerLink("client", "tns:"+process.getName(), process.getName()+"Provider", null);
+				process.addPartnerLink(client_PL);
+				AdditiveSplitting_PL = new BpelPartnerLink("AdditiveSplitting_PL", "tns:AdditiveSplitting_PLT", null, "AdditiveSplittingServiceProvider");
+				process.addPartnerLink(AdditiveSplitting_PL);
+				Broker_PL  = new BpelPartnerLink("Broker_PL", "tns:Broker_PLT", null, "BrokerServiceProvider");
+				process.addPartnerLink(Broker_PL);
+				
+				///
+				JOB_CS= new BpelCorrelationSet("JOB_CS", "tns:jobid_CS");
+				process.addCorrelationSet(JOB_CS);
+				bpelCompositeActivity= (BpelCompositeActivity) process ;
+				scope= bpelCompositeActivity.getScope();
+
+				BpelVariable variable = new BpelVariableMessageType("input", "tns:"+wf_name+"RequestMessage");
+				scope.addVariable(variable);
+
+				BpelVariable variable2 = new BpelVariableMessageType("output", "tns:"+wf_name+"ResponseMessage");
+				scope.addVariable(variable2);
+
+				//Initial receive to start the workflow
+				initial_receive = new BpelCompositeReceiveActivity("receiveInput");
+				initial_receive.setOperation("start");
+				initial_receive.setPartnerLink("client");
+				initial_receive.setPortType("tns:"+wf_name);
+				initial_receive.setVariable("input");
+				initial_receive.setCreateInstance("yes");
+		        BpelCorrelation corr = new BpelCorrelation("yes", "JOB_CS");
+		        initial_receive.addCorrelation(corr);
+		      
+		        bpelCompositeActivity.addChild(initial_receive);
+		        bpelCompositeActivity.connect(bpelCompositeActivity.getStartEvent(), initial_receive);
+		        
+		        last_node = initial_receive.getName();
+		        
+		        process.setScope(scope);
+		        
+				 //BpelParser bpelParser = new BpelParser();
+		         //additive_splitting_process = bpelParser.parse(ODE_PATH+"/WF_Process/WF_Process.bpel");
+		         //((BpelCompositeActivity)additive_splitting_process).getScope().getVariables().
+			    
+	}
+	/*
+	public Workflow copy()
+	{
+		Workflow wf = new Workflow(this.wf_name, this.process.getTargetNamespace());
+		wf.setFolder_Path(this.folder_Path);
+		wf.setAdditive_splitting_process(this.additive_splitting_process);
+		wf.setAdditive_splitting_url(additive_splitting_url);
+		wf.setBroker_namespace(Broker_namespace);
+		wf.setWf_name(wf_name);
+		wf.setAdditiveSplitting_namespace(AdditiveSplitting_namespace);
+		wf.setODE_PATH(ODE_PATH);
+		wf.setProcess(process);
+		
+		return wf;
+	}
+	*/
 	/**
 	 * @return the folder_Path
 	 */
@@ -262,6 +285,7 @@ public class Workflow {
         	  bpelCompositeActivity.connect(initial_receive.getControlOutputPort(),split.getControlInputPort());
         	  //bpelCompositeActivity.connect(join.getControlOutputPort(), bpelCompositeActivity.getEndEvent().getControlInputPort());
           }
+          last_node = "FlowSplit"+i;
           
 	}
 	
@@ -457,5 +481,135 @@ public class Workflow {
 		appZip.zipIt(appZip.getOutput_ZIP_Path());
 
 		deployProc.deploy();
+	}
+
+
+	public BpelProcess getProcess() {
+		return process;
+	}
+
+
+	public void setProcess(BpelProcess process) {
+		this.process = process;
+	}
+
+
+	public String getBroker_services_url() {
+		return broker_services_url;
+	}
+
+
+	public void setBroker_services_url(String broker_services_url) {
+		this.broker_services_url = broker_services_url;
+	}
+
+
+	public String getQueryLanguage() {
+		return queryLanguage;
+	}
+
+
+	public void setQueryLanguage(String queryLanguage) {
+		this.queryLanguage = queryLanguage;
+	}
+
+
+	public String getWSDL_SCHEMA() {
+		return WSDL_SCHEMA;
+	}
+
+
+	public void setWSDL_SCHEMA(String wSDL_SCHEMA) {
+		WSDL_SCHEMA = wSDL_SCHEMA;
+	}
+
+
+	public BpelCorrelationSet getJOB_CS() {
+		return JOB_CS;
+	}
+
+
+	public void setJOB_CS(BpelCorrelationSet jOB_CS) {
+		JOB_CS = jOB_CS;
+	}
+
+
+	public BpelCompositeActivity getBpelCompositeActivity() {
+		return bpelCompositeActivity;
+	}
+
+
+	public void setBpelCompositeActivity(BpelCompositeActivity bpelCompositeActivity) {
+		this.bpelCompositeActivity = bpelCompositeActivity;
+	}
+
+
+	public BpelCompositeReceiveActivity getInitial_receive() {
+		return initial_receive;
+	}
+
+
+	public void setInitial_receive(BpelCompositeReceiveActivity initial_receive) {
+		this.initial_receive = initial_receive;
+	}
+
+
+	public String getLast_node() {
+		return last_node;
+	}
+
+
+	public void setLast_node(String last_node) {
+		this.last_node = last_node;
+	}
+
+
+	public BpelScope getScope() {
+		return scope;
+	}
+
+
+	public void setScope(BpelScope scope) {
+		this.scope = scope;
+	}
+
+
+	public ArrayList<BpelVariable> getVariables() {
+		return variables;
+	}
+
+
+	public void setVariables(ArrayList<BpelVariable> variables) {
+		this.variables = variables;
+	}
+
+
+	public BpelPartnerLink getClient_PL() {
+		return client_PL;
+	}
+
+
+	public void setClient_PL(BpelPartnerLink client_PL) {
+		this.client_PL = client_PL;
+	}
+
+
+	public BpelPartnerLink getAdditiveSplitting_PL() {
+		return AdditiveSplitting_PL;
+	}
+
+
+	public void setAdditiveSplitting_PL(BpelPartnerLink additiveSplitting_PL) {
+		AdditiveSplitting_PL = additiveSplitting_PL;
+	}
+
+
+	public BpelPartnerLink getBroker_PL() {
+		return Broker_PL;
+	}
+
+
+	public void setBroker_PL(BpelPartnerLink broker_PL) {
+		Broker_PL = broker_PL;
 	}
 }
