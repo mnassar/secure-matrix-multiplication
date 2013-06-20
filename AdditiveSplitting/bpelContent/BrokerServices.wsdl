@@ -11,6 +11,15 @@ targetNamespace="http://www.brokerservices.org/MatServ/" xmlns:p="http://www.w3.
     			<sequence>
     				<element name="op_id" type="string"></element>
     				<element name="job_id" type="string"></element>
+    				<element name="add_list" maxOccurs="4" minOccurs="1">
+    					<complexType>
+    					<sequence>
+    					
+    					<element name="cloudURL" type="string">
+    					</element>
+    					<element name="splitName" type="string"></element>
+    					</sequence></complexType>
+    				</element>
     				<element name="matA_ID" type="string"></element>
     				<element name="matB_ID" type="string"></element>
     				<element name="callback" type="string"></element>
