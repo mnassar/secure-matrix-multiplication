@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<deploy xmlns="http://www.apache.org/ode/schemas/dd/2007/03" xmlns:MatServ="http://www.cloudservices.org/MatServ/" xmlns:MatServ_1="http://www.brokerservices.org/MatServ/" xmlns:additivesplitting.bpelprocess="http://additivesplitting.bpelprocess">
+  <process name="additivesplitting.bpelprocess:AdditiveSplitting">
+    <active>true</active>
+    <retired>false</retired>
+    <process-events generate="all"/>
+    <provide partnerLink="client">
+      <service name="additivesplitting.bpelprocess:AdditiveSplittingService" port="AdditiveSplittingPort"/>
+    </provide>
+    <provide partnerLink="callback_PL">
+      <service name="additivesplitting.bpelprocess:AdditiveSplittingService" port="AdditiveSplittingPort"/>
+    </provide>
+    <invoke partnerLink="OnCloud1_PL">
+      <service name="MatServ:MatServ" port="CloudServicesPort"/>
+    </invoke>
+    <invoke partnerLink="OnBroker_PL">
+      <service name="MatServ_1:MatServ" port="BrokerServicesPort"/>
+    </invoke>
+    <invoke partnerLink="OnCloud2_PL">
+      <service name="MatServ:MatServ" port="CloudServicesPort"/>
+    </invoke>
+    <invoke partnerLink="OnCloud3_PL">
+      <service name="MatServ:MatServ" port="CloudServicesPort"/>
+    </invoke>
+    <invoke partnerLink="OnCloud4_PL">
+      <service name="MatServ:MatServ" port="CloudServicesPort"/>
+    </invoke>
+  </process>
+</deploy>
