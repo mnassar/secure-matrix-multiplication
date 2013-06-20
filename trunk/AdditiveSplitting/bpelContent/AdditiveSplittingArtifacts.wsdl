@@ -119,6 +119,13 @@
                 </complexType>
             </element>
             -->
+            <element name="initiateResponse">
+            	<complexType>
+            		<sequence>
+            			<element name="out" type="string"></element>
+            		</sequence>
+            	</complexType>
+            </element>
         </schema>
     </types>
   
@@ -159,9 +166,11 @@
      a logical service unit.
      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
     <!-- portType implemented by the AdditiveSplitting BPEL process -->
+   
     <portType name="AdditiveSplitting">
         <operation name="initiate">
             <input message="tns:AdditiveSplittingRequestMessage"/>
+            <output message="tns:AdditiveSplittingResponseMessage"></output>
         </operation>
         <operation name="resplit_callBack">
     		<input message="tns:callbackRequestMessage_0"/>
@@ -292,7 +301,7 @@
 <vprop:propertyAlias messageType="ns1:resplitRequest" part="parameters" propertyName="tns:op0_CS">
 <vprop:query>/op_id</vprop:query>
 </vprop:propertyAlias>
-<vprop:propertyAlias messageType="tns:callbackRequestMessage_1" part="parameters" propertyName="tns:op0_CS">
+<vprop:propertyAlias messageType="tns:callbackRequestMessage_0" part="parameters" propertyName="tns:op0_CS">
 <vprop:query>/tns:op_ID</vprop:query>
 </vprop:propertyAlias>
 <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
