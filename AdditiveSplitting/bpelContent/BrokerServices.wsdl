@@ -81,7 +81,7 @@ targetNamespace="http://www.brokerservices.org/MatServ/" xmlns:p="http://www.w3.
   </wsdl:binding>
   <wsdl:service name="MatServ">
     <wsdl:port binding="ws:BrokerServicesBinding" name="BrokerServicesPort">
-      <soap:address location="http://10.160.2.27:8080/BrokerServices/services/MatServ"/>
+      <soap:address location="http://localhost:8080/BrokerServices/services/MatServ"/>
     </wsdl:port>
   </wsdl:service>
 </wsdl:definitions>
