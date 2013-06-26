@@ -170,7 +170,7 @@
     <portType name="AdditiveSplitting">
         <operation name="initiate">
             <input message="tns:AdditiveSplittingRequestMessage"/>
-            <output message="tns:AdditiveSplittingResponseMessage"></output>
+            <output message="tns:AdditiveSplittingResponseMessage"/>
         </operation>
         <operation name="resplit_callBack">
     		<input message="tns:callbackRequestMessage_0"/>
@@ -210,11 +210,15 @@
         <plnk:role name="BrokerServicesProvider" portType="ns1:MatServ"/>
     </plnk:partnerLinkType>  
 
-<!--
+
 <vprop:property name="jobid_CS" type="p:string"/>
 <vprop:propertyAlias messageType="tns:AdditiveSplittingRequestMessage" part="payload" propertyName="tns:jobid_CS">
 <vprop:query>/tns:jobID</vprop:query>
 </vprop:propertyAlias>
+<vprop:propertyAlias messageType="tns:AdditiveSplittingResponseMessage" part="payload" propertyName="tns:jobid_CS">
+<vprop:query>/tns:jobID</vprop:query>
+</vprop:propertyAlias>
+<!--
 <vprop:propertyAlias messageType="tns:callbackRequestMessage_1" part="parameters" propertyName="tns:jobid_CS">
 <vprop:query>/tns:jobID</vprop:query>
 </vprop:propertyAlias>
@@ -235,6 +239,9 @@
 
 <vprop:property name="sub_jobid_CS" type="p:string"/>
 <vprop:propertyAlias messageType="tns:AdditiveSplittingRequestMessage" part="payload" propertyName="tns:sub_jobid_CS">
+<vprop:query>/tns:sub_jobID</vprop:query>
+</vprop:propertyAlias>
+<vprop:propertyAlias messageType="tns:AdditiveSplittingResponseMessage" part="payload" propertyName="tns:sub_jobid_CS">
 <vprop:query>/tns:sub_jobID</vprop:query>
 </vprop:propertyAlias>
 <vprop:propertyAlias messageType="tns:callbackRequestMessage_0" part="parameters" propertyName="tns:sub_jobid_CS">
@@ -317,6 +324,9 @@
             <input>
                 <soap:body use="literal"/>
             </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
         </operation>
          <operation name="resplit_callBack">
     		<soap:operation soapAction="http://additivesplitting.bpelprocess/resplit_callBack"/>
