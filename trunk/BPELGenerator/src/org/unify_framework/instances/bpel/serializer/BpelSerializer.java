@@ -311,7 +311,7 @@ public class BpelSerializer implements ElementVisitor {
 		Element flowElement = this.document.createElementNS(BPEL_NAMESPACE_URI, "bpel:flow");
 		this.unifyToDomMapping.put(andSplit, flowElement);
 		this.currentFlowElement = flowElement;
-		flowElement.setAttribute("name", andSplit.getName().substring(0, andSplit.getName().length() - 6)); // Trim '_Split' from the end of the name
+		flowElement.setAttribute("name", andSplit.getName());//.substring(0, andSplit.getName().length() - 6)); // Trim '_Split' from the end of the name
 		for (ControlOutputPort controlOutputPort : andSplit.getControlOutputPorts()) {
 			Element childElement = traversePathUntil(controlOutputPort, andSplit.getCorrespondingAndJoin());
 			flowElement.appendChild(childElement);

@@ -1,3 +1,5 @@
+package org.bpel.deploy;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -39,7 +41,7 @@ public class FolderZipper
 
 	private String source_Folder ;
  
-    FolderZipper(String folderPath, String zipPath){
+    public FolderZipper(String folderPath, String zipPath){
     	fileList = new ArrayList<String>();
     	source_Folder = new String(folderPath);
     	output_ZIP_Path = new String(zipPath);
