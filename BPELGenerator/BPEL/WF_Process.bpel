@@ -1,0 +1,339 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpel:process
+    xmlns:bpel="http://docs.oasis-open.org/wsbpel/2.0/process/executable"
+    exitOnStandardFault="yes" name="WF_Process"
+    suppressJoinFailure="yes"
+    targetNamespace="http://matrix.bpelprocess"
+    xmlns:ns="http://www.example.org/MatServ24/"
+    xmlns:ns1="http://www.example.org/MatServ25/"
+    xmlns:ns2="http://www.example.org/MatServ26/"
+    xmlns:ns3="http://www.example.org/MatServ33/"
+    xmlns:ns4="http://www.example.org/MatServ27/"
+    xmlns:ode="http://www.apache.org/ode/type/extension"
+    xmlns:tns="http://matrix.bpelprocess" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <bpel:import importType="http://schemas.xmlsoap.org/wsdl/"
+        location="WF_ProcessArtifacts.wsdl" namespace="http://matrix.bpelprocess"/>
+    <bpel:import importType="http://schemas.xmlsoap.org/wsdl/"
+        location="MatServ24.wsdl" namespace="http://www.example.org/MatServ24/"/>
+    <bpel:import importType="http://schemas.xmlsoap.org/wsdl/"
+        location="MatServ25.wsdl" namespace="http://www.example.org/MatServ25/"/>
+    <bpel:import importType="http://schemas.xmlsoap.org/wsdl/"
+        location="MatServ26.wsdl" namespace="http://www.example.org/MatServ26/"/>
+    <bpel:import importType="http://schemas.xmlsoap.org/wsdl/"
+        location="MatServ33.wsdl" namespace="http://www.example.org/MatServ33/"/>
+    <bpel:import importType="http://schemas.xmlsoap.org/wsdl/"
+        location="MatServ27.wsdl" namespace="http://www.example.org/MatServ27/"/>
+    <bpel:partnerLinks>
+        <bpel:partnerLink myRole="WF_ProcessProvider" name="client" partnerLinkType="tns:WF_Process"/>
+        <bpel:partnerLink name="A1B1_PL"
+            partnerLinkType="tns:Mahout_PL24" partnerRole="ServiceProvider24"/>
+        <bpel:partnerLink name="A2B2_PL"
+            partnerLinkType="tns:Mahout_PL25" partnerRole="ServiceProvider25"/>
+        <bpel:partnerLink name="A1B2_PL"
+            partnerLinkType="tns:Mahout_PL26" partnerRole="ServiceProvider26"/>
+        <bpel:partnerLink name="A2B1_PL"
+            partnerLinkType="tns:Mahout_PL33" partnerRole="ServiceProvider33"/>
+        <bpel:partnerLink name="Add_PL"
+            partnerLinkType="tns:Mahout_PL27" partnerRole="ServiceProvider27"/>
+        <bpel:partnerLink myRole="WF_ProcessProvider" name="mult1_PL" partnerLinkType="tns:WF_Process"/>
+        <bpel:partnerLink myRole="WF_ProcessProvider" name="mult2_PL" partnerLinkType="tns:WF_Process"/>
+        <bpel:partnerLink myRole="WF_ProcessProvider" name="mult3_PL" partnerLinkType="tns:WF_Process"/>
+        <bpel:partnerLink myRole="WF_ProcessProvider" name="mult4_PL" partnerLinkType="tns:WF_Process"/>
+        <bpel:partnerLink myRole="WF_ProcessProvider" name="add_PL" partnerLinkType="tns:WF_Process"/>
+    </bpel:partnerLinks>
+    <bpel:variables>
+        <bpel:variable messageType="tns:addResultRequest" name="add_PLRequest"/>
+        <bpel:variable messageType="ns3:computeRequest" name="A2B1_PLRequest"/>
+        <bpel:variable messageType="ns4:computeRequest" name="C1C2_PLRequest"/>
+        <bpel:variable messageType="tns:multResult2Request" name="mult2_PLRequest"/>
+        <bpel:variable name="JOB" type="xsd:int"/>
+        <bpel:variable messageType="ns2:computeRequest" name="A1B2_PLRequest"/>
+        <bpel:variable messageType="tns:multResult3Request" name="mult3_PLRequest"/>
+        <bpel:variable messageType="tns:multResult4Request" name="mult4_PLRequest"/>
+        <bpel:variable messageType="tns:multResult1Request" name="mult1_PLRequest"/>
+        <bpel:variable messageType="tns:WF_ProcessRequestMessage" name="input"/>
+        <bpel:variable messageType="ns:computeRequest" name="A1B1_PLRequest"/>
+        <bpel:variable messageType="ns1:computeRequest" name="A2B2_PLRequest"/>
+        <bpel:variable messageType="tns:WF_ProcessResponseMessage" name="output"/>
+    </bpel:variables>
+    <bpel:correlationSets>
+        <bpel:correlationSet name="JOB_CS" properties="tns:jobid_CS"/>
+    </bpel:correlationSets>
+    <bpel:sequence>
+        <bpel:receive createInstance="yes" name="receiveInput"
+            operation="process" partnerLink="client"
+            portType="tns:WF_Process" variable="input">
+            <bpel:correlations>
+                <bpel:correlation initiate="yes" set="JOB_CS"/>
+            </bpel:correlations>
+        </bpel:receive>
+        <bpel:assign name="Assign" validate="no">
+            <bpel:copy>
+                <bpel:from>
+                    <bpel:literal>
+                        <tns:WF_ProcessResponse
+                            xmlns:tns="http://matrix.bpelprocess" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                            <tns:result>tns:result</tns:result>
+                            <tns:instanceID>tns:instanceID</tns:instanceID>
+                        </tns:WF_ProcessResponse>
+                    </bpel:literal>
+                </bpel:from>
+                <bpel:to part="payload" variable="output"/>
+            </bpel:copy>
+            <bpel:copy>
+                <bpel:from part="payload" variable="input">
+                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">tns:input</bpel:query>
+                </bpel:from>
+                <bpel:to variable="JOB"/>
+            </bpel:copy>
+            <bpel:copy>
+                <bpel:from><![CDATA[string($ode:pid)]]></bpel:from>
+                <bpel:to part="payload" variable="output">
+                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">tns:instanceID</bpel:query>
+                </bpel:to>
+            </bpel:copy>
+            <bpel:copy>
+                <bpel:from><![CDATA[concat($input.payload/tns:matA, $input.payload/tns:matB)]]></bpel:from>
+                <bpel:to part="payload" variable="output">
+                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">tns:result</bpel:query>
+                </bpel:to>
+            </bpel:copy>
+        </bpel:assign>
+        <bpel:reply name="replyOutput" operation="process"
+            partnerLink="client" portType="tns:WF_Process" variable="output"/>
+        <bpel:flow name="Flow_split">
+            <bpel:sequence>
+                <bpel:assign name="Assign1" validate="no">
+                    <bpel:copy>
+                        <bpel:from>
+                            <bpel:literal>
+                                <tns:compute
+                                    xmlns:tns="http://www.example.org/MatServ24/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                                    <operation>multiply</operation>
+                                    <op_id>1</op_id>
+                                    <job_id>0</job_id>
+                                    <matA_ID>A1</matA_ID>
+                                    <matB_ID>B1</matB_ID>
+                                    <callback>multResult1</callback>
+                                </tns:compute>
+                            </bpel:literal>
+                        </bpel:from>
+                        <bpel:to part="parameters" variable="A1B1_PLRequest"/>
+                    </bpel:copy>
+                    <bpel:copy>
+                        <bpel:from variable="JOB"/>
+                        <bpel:to part="parameters" variable="A1B1_PLRequest">
+                            <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[job_id]]></bpel:query>
+                        </bpel:to>
+                    </bpel:copy>
+                    <bpel:copy>
+                        <bpel:from><![CDATA[concat($input.payload/tns:matA, "_1")]]></bpel:from>
+                        <bpel:to part="parameters" variable="A1B1_PLRequest">
+                            <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[matA_ID]]></bpel:query>
+                        </bpel:to>
+                    </bpel:copy>
+                    <bpel:copy>
+                        <bpel:from><![CDATA[concat($input.payload/tns:matB, "_1")]]></bpel:from>
+                        <bpel:to part="parameters" variable="A1B1_PLRequest">
+                            <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[matB_ID]]></bpel:query>
+                        </bpel:to>
+                    </bpel:copy>
+                </bpel:assign>
+                <bpel:invoke inputVariable="A1B1_PLRequest"
+                    name="Mult_A1B1" operation="compute"
+                    partnerLink="A1B1_PL" portType="ns:MatServ"/>
+                <bpel:receive name="CB_A1_B1" operation="multResult1"
+                    partnerLink="mult1_PL" portType="tns:WF_Process" variable="mult1_PLRequest">
+                    <bpel:correlations>
+                        <bpel:correlation initiate="no" set="JOB_CS"/>
+                    </bpel:correlations>
+                </bpel:receive>
+            </bpel:sequence>
+            <bpel:sequence>
+                <bpel:assign name="Assign2" validate="no">
+                    <bpel:copy>
+                        <bpel:from>
+                            <bpel:literal>
+                                <tns:compute
+                                    xmlns:tns="http://www.example.org/MatServ25/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                                    <operation>multiply</operation>
+                                    <op_id>2</op_id>
+                                    <job_id>0</job_id>
+                                    <matA_ID>A2</matA_ID>
+                                    <matB_ID>B2</matB_ID>
+                                    <callback>multResult2</callback>
+                                </tns:compute>
+                            </bpel:literal>
+                        </bpel:from>
+                        <bpel:to part="parameters" variable="A2B2_PLRequest"/>
+                    </bpel:copy>
+                    <bpel:copy>
+                        <bpel:from variable="JOB"/>
+                        <bpel:to part="parameters" variable="A2B2_PLRequest">
+                            <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[job_id]]></bpel:query>
+                        </bpel:to>
+                    </bpel:copy>
+                    <bpel:copy>
+                        <bpel:from><![CDATA[concat($input.payload/tns:matA, "_2")]]></bpel:from>
+                        <bpel:to part="parameters" variable="A2B2_PLRequest">
+                            <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[matA_ID]]></bpel:query>
+                        </bpel:to>
+                    </bpel:copy>
+                    <bpel:copy>
+                        <bpel:from><![CDATA[concat($input.payload/tns:matB, "_2")]]></bpel:from>
+                        <bpel:to part="parameters" variable="A2B2_PLRequest">
+                            <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[matB_ID]]></bpel:query>
+                        </bpel:to>
+                    </bpel:copy>
+                </bpel:assign>
+                <bpel:invoke inputVariable="A2B2_PLRequest"
+                    name="Mult_A2B2" operation="compute"
+                    partnerLink="A2B2_PL" portType="ns1:MatServ"/>
+                <bpel:receive name="CB_A2_B2" operation="multResult2"
+                    partnerLink="mult2_PL" portType="tns:WF_Process" variable="mult2_PLRequest">
+                    <bpel:correlations>
+                        <bpel:correlation initiate="no" set="JOB_CS"/>
+                    </bpel:correlations>
+                </bpel:receive>
+            </bpel:sequence>
+            <bpel:sequence>
+                <bpel:assign name="Assign3" validate="no">
+                    <bpel:copy>
+                        <bpel:from>
+                            <bpel:literal>
+                                <tns:compute
+                                    xmlns:tns="http://www.example.org/MatServ26/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                                    <operation>multiply</operation>
+                                    <op_id>3</op_id>
+                                    <job_id>0</job_id>
+                                    <matA_ID>A1</matA_ID>
+                                    <matB_ID>B2</matB_ID>
+                                    <callback>multResult3</callback>
+                                </tns:compute>
+                            </bpel:literal>
+                        </bpel:from>
+                        <bpel:to part="parameters" variable="A1B2_PLRequest"/>
+                    </bpel:copy>
+                    <bpel:copy>
+                        <bpel:from variable="JOB"/>
+                        <bpel:to part="parameters" variable="A1B2_PLRequest">
+                            <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[job_id]]></bpel:query>
+                        </bpel:to>
+                    </bpel:copy>
+                    <bpel:copy>
+                        <bpel:from><![CDATA[concat($input.payload/tns:matA, "_1")]]></bpel:from>
+                        <bpel:to part="parameters" variable="A1B2_PLRequest">
+                            <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[matA_ID]]></bpel:query>
+                        </bpel:to>
+                    </bpel:copy>
+                    <bpel:copy>
+                        <bpel:from><![CDATA[concat($input.payload/tns:matB, "_2")]]></bpel:from>
+                        <bpel:to part="parameters" variable="A1B2_PLRequest">
+                            <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[matB_ID]]></bpel:query>
+                        </bpel:to>
+                    </bpel:copy>
+                </bpel:assign>
+                <bpel:invoke inputVariable="A1B2_PLRequest"
+                    name="Mult_A1B2" operation="compute"
+                    partnerLink="A1B2_PL" portType="ns2:MatServ"/>
+                <bpel:receive name="CB_A1_B2" operation="multResult3"
+                    partnerLink="mult3_PL" portType="tns:WF_Process" variable="mult3_PLRequest">
+                    <bpel:correlations>
+                        <bpel:correlation initiate="no" set="JOB_CS"/>
+                    </bpel:correlations>
+                </bpel:receive>
+            </bpel:sequence>
+            <bpel:sequence>
+                <bpel:assign name="Assign4" validate="no">
+                    <bpel:copy>
+                        <bpel:from>
+                            <bpel:literal>
+                                <tns:compute
+                                    xmlns:tns="http://www.example.org/MatServ33/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                                    <operation>multiply</operation>
+                                    <op_id>4</op_id>
+                                    <job_id>0</job_id>
+                                    <matA_ID>A2</matA_ID>
+                                    <matB_ID>B1</matB_ID>
+                                    <callback>multResult4</callback>
+                                </tns:compute>
+                            </bpel:literal>
+                        </bpel:from>
+                        <bpel:to part="parameters" variable="A2B1_PLRequest"/>
+                    </bpel:copy>
+                    <bpel:copy>
+                        <bpel:from variable="JOB"/>
+                        <bpel:to part="parameters" variable="A2B1_PLRequest">
+                            <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[job_id]]></bpel:query>
+                        </bpel:to>
+                    </bpel:copy>
+                    <bpel:copy>
+                        <bpel:from><![CDATA[concat($input.payload/tns:matA, "_2")]]></bpel:from>
+                        <bpel:to part="parameters" variable="A2B1_PLRequest">
+                            <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[matA_ID]]></bpel:query>
+                        </bpel:to>
+                    </bpel:copy>
+                    <bpel:copy>
+                        <bpel:from><![CDATA[concat($input.payload/tns:matB, "_1")]]></bpel:from>
+                        <bpel:to part="parameters" variable="A2B1_PLRequest">
+                            <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[matB_ID]]></bpel:query>
+                        </bpel:to>
+                    </bpel:copy>
+                </bpel:assign>
+                <bpel:invoke inputVariable="A2B1_PLRequest"
+                    name="Mult_A2B1" operation="compute"
+                    partnerLink="A2B1_PL" portType="ns4:MatServ"/>
+                <bpel:receive name="CB_A2_B1" operation="multResult4"
+                    partnerLink="mult4_PL" portType="tns:WF_Process" variable="mult4_PLRequest">
+                    <bpel:correlations>
+                        <bpel:correlation initiate="no" set="JOB_CS"/>
+                    </bpel:correlations>
+                </bpel:receive>
+            </bpel:sequence>
+        </bpel:flow>
+        <bpel:assign name="Assign5" validate="no">
+            <bpel:copy>
+                <bpel:from>
+                    <bpel:literal>
+                        <tns:compute
+                            xmlns:tns="http://www.example.org/MatServ27/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                            <operation>add</operation>
+                            <op_id>5</op_id>
+                            <job_id>0</job_id>
+                            <matA_ID>A</matA_ID>
+                            <matB_ID>B</matB_ID>
+                            <callback>addResult</callback>
+                        </tns:compute>
+                    </bpel:literal>
+                </bpel:from>
+                <bpel:to part="parameters" variable="C1C2_PLRequest"/>
+            </bpel:copy>
+            <bpel:copy>
+                <bpel:from variable="JOB"/>
+                <bpel:to part="parameters" variable="C1C2_PLRequest">
+                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[job_id]]></bpel:query>
+                </bpel:to>
+            </bpel:copy>
+            <bpel:copy>
+                <bpel:from><![CDATA[$input.payload/tns:matA]]></bpel:from>
+                <bpel:to part="parameters" variable="C1C2_PLRequest">
+                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[matA_ID]]></bpel:query>
+                </bpel:to>
+            </bpel:copy>
+            <bpel:copy>
+                <bpel:from><![CDATA[$input.payload/tns:matB]]></bpel:from>
+                <bpel:to part="parameters" variable="C1C2_PLRequest">
+                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[matB_ID]]></bpel:query>
+                </bpel:to>
+            </bpel:copy>
+        </bpel:assign>
+        <bpel:invoke inputVariable="C1C2_PLRequest" name="Add"
+            operation="compute" partnerLink="Add_PL" portType="ns4:MatServ"/>
+        <bpel:receive name="Receive2" operation="addResult"
+            partnerLink="add_PL" portType="tns:WF_Process" variable="add_PLRequest">
+            <bpel:correlations>
+                <bpel:correlation initiate="no" set="JOB_CS"/>
+            </bpel:correlations>
+        </bpel:receive>
+    </bpel:sequence>
+</bpel:process>

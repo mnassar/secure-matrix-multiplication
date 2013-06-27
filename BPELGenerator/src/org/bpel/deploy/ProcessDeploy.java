@@ -1,3 +1,5 @@
+package org.bpel.deploy;
+
 import java.util.List; 
 import java.util.Iterator; 
 import java.io.File; 
@@ -82,10 +84,17 @@ public class ProcessDeploy {
 		// TODO Auto-generated method stub
 
 		//Default values
-		String bpelprocess_folder = "/home/farida/workspace2/WF_Process/bpelContent";
+		/*String bpelprocess_folder = "/home/farida/workspace2/WF_Process/bpelContent";
 		String process_Name = "My_Process";
 		String zipTo_Path= "/home/farida/Documents/ZippedProcess.zip";
 		String deploymentService_URL ="http://localhost:8080/ode/processes/DeploymentService";
+		*/
+		
+		String bpelprocess_folder = "/home/farida/Clean_workspace/BPELGenerator/BPEL";
+		String process_Name = "WF_Process";
+		String zipTo_Path= "/home/farida/Documents/WF_Process.zip";
+		String deploymentService_URL ="http://10.160.2.27:8080/ode/processes/DeploymentService";
+		
 		//Read values from args []
 		
 		ProcessDeploy deployProc = new ProcessDeploy();

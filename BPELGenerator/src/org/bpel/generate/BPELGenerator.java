@@ -1,3 +1,5 @@
+package org.bpel.generate;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 
@@ -40,6 +42,7 @@ import org.unify_framework.instances.bpel.BpelToVariable;
 import org.unify_framework.instances.bpel.BpelVariable;
 import org.unify_framework.instances.bpel.BpelVariableMessageType;
 import org.unify_framework.instances.bpel.BpelVariableType;
+import org.unify_framework.instances.bpel.parser.BpelParser;
 import org.unify_framework.instances.bpel.serializer.BpelSerializer;
 import org.unify_framework.instances.bpel.visitors.ElementVisitor;
 import org.w3c.dom.CDATASection;
@@ -118,6 +121,7 @@ public class BPELGenerator {
 	            process.addCorrelationSet(JOB_CS);
 	            BpelCompositeActivity bpelCompositeActivity= (BpelCompositeActivity) process ;
 	            
+	            
 	            //BpelScopeActivity scope_activ = new BpelScopeActivity("main");
 	    		BpelScope scope = bpelCompositeActivity.getScope();
 	    		
@@ -164,6 +168,7 @@ public class BPELGenerator {
 	    		variable = new BpelVariableType("JOB", "xsd:int");
 	    		scope.addVariable(variable);
 	    		
+	    		
 	            /*
 	            BpelReceiveActivity receive = new BpelReceiveActivity("ReceiveInput");
 	            receive.setOperation("initiate");
@@ -195,7 +200,7 @@ public class BPELGenerator {
 	            
 	            BpelCopy copy = new BpelCopy();
 	
-	            XpathExpressionImpl expression= new XpathExpressionImpl("<![CDATA[concat(\"Hello, \",$input.payload/tns:input, \"!\")]]>");
+	         //   XpathExpressionImpl expression= new XpathExpressionImpl("<![CDATA[concat(\"Hello, \",$input.payload/tns:input, \"!\")]]>");
 	            //Node express=  new org.w3c.dom.Node() expression.getCopy();
 	    		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 				DocumentBuilder db = dbf.newDocumentBuilder();
@@ -223,12 +228,8 @@ public class BPELGenerator {
 	            BpelToVariable to2 = new BpelToVariable("JOB");
 	            copy2.setTo(to2);
 	            assign.addCopy(copy2);
-	            
-	            
-				
+	
 	            BpelCopy copy3 = new BpelCopy();
-	            
-	           
 	            CDATASection cdata = document.createCDATASection("string($ode:pid)");
 	            BpelFromExpression from3 = new BpelFromExpression(cdata.cloneNode(true));
 	            
@@ -777,7 +778,7 @@ public class BPELGenerator {
 	            bpelCompositeActivity.connect(reply.getControlOutputPort(), split.getControlInputPort());
 	            
 	            bpelCompositeActivity.connect(split.getNewControlOutputPort(),assignA1B1.getControlInputPort());
-	            bpelCompositeActivity.connect(assignA1B1.getControlOutputPort(), A1B1.getControlInputPort());
+	            bpelCompositeActivity.connect(assignA1B1, A1B1);
 	            bpelCompositeActivity.connect(split.getNewControlOutputPort(), assignA2B2.getControlInputPort());
 	            bpelCompositeActivity.connect(assignA2B2.getControlOutputPort(),A2B2.getControlInputPort());
 	            bpelCompositeActivity.connect(split.getNewControlOutputPort(),  assignA1B2.getControlInputPort());
@@ -806,7 +807,11 @@ public class BPELGenerator {
 	          
 	            BpelSerializer bpelSerializer = new BpelSerializer();
 	            bpelSerializer.serialize(process, file);
-	            
+	         /*
+	            BpelParser bpelParser = new BpelParser();
+	            BpelProcess parsed_proc = bpelParser.parse(file);
+	            System.out.println("Number of variables in the parsed process "+((BpelCompositeActivity)parsed_proc).getScope().getVariables().size());
+	            */
 	        }
 
 	        catch (Exception e) {
