@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
+xmlns:ws="http://www.brokerservices.org/MatServ/" 
+xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
+ name="MatServ" 
+targetNamespace="http://www.brokerservices.org/MatServ/" xmlns:p="http://www.w3.org/2001/XMLSchema">
+  <wsdl:types>
+    <schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.brokerservices.org/MatServ/" xmlns:ws="http://www.brokerservices.org/MatServ/">
+    	<element name="add">
+    		<complexType>
+    			<sequence>
+    				<element name="op_id" type="string"></element>
+    				<element name="job_id" type="string"></element>
+    				<element name="matA_ID" type="string"></element>
+    				<element name="matB_ID" type="string"></element>
+    				<element name="callback" type="string"></element>
+    			</sequence>
+    		</complexType>
+    	</element>
+
+
+
+    	<element name="resplit">
+    		<complexType>
+    			<sequence>
+    				<element name="op_id" type="string"></element>
+    				<element name="job_id" type="string"></element>
+    				<element name="matA_ID" type="string"></element>
+    				<element name="matB_ID" type="string"></element>
+    				<element name="callback" type="string"></element>
+    				
+    			</sequence>
+    		</complexType>
+    	</element>
+
+    	<element name="addResponse">
+    		<complexType>
+    			<sequence>
+    				<element name="out" type="string"></element>
+    			</sequence>
+    		</complexType>
+    	</element>
+    	<element name="resplitResponse">
+    		<complexType>
+    			<sequence>
+    				<element name="out" type="string"></element>
+    			</sequence>
+    		</complexType>
+    	</element>
+    </schema>
+  </wsdl:types>
+  <wsdl:message name="addRequest">
+    <wsdl:part element="ws:add" name="parameters"/>
+  </wsdl:message>
+
+
+  <wsdl:message name="resplitRequest">
+  	<wsdl:part name="parameters" element="ws:resplit"></wsdl:part>
+  </wsdl:message>
+
+  <wsdl:message name="addResponse">
+  	<wsdl:part name="parameters" element="ws:addResponse"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="resplitResponse">
+  	<wsdl:part name="parameters" element="ws:resplitResponse"></wsdl:part>
+  </wsdl:message>
+  <wsdl:portType name="MatServ">
+    <wsdl:operation name="add">
+      <wsdl:input message="ws:addRequest"/>
+      <wsdl:output message="ws:addResponse"></wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="resplit">
+    	<wsdl:input message="ws:resplitRequest"></wsdl:input>
+    	<wsdl:output message="ws:resplitResponse"></wsdl:output>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="BrokerServicesBinding" type="ws:MatServ">
+  	<soap:binding style="document"
+  		transport="http://schemas.xmlsoap.org/soap/http" />
+  	<wsdl:operation name="add">
+  		<soap:operation
+  			soapAction="http://www.brokerservices.org/MatServ/add" />
+  		<wsdl:input>
+  			<soap:body use="literal" />
+  		</wsdl:input>
+  	</wsdl:operation>
+  	<wsdl:operation name="resplit">
+  		<soap:operation
+  			soapAction="http://www.brokerservices.org/MatServ/resplit" />
+  		<wsdl:input>
+  			<soap:body use="literal" />
+  		</wsdl:input>
+  	</wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="MatServ">
+    <wsdl:port binding="ws:BrokerServicesBinding" name="BrokerServicesPort">
+      <soap:address location="http://10.160.2.27:8080/BrokerServices/services/MatServ"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

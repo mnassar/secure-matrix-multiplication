@@ -36,11 +36,12 @@ import com.google.gson.Gson;
 import com.sun.jersey.core.header.FormDataContentDisposition;
 
 import Jama.Matrix;
-import broker.Broker;
+
 import broker.BrokerSOCResource;
 import broker.Location;
 import broker.MetadataStoreConnection;
 import broker.SOCConfiguration;
+import broker.SOCResource;
 import broker.StorageProtocol;
 
 import java.net.URI;
@@ -61,7 +62,7 @@ import java.util.UUID;
 public class SocService {
 
 	protected final static ObjectMapper defaultMapper = new ObjectMapper();
-	protected static Broker br= new Broker();
+	
 
 @POST
 @Path("/upload")
@@ -106,7 +107,7 @@ public Response storeResource(SOCResource resource)
 			Location loc_split2 ;
 			while((loc_split2= conf.getRandomCloud())!=loc_split1);
 			
-			//splitter.Split(loc_split1, loc_split2);
+			splitter.Split(loc_split1, loc_split2);
 			resourceOnBroker.addLocation(loc_split1);
 			resourceOnBroker.addLocation(loc_split2);
 		}

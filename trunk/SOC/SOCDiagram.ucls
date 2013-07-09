@@ -55,8 +55,8 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="7" language="java" name="securerest.SOCResourceAlias" project="SOC" 
-    file="/SOC/src/securerest/SOCResourceAlias.java" binary="false" corner="BOTTOM_RIGHT">    
+  <class id="7" language="java" name="broker.SOCResourceAlias" project="SOC" 
+    file="/SOC/src/broker/SOCResourceAlias.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="1076" y="384"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
       visibility="false">      
@@ -73,7 +73,7 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="9" language="java" name="securerest.SOCResource" project="SOC" file="/SOC/src/securerest/SOCResource.java" 
+  <class id="9" language="java" name="broker.SOCResource" project="SOC" file="/SOC/src/broker/SOCResource.java" 
     binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="650" y="102"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
@@ -82,8 +82,8 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="10" language="java" name="securerest.SOCJobStatus" project="SOC" 
-    file="/SOC/src/securerest/SOCJobStatus.java" binary="false" corner="BOTTOM_RIGHT">    
+  <class id="10" language="java" name="broker.SOCJobStatus" project="SOC" file="/SOC/src/broker/SOCJobStatus.java" 
+    binary="false" corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="757" y="714"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
       visibility="false">      
@@ -100,8 +100,8 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="12" language="java" name="securerest.SOCJob" project="SOC" file="/SOC/src/securerest/SOCJob.java" 
-    binary="false" corner="BOTTOM_RIGHT">    
+  <class id="12" language="java" name="broker.SOCJob" project="SOC" file="/SOC/src/broker/SOCJob.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
     <position height="-1" width="-1" x="1021" y="731"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 
       visibility="false">      

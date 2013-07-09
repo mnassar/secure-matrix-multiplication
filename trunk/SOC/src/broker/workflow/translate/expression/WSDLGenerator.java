@@ -148,15 +148,17 @@ public class WSDLGenerator  {
 		
 		
 		addNameSpace("",  "http://schemas.xmlsoap.org/wsdl/" );
-		addNameSpace("ns", wf.getAdditiveSplitting_namespace() );
-
+		addNameSpace("ns1", wf.getAdditiveSplitting_namespace() );
+		addNameSpace("ns2", wf.getBroker_namespace() );
 		addNameSpace("p", "http://www.w3.org/2001/XMLSchema"  );
 		addNameSpace("plnk", "http://docs.oasis-open.org/wsbpel/2.0/plnktype" );
 		addNameSpace("soap", "http://schemas.xmlsoap.org/wsdl/soap/" );
 		addNameSpace("vprop", "http://docs.oasis-open.org/wsbpel/2.0/varprop"  );
 		addNameSpace("tns", wf.getProcess().getTargetNamespace() );
 		
-		addImport(wf.getODE_PATH()+"/WF_Process/WF_ProcessArtifacts.wsdl", wf.getAdditiveSplitting_namespace());
+		addImport("AdditiveSplittingArtifacts.wsdl", wf.getAdditiveSplitting_namespace());
+		
+		addImport("BrokerServices.wsdl", "http://www.brokerservices.org/MatServ/");
 		
 		addPortType(wf.getWf_name());
 		//addOneWayOperation("start", wf.getWf_name()+"RequestMessage", wf.getWf_name());
@@ -168,9 +170,18 @@ public class WSDLGenerator  {
 		addComplexType(wf.getWf_name()+"Request", sequence);
 		
 		sequence.clear();
-		sequence.put("payload", wf.getWf_name()+"Request");
+		sequence.put("parameters", wf.getWf_name()+"Request");
 		addMessage(wf.getWf_name()+"RequestMessage", sequence);
 		
+		sequence.clear();
+		sequence = new HashMap<String, String>();
+		sequence.put("jobID", "string");
+		sequence.put("instanceID", "string");
+		addComplexType(wf.getWf_name()+"Response", sequence);
+		
+		sequence.clear();
+		sequence.put("parameters", wf.getWf_name()+"Response");
+		addMessage(wf.getWf_name()+"ResponseMessage", sequence);
 		
 	//
 		for(BpelVariable v: wf.getVariables())
@@ -179,9 +190,9 @@ public class WSDLGenerator  {
 			{
 				sequence.clear();
 				sequence.put("job_id", "string");
-				sequence.put("op_id", "int");
-				sequence.put("input", "string");
-				sequence.put("callback", "string");
+				sequence.put("sub_jobid", "string");
+				sequence.put("result", "string");
+				
 				//********************* Remains to check if it is already found don't add it
 				////////******************************
 				boolean added= false;
@@ -204,8 +215,9 @@ public class WSDLGenerator  {
 			}
 		}
 		
-		addProperty("jobid_CS", "p:int");
-		addPropertyAlias(wf.getWf_name()+"RequestMessage", "payload", "jobid_CS", "/tns:jobID");
+		addProperty("jobid_CS", "p:string");
+		addPropertyAlias(wf.getWf_name()+"RequestMessage", "parameters", "jobid_CS", "/tns:jobID");
+		addPropertyAlias(wf.getWf_name()+"ResponseMessage", "parameters", "jobid_CS", "/tns:jobID");
 		
 		for(BpelVariable v: wf.getVariables())
 		{
@@ -223,7 +235,7 @@ public class WSDLGenerator  {
 			if(n.getClass() == BpelCompositeReceiveActivity.class)
 			{
 				if(((BpelCompositeReceiveActivity)n).getOperation().equals("start"))
-					addOneWayOperation(((BpelCompositeReceiveActivity)n).getOperation(), wf.getWf_name()+"RequestMessage", wf.getWf_name());
+					addTwoWaysOperation(((BpelCompositeReceiveActivity)n).getOperation(), wf.getWf_name()+"RequestMessage",wf.getWf_name()+"ResponseMessage", wf.getWf_name());
 				else
 					addOneWayOperation(((BpelCompositeReceiveActivity)n).getOperation(), ((BpelCompositeReceiveActivity)n).getOperation()+"Request", wf.getWf_name());
 				
@@ -245,19 +257,30 @@ public class WSDLGenerator  {
 				Iterator<String> I = values.iterator();
 				Iterator<String>  keyIter = map.keySet().iterator();
 				String prefix="";
+				String portType="";
 	//**************************
-	//Revise this part back .. prefix is empty
+	//Revise this part back .. I use a workaround .. need a better solution .
 				while(I.hasNext())
 				{
-					if(I.next().toLowerCase().contains(pL.getPartnerRole().substring(0,pL.getPartnerRole().length()-8)))
+					String namespace = new String(I.next().toLowerCase());
+					if(namespace.contains("additivesplitting") && pL.getPartnerRole().toLowerCase().contains("additivesplitting"))
 					{
-						prefix = keyIter.next(); break;
+						prefix = keyIter.next(); 
+						portType="AdditiveSplitting";
+						break;
 					}
+					else if(namespace.contains("brokerservices")&& pL.getPartnerRole().toLowerCase().contains("brokerservices"))
+					{
+						prefix = keyIter.next(); 
+						portType="MatServ";
+						break;
+					}
+						
 					
 					keyIter.next();
 				}
 /////***************************				
-				addPartnerLinkType(pL.getPartnerLinkType().substring(4), pL.getPartnerRole(), prefix+":"+pL.getPartnerRole().substring(0,pL.getPartnerRole().length()-8));
+				addPartnerLinkType(pL.getPartnerLinkType().substring(4), pL.getPartnerRole(), prefix+":"+portType/*pL.getPartnerRole().substring(0,pL.getPartnerRole().length()-8)*/);
 			}
 		}
 		
@@ -281,9 +304,11 @@ public class WSDLGenerator  {
 	{
 		Element sequence = null;
 
+		Element type = doc.createElement("element");
+		type.setAttribute("name", name);
+		
 		Element complex = doc.createElement("complexType");
-		complex.setAttribute("name", name);
-
+	
 		sequence = doc.createElement("sequence");
 
 		for(String key : name_type_pairs.keySet())
@@ -293,9 +318,10 @@ public class WSDLGenerator  {
 			part1.setAttribute("type",  name_type_pairs.get(key));
 			sequence.appendChild(part1);
 		}
+		
 		complex.appendChild(sequence);
-
-		schema.appendChild(complex);
+		type.appendChild(complex);
+		schema.appendChild(type);
 		
 	}
 	
@@ -320,6 +346,16 @@ public class WSDLGenerator  {
 	
 	public void addPartnerLinkType(String name, String rolename, String portType)
 	{
+		//Check if it is already found
+		for(int i=0; i< definition.getExtensibilityElements().size(); i++)
+		{
+			if(((UnknownExtensibilityElement)definition.getExtensibilityElements().get(i)).getElement().getAttribute("name").equals(name))
+			{
+				return;
+			}
+		}
+		
+		
 		// generate a schema in DOM to set into the types object
 		javax.xml.parsers.DocumentBuilderFactory domfactory =
 		javax.xml.parsers.DocumentBuilderFactory.newInstance();
@@ -522,6 +558,28 @@ public class WSDLGenerator  {
 		input.setMessage(definition.getMessage(new QName(targetNamespace, inputMessageName)));
 
 		operation.setInput(input);
+		operation.setUndefined(false);
+		definition.getPortType(messageqname).addOperation(operation);
+
+	}
+	
+	public void addTwoWaysOperation(String name, String inputMessageName, String outputMessageName,  String portType)
+	{
+		QName messageqname= new QName(targetNamespace, portType);
+		
+		OperationImpl operation = (OperationImpl)definition.createOperation();
+		operation.setName(name);
+		operation.setStyle(javax.wsdl.OperationType.REQUEST_RESPONSE);
+
+		InputImpl input = (InputImpl)definition.createInput();
+		//input.setName(inputMessageName);
+		input.setMessage(definition.getMessage(new QName(targetNamespace, inputMessageName)));
+
+		OutputImpl output = (OutputImpl)definition.createOutput();
+		output.setMessage(definition.getMessage(new QName(targetNamespace, outputMessageName)));
+		
+		operation.setInput(input);
+		operation.setOutput(output);
 		operation.setUndefined(false);
 		definition.getPortType(messageqname).addOperation(operation);
 

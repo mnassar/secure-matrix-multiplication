@@ -7,7 +7,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import securerest.SOCJob;
 
 import com.google.gson.Gson;
 
@@ -57,13 +56,34 @@ public class MetadataStoreConnection {
 		return false;
 	}
 
+	public int updateSOCResource(BrokerSOCResource resource)
+
+	{
+		Gson gson = new Gson();
+
+		String resource_json = gson.toJson(resource);
+
+		PreparedStatement statement;
+		try {
+			
+			String query= "UPDATE resources SET resource ='"+resource_json+"' WHERE resource_id='"+ resource.getResource_id()+"'";
+			System.out.println(query);
+			statement = connect.prepareStatement(query);
+			return  statement.executeUpdate();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return 0;
+	}
 
 	public String getSOCResource(String resourceID)
 
 	{
 		PreparedStatement statement;
 		try {
-			String query  ="SELECT * FROM resources WHERE RESOURCE_ID='"+resourceID+"'";
+			String query  = "SELECT * FROM resources WHERE RESOURCE_ID='"+resourceID+"'";
 			statement = connect.prepareStatement(query);
 			resultSet = statement.executeQuery();
 			while (resultSet.next()) {

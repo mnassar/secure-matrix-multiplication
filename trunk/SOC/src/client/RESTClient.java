@@ -9,6 +9,9 @@ import broker.BrokerSOCResource;
 import broker.JobType;
 import broker.MatrixMeta;
 import broker.ResourceMeta;
+import broker.SOCJob;
+import broker.SOCResource;
+import broker.SOCResourceAlias;
 import broker.StorageProtocol;
 
 import com.sun.jersey.api.client.Client;
@@ -29,9 +32,6 @@ import org.xml.sax.InputSource;
 
 
 import securerest.MatrixOP;
-import securerest.SOCJob;
-import securerest.SOCResource;
-import securerest.SOCResourceAlias;
 import sun.net.www.http.HttpClient;
 
 import javax.ws.rs.core.Response;
@@ -178,7 +178,6 @@ public class RESTClient {
     		System.out.println(meta_data);
     
     		ClientResponse response = service.path("/job/compute").type(MediaType.APPLICATION_JSON).post(ClientResponse.class, meta_data);
-    		
     		
     		if (response.getStatus() != 201 ) {
     		   throw new RuntimeException("Failed : HTTP error code : "
