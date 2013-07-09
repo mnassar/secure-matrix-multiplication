@@ -1,7 +1,5 @@
-package securerest;
+package broker;
 
-import broker.ResourceMeta;
-import broker.StorageProtocol;
 
 public class SOCResource {
 	
@@ -14,11 +12,16 @@ public class SOCResource {
 		return resource_meta;
 	}
 	public void setResource_meta(ResourceMeta resource_meta) {
-		this.resource_meta = resource_meta;
+		if(resource_meta.getType().equals("matrix"))
+			this.resource_meta =  new broker.MatrixMeta(resource_meta);
+		else
+			this.resource_meta =  new ResourceMeta(resource_meta.getType());
+		
 	}
 	
+	
 	public void setResource_meta(broker.MatrixMeta resource_meta) {
-		this.resource_meta = resource_meta;
+		this.resource_meta = new broker.MatrixMeta(resource_meta);
 		this.resource_meta.setType("matrix");
 	}
 	

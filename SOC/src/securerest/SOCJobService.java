@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 
@@ -29,6 +30,14 @@ import javax.ws.rs.core.Response.ResponseBuilder ;
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.soap.MessageFactory;
+import javax.xml.soap.SOAPBody;
+import javax.xml.soap.SOAPBodyElement;
+import javax.xml.soap.SOAPConnection;
+import javax.xml.soap.SOAPConnectionFactory;
+import javax.xml.soap.SOAPElement;
+import javax.xml.soap.SOAPHeader;
+import javax.xml.soap.SOAPMessage;
 
 import matrix.splitters.AdditiveSplitter;
 
@@ -37,15 +46,20 @@ import org.nfunk.jep.ParseException;
 import org.xml.sax.SAXException;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.sun.jersey.core.header.FormDataContentDisposition;
 
 import Jama.Matrix;
-import broker.Broker;
+
 import broker.BrokerSOCResource;
 import broker.JobType;
 import broker.Location;
 import broker.MetadataStoreConnection;
+import broker.ResourceMeta;
+import broker.ResourceMetaAdapter;
 import broker.SOCConfiguration;
+import broker.SOCJob;
+import broker.SOCJobStatus;
 import broker.StorageProtocol;
 import broker.workflow.translate.expression.ExpressionToWorkflow;
 import broker.workflow.translate.expression.ExpressionTranslator;
@@ -80,7 +94,9 @@ public Response compute(SOCJob job)
 {
 		
 		SOCConfiguration conf = new SOCConfiguration();
-		String job_id = UUID.randomUUID().toString();
+		//String job_id = UUID.randomUUID().toString();
+		Random r= new Random();
+		String job_id = new Integer(r.nextInt(10000)).toString();
 		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		   //get current date time with Date()
 		   java.util.Date date = new java.util.Date();
@@ -125,6 +141,9 @@ public Response compute(SOCJob job)
 							String resourceID = job_to_start.getAliases().get(i).getResource_id();
 							String resource = conn.getSOCResource(resourceID);
 							Gson gson = new Gson();
+							GsonBuilder builder = new GsonBuilder();
+						    builder.registerTypeAdapter(ResourceMeta.class   , new ResourceMetaAdapter());
+						    gson = builder.create();
 							BrokerSOCResource resourceObj = gson.fromJson(resource, BrokerSOCResource.class);
 							translator.addExpressionVariable(alias,resourceObj);
 						}
@@ -148,8 +167,72 @@ public Response compute(SOCJob job)
 						}
 						//Execute the workflow
 
-						
-						
+						try {
+							SOAPConnectionFactory sfc = SOAPConnectionFactory.newInstance();
+							SOAPConnection connection = sfc.createConnection();
+
+							MessageFactory mf = MessageFactory.newInstance();
+							SOAPMessage sm = mf.createMessage();
+
+							SOAPHeader sh = sm.getSOAPHeader();
+							SOAPBody sb = sm.getSOAPBody();
+							sh.detachNode();
+							QName bodyName = new QName(workflow_generator.getWorkflowNamespace(), "expjob_"+job_to_start.getJob_Id()+"Request", "tns");
+							SOAPBodyElement bodyElement = sb.addBodyElement(bodyName);
+							QName qn = new QName("expression");
+							
+							SOAPElement quotation = bodyElement.addChildElement(qn);
+
+							quotation.addTextNode(job_to_start.getExpression());
+
+							qn = new QName("jobID");
+							
+							SOAPElement job = bodyElement.addChildElement(qn);
+
+							job.addTextNode(job_to_start.getJob_Id());
+
+						//	System.out.println("\n Soap Request:\n");
+							sm.writeTo(System.out);
+						//	System.out.println();
+
+							URL endpoint = new URL(workflow_generator.getProcessURL());
+							SOAPMessage response = connection.call(sm, endpoint);
+							System.out.println(response.getContentDescription());
+						} catch (Exception ex) {
+							ex.printStackTrace();
+						}
+						/*
+						try {
+							String soapXml = "<?xml version=\"1.0\" encoding=\"utf-16\"?>"+
+						"<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">"
+						+ "<soap:Body><expjob_"+job_to_start.getJob_Id()+"Request> "
+						+"<expression>"+ job_to_start.getExpression()+"</expression>"
+						+"<jobID>"+job_to_start.getJob_Id()+"</jobID>"
+						+"</expjob_"+job_to_start.getJob_Id()+"Request>"  
+						+"</soap:Body></soap:Envelope>";
+
+							java.net.URL url = new java.net.URL(workflow_generator.getProcessURL());
+							java.net.URLConnection url_conn = url.openConnection();
+							// Set the necessary header fields
+							url_conn.setRequestProperty("SOAPAction", SOCConfiguration.BROKER_URL+"/ode/processes/expjob_"+job_to_start.getJob_Id());
+							url_conn.setDoOutput(true);
+							// Send the request
+							java.io.OutputStreamWriter wr = new java.io.OutputStreamWriter(url_conn.getOutputStream());
+							wr.write(soapXml);
+							wr.flush();
+							// Read the response
+							java.io.BufferedReader rd = new java.io.BufferedReader(new java.io.InputStreamReader(url_conn.getInputStream()));
+							String line;
+
+							while ((line = rd.readLine()) != null) { System.out.println(line);  }
+						} catch (MalformedURLException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+*/
 						
 						
 					}

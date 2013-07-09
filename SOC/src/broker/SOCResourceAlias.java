@@ -1,4 +1,4 @@
-package securerest;
+package broker;
 
 public class SOCResourceAlias {
 

@@ -54,18 +54,36 @@ public class ExpressionToWorkflow {
 	private int flow_counter;
 	
 	private WSDLGenerator wsdl_gen;
+	private DeployXML deploy_xml;
 	
-	public ExpressionToWorkflow(ExpressionTranslator translator)
+	public String getProcessURL()
+	{
+		return SOCConfiguration.BROKER_URL+"/ode/processes/"+ exp_wf.getWf_name();
+	}
+	
+	public String getWorkflowNamespace()
+	{
+		return "http://soc."+ exp_wf.getWf_name()+".workflow";
+	}
+	public ExpressionToWorkflow(ExpressionTranslator translator) 
 	{
 		
 		expression = new String(translator.getExpression());
 		job_ID = new String(translator.getJob_ID());
 		String expwf_process= "exp"+job_ID;
+		
+		SOCConfiguration soc_conf = new SOCConfiguration();
+		
 		exp_wf = new Workflow(expwf_process, "http://soc."+expwf_process+".workflow");
+		
+		exp_wf.setODE_PATH(SOCConfiguration.ODE_PATH);
+		exp_wf.setFolder_Path(SOCConfiguration.WORKFLOWS_PATH);
+		exp_wf.setAdditive_splitting_url(SOCConfiguration.ADDITIVE_SPLITTING_PROCESS);
+		broker_url = new String(SOCConfiguration.BROKER_URL);
+		exp_wf.setBroker_services_url(broker_url);
+		
 		this.translator = new ExpressionTranslator(translator);
 	
-		
-		
 		sub_wf_job = new Random();
 		assign_counter = 0;
 		var_counter=0;
@@ -75,6 +93,9 @@ public class ExpressionToWorkflow {
 		current_flow = 0;
 		flow_counter= 0;
 		flow_stack = new ArrayList<Integer>();
+	
+		
+		/*
 		File conf = new File("/etc/soc/soc.conf");
 		
 		BufferedReader br = null;
@@ -108,10 +129,22 @@ public class ExpressionToWorkflow {
 				ex.printStackTrace();
 			}
 		}
-	
+	*/
 		
-		exp_wf.initialize();
+		try {
+			exp_wf.initialize();
+		} catch (ParserConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SAXException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		this.wsdl_gen = new WSDLGenerator("http://soc."+expwf_process+".workflow", expwf_process);
+		
 	//	wsdl_gen.initialize(exp_wf);
 	}
 	public void initialise()
@@ -143,20 +176,25 @@ public class ExpressionToWorkflow {
 		wsdl_gen.write(exp_wf.getFolder_Path()+"/"+exp_wf.getWf_name()+"/"+exp_wf.getWf_name()+"Artifacts.wsdl");
 		
 		
-		
-		
 		//DEPLOY
-	//	exp_wf.deploy(broker_url);
+		deploy_xml = new DeployXML(exp_wf);
+		deploy_xml.addPartnerLinks();
+		deploy_xml.write();
+		
+		exp_wf.deploy(broker_url);
 	
 	}
 	/**
 	 * @param args
+	 * @throws IOException 
+	 * @throws SAXException 
+	 * @throws ParserConfigurationException 
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws ParserConfigurationException, SAXException, IOException {
 		// TODO Auto-generated method stub
 
-		String expression = "(A*B+C*D)+(A*D+ B*C)+(A*C+B*D)";
-		//String expression = "-A*B*C";
+	//	String expression = "(A*B+C*D)+(A*D+ B*C)+(A*C+B*D)";
+		String expression = "A*B +C*D";
 		ExpressionTranslator translator = new ExpressionTranslator(expression);
 		//**********************
 				//read data from the metadata store
@@ -321,55 +359,54 @@ public class ExpressionToWorkflow {
 					
 					if(left_operand.getStorage_protocol() == StorageProtocol.ADDITIVE_SPLITTING)
 					{
-						
-						
-						
-						//**************************8
-						//check if resplitting is needed
+					//**************************8
+						//check if resplitting is needed : is done now in the additive splitting protocol itself
 						///**************************8
 						
 						//boolean added =exp_wf.addNamespace("ns"+namespace_counter, exp_wf.getAdditive_splitting_process().getTargetNamespace());
 						//if(added== true) namespace_counter++;
 					//assign additive splitting message request
-						String request_str= "<bpel:literal><tns:WF_ProcessRequest xmlns:tns=\""+exp_wf.getAdditiveSplitting_namespace()+"\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">"+
+						String request_str= "<bpel:literal><tns:AdditiveSplittingRequest xmlns:tns=\""+exp_wf.getAdditiveSplitting_namespace()+"\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">"+
 								  "<tns:jobID>"+exp_wf.getWf_name()+"</tns:jobID>"+
 								  "<tns:sub_jobID>"+UUID.randomUUID().toString()+"</tns:sub_jobID>"+
 								  "<tns:matA>"+left_operand.getResource_id()+"</tns:matA>"+
 								  "<tns:matB>"+right_operand.getResource_id()+"</tns:matB>"+
-								  "</tns:WF_ProcessRequest></bpel:literal>";
+								  "</tns:AdditiveSplittingRequest></bpel:literal>";
+					
+						int input = var_counter;
+						exp_wf.addMessageVariable("var"+input, "ns1:AdditiveSplittingRequestMessage"); // reading variable type may be done from parsing the additive splitting bpel file and getting the variable type but this would be complicated and would take time, while they are not supposed to change 
+						exp_wf.addAssign("Assign"+assign_counter, request_str, "var"+input);
 						
-						exp_wf.addMessageVariable("var"+var_counter, "ns1:WF_ProcessRequestMessage"); // reading variable type may be done from parsing the additive splitting bpel file and getting the variable type but this would be complicated and would take time, while they are not supposed to change 
-						exp_wf.addAssign("Assign"+assign_counter, request_str, "var"+var_counter);
-						
-						
+					
+						int output = ++var_counter ;
+						exp_wf.addMessageVariable("var"+output, "ns1:AdditiveSplittingResponseMessage");   
+					
 						
 					//Invoke additive splitting process   activ_name, operation, pl, portType, input
 						
-						exp_wf.addInvokeActivity("Invoke"+invoke_counter, "process", exp_wf.AdditiveSplitting_PL.getName(), "ns1:WF_Process", "var"+var_counter);
+						exp_wf.addInvokeActivity("Invoke"+invoke_counter, "initiate", exp_wf.AdditiveSplitting_PL.getName(), "ns1:AdditiveSplitting", "var"+input, "var"+output);
 						
 						
 					}
 					//else OTHER PROTOCOLS
 			///
-					///
-				///	
+				
 					
 					
-					var_counter++;
-					exp_wf.addMessageVariable("var"+var_counter, "tns:callback"+receive_counter+"Request");   
+					
 					
 					//receive callback
-					exp_wf.addCallbackActivity("Callback"+receive_counter, "callback"+receive_counter, "CB_"+receive_counter+"_PL", "tns:"+exp_wf.getWf_name(), "var"+var_counter);
+					//exp_wf.addCallbackActivity("Callback"+receive_counter, "callback"+receive_counter, "CALLBACK_PL", "tns:"+exp_wf.getWf_name(), "var"+var_counter);
 					
 					
 					exp_wf.connect("Assign"+assign_counter, "Invoke"+invoke_counter);
-					exp_wf.connect("Invoke"+invoke_counter, "Callback"+receive_counter );
-					//exp_wf.connectToFlow(current_flow, "Assign"+assign_counter, "Callback"+receive_counter);
+					//exp_wf.connect("Invoke"+invoke_counter, "Callback"+receive_counter );
+					//////exp_wf.connectToFlow(current_flow, "Assign"+assign_counter, "Callback"+receive_counter);
 					exp_wf.connectToLastNode("Assign"+assign_counter);
 					if(current_flow >0)
-						exp_wf.connectToFlow(flow_stack.get(current_flow-1), "Callback"+receive_counter );
+						exp_wf.connectToFlow(flow_stack.get(current_flow-1), "Invoke"+invoke_counter );
 					else
-						exp_wf.connectToEnd("Callback"+receive_counter );
+						exp_wf.connectToEnd("Invoke"+invoke_counter );
 					
 					assign_counter++;
 					invoke_counter++;
@@ -402,42 +439,54 @@ public class ExpressionToWorkflow {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-					//*************************88 for testing only ***************
+					//************************* for testing only ***************
 					
 					//assign add broker message request
 					
-					String request_str= "<bpel:literal><tns:compute xmlns:tns=\""+exp_wf.getBroker_namespace()+ "\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">"
-                     +"<operation>add</operation>"
+					String request_str= "<bpel:literal><tns:add xmlns:tns=\""+exp_wf.getBroker_namespace()+ "\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">"
                      +"<op_id>"+current_flow +"</op_id>"
                      +"<job_id>"+exp_wf.getWf_name() +"</job_id>"
                      + "<matA_ID>"+left_operand.getResource_id()+"</matA_ID>"
                      +"<matB_ID>"+right_operand.getResource_id()+"</matB_ID>"
-                     +"<callback>addResult</callback>"
-                     +"</tns:compute></bpel:literal>";
+                     +"<callback>"+"Callback"+receive_counter+"</callback>"
+                     +"</tns:add></bpel:literal>";
 					
-
-					exp_wf.addMessageVariable("var"+assign_counter, "ns2:computeRequest"); // reading variable type may be done from parsing the additive splitting bpel file and getting the variable type but this would be complicated and would take time, while they are not supposed to change 
-					exp_wf.addAssign("Assign"+assign_counter, request_str, "var"+assign_counter);
+/*
+					 * <ws:add xmlns:ws="http://www.brokerservices.org/MatServ/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <op_id>5</op_id>
+  <job_id>job_id</job_id>
+  <matA_ID>matA_ID</matA_ID>
+  <matB_ID>matB_ID</matB_ID>
+  <callback>callBack_Operation1</callback>
+</ws:add>
+					 * 
+*/
+					
+                    int input = var_counter;
+					exp_wf.addMessageVariable("var"+input, "ns2:addRequest"); // reading variable type may be done from parsing the additive splitting bpel file and getting the variable type but this would be complicated and would take time, while they are not supposed to change 
+					exp_wf.addAssign("Assign"+assign_counter, request_str, "var"+input);
 			
-					
+					int output = ++var_counter;
+					exp_wf.addMessageVariable("var"+output, "ns2:addResponse");   
 					//Invoke broker webservice		
-					exp_wf.addInvokeActivity("Invoke"+invoke_counter, "process", exp_wf.Broker_PL.getName(), "ns2:Broker_Services", "var"+ assign_counter);
+					exp_wf.addInvokeActivity("Invoke"+invoke_counter, "add", exp_wf.Broker_PL.getName(), "ns2:BrokerServices", "var"+ input,  "var"+ output );
 			
-					//receive callback
-					exp_wf.addMessageVariable("var"+assign_counter, "tns:callback"+receive_counter+"Request");   
+					
+					
 					
 					//receive callback
-					exp_wf.addCallbackActivity("Callback"+receive_counter, "callback"+receive_counter, "CB_"+receive_counter+"_PL", "tns:"+exp_wf.getWf_name(), "var"+assign_counter);
+					//exp_wf.addCallbackActivity("Callback"+receive_counter, "callback"+receive_counter, "CALLBACK_PL", "tns:"+exp_wf.getWf_name(), "var"+assign_counter);
 					
 					exp_wf.connect("Assign"+assign_counter, "Invoke"+invoke_counter);
-					exp_wf.connect("Invoke"+invoke_counter, "Callback"+receive_counter );
-					//exp_wf.connectBetweenFlow(current_flow, 1, "Assign"+assign_counter, "Callback"+receive_counter);
+					
+					//exp_wf.connect("Invoke"+invoke_counter, "Callback"+receive_counter );
+				///	//exp_wf.connectBetweenFlow(current_flow, 1, "Assign"+assign_counter, "Callback"+receive_counter);
 					
 					exp_wf.connectToLastNode("Assign"+assign_counter);
 					if(current_flow >0)
-						exp_wf.connectToFlow(flow_stack.get(current_flow-1), "Callback"+receive_counter );
+						exp_wf.connectToFlow(flow_stack.get(current_flow-1), "Invoke"+invoke_counter );
 					else
-						exp_wf.connectToEnd("Callback"+receive_counter );
+						exp_wf.connectToEnd("Invoke"+invoke_counter );
 					
 					assign_counter++;
 					invoke_counter++;
@@ -495,6 +544,22 @@ public class ExpressionToWorkflow {
 
 			}
 		
+	}
+
+	public String getJob_ID() {
+		return job_ID;
+	}
+
+	public void setJob_ID(String job_ID) {
+		this.job_ID = job_ID;
+	}
+
+	public Workflow getExp_wf() {
+		return exp_wf;
+	}
+
+	public void setExp_wf(Workflow exp_wf) {
+		this.exp_wf = exp_wf;
 	}
 
 }

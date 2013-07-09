@@ -68,7 +68,7 @@ public class ExpressionTranslator {
 		this.variables_map = variables_map;
 	}
 
-	public void translate()
+	public void translate() throws ParserConfigurationException, SAXException, IOException
 	{
 		ExpressionToWorkflow expWF = new ExpressionToWorkflow(this);
 		expWF.initialise();
@@ -98,7 +98,12 @@ public class ExpressionTranslator {
 		
 		////////////////////////////////////
 		
-		trans.translate();
+		try {
+			trans.translate();
+		} catch (IOException | ParserConfigurationException | SAXException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	/**
 	 * @return the job_ID

@@ -10,6 +10,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.commons.io.FileUtils;
 import org.bpel.deploy.FolderZipper;
 import org.bpel.deploy.ProcessDeploy;
 import org.unify_framework.abstract_syntax.Node;
@@ -26,14 +27,17 @@ import org.unify_framework.instances.bpel.BpelAssignActivity;
 import org.unify_framework.instances.bpel.BpelAtomicActivity;
 import org.unify_framework.instances.bpel.BpelCompositeActivity;
 import org.unify_framework.instances.bpel.BpelCompositeReceiveActivity;
+import org.unify_framework.instances.bpel.BpelCompositeReplyActivity;
 import org.unify_framework.instances.bpel.BpelCopy;
 import org.unify_framework.instances.bpel.BpelCorrelation;
 import org.unify_framework.instances.bpel.BpelCorrelationSet;
 import org.unify_framework.instances.bpel.BpelFromExpression;
+import org.unify_framework.instances.bpel.BpelFromVariable;
 import org.unify_framework.instances.bpel.BpelImport;
 import org.unify_framework.instances.bpel.BpelInvokeActivity;
 import org.unify_framework.instances.bpel.BpelPartnerLink;
 import org.unify_framework.instances.bpel.BpelProcess;
+import org.unify_framework.instances.bpel.BpelReplyActivity;
 import org.unify_framework.instances.bpel.BpelScope;
 import org.unify_framework.instances.bpel.BpelToVariable;
 import org.unify_framework.instances.bpel.BpelVariable;
@@ -42,8 +46,11 @@ import org.unify_framework.instances.bpel.BpelVariableType;
 import org.unify_framework.instances.bpel.parser.BpelParser;
 import org.unify_framework.instances.bpel.serializer.BpelSerializer;
 import org.unify_framework.instances.bpel.visitors.Element;
+import org.w3c.dom.CDATASection;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
+
+import broker.SOCConfiguration;
 
 public class Workflow {
 
@@ -62,6 +69,7 @@ public class Workflow {
 	BpelCorrelationSet JOB_CS;
     BpelCompositeActivity bpelCompositeActivity;//= (BpelCompositeActivity) process ;
     BpelCompositeReceiveActivity initial_receive;
+    BpelCompositeReplyActivity reply_response ;
     String last_node;
     
 	BpelScope scope;// = bpelCompositeActivity.getScope();
@@ -69,7 +77,7 @@ public class Workflow {
 	ArrayList<BpelVariable> variables;
 	
 	BpelPartnerLink client_PL;
-	
+	BpelPartnerLink CALLBACK_PL;
 	BpelPartnerLink AdditiveSplitting_PL;
 	String AdditiveSplitting_namespace;
 	BpelPartnerLink Broker_PL;
@@ -77,12 +85,11 @@ public class Workflow {
 	
 	public Workflow(String process_name, String process_namespace)
 	{
-
 		wf_name = new String(process_name);
 		variables = new ArrayList<BpelVariable>();
 		process = new BpelProcess(process_name, process_namespace);
 		AdditiveSplitting_namespace = "http://additivesplitting.bpelprocess";
-		Broker_namespace = "http://brokerservices.service";
+		Broker_namespace = "http://www.brokerservices.org/MatServ/";
 		///**************
 		//TODO: Add to the process namespace declarations for the additive splitting and other protocols
 		//and add namespace for the cloud and broker services
@@ -99,15 +106,15 @@ public class Workflow {
 		
 	}
 	
-	public void initialize()
+	public void initialize() throws ParserConfigurationException, SAXException, IOException 
 	{
 		///**************
 				//TODO: Add necessary Imports
-				BpelImport imp  = new BpelImport(AdditiveSplitting_namespace, ODE_PATH+"/WF_Process/WF_ProcessArtifacts.wsdl", WSDL_SCHEMA);
+				BpelImport imp  = new BpelImport(AdditiveSplitting_namespace, "AdditiveSplittingArtifacts.wsdl", WSDL_SCHEMA);
 				process.addImport(imp);
-				BpelImport imp2  = new BpelImport(Broker_namespace, broker_services_url+"?wsdl", WSDL_SCHEMA);
+				BpelImport imp2  = new BpelImport(Broker_namespace, "BrokerServices.wsdl", WSDL_SCHEMA);
 				process.addImport(imp2);
-				imp = new BpelImport(process.getTargetNamespace(), folder_Path+"/"+wf_name+"/"+wf_name+"Artifacts.wsdl", WSDL_SCHEMA);
+				imp = new BpelImport(process.getTargetNamespace(), wf_name+"Artifacts.wsdl", WSDL_SCHEMA);
 				process.addImport(imp);
 				
 				///
@@ -118,9 +125,11 @@ public class Workflow {
 				process.addPartnerLink(client_PL);
 				AdditiveSplitting_PL = new BpelPartnerLink("AdditiveSplitting_PL", "tns:AdditiveSplitting_PLT", null, "AdditiveSplittingServiceProvider");
 				process.addPartnerLink(AdditiveSplitting_PL);
-				Broker_PL  = new BpelPartnerLink("Broker_PL", "tns:Broker_PLT", null, "BrokerServiceProvider");
+				Broker_PL  = new BpelPartnerLink("Broker_PL", "tns:Broker_PLT", null, "BrokerServicesProvider");
 				process.addPartnerLink(Broker_PL);
 				
+			//	CALLBACK_PL = new BpelPartnerLink("CALLBACK_PL", "tns:"+process.getName(), process.getName()+"Provider", null);
+				//process.addPartnerLink(CALLBACK_PL);
 				///
 				JOB_CS= new BpelCorrelationSet("JOB_CS", "tns:jobid_CS");
 				process.addCorrelationSet(JOB_CS);
@@ -140,14 +149,126 @@ public class Workflow {
 				initial_receive.setPortType("tns:"+wf_name);
 				initial_receive.setVariable("input");
 				initial_receive.setCreateInstance("yes");
-		        BpelCorrelation corr = new BpelCorrelation("yes", "JOB_CS");
+		      
+				BpelCorrelation corr = new BpelCorrelation("yes", "JOB_CS");
 		        initial_receive.addCorrelation(corr);
 		      
 		        bpelCompositeActivity.addChild(initial_receive);
 		        bpelCompositeActivity.connect(bpelCompositeActivity.getStartEvent(), initial_receive);
 		        
-		        last_node = initial_receive.getName();
+		        BpelAssignActivity response_assign =  new BpelAssignActivity("responseAssign");
+		        response_assign.setValidate("no");
 		        
+		        BpelCopy copy = new BpelCopy();
+		        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+				DocumentBuilder db = dbf.newDocumentBuilder();
+				Document document = db.newDocument();
+				org.w3c.dom.Element literalElement= db.parse(new ByteArrayInputStream(new String("<bpel:literal><tns:"+wf_name+"Response xmlns:tns=\""+process.getTargetNamespace()+"\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">"+
+						  "<tns:jobID>tns:jobID</tns:jobID>"+
+						  "<tns:instanceID>tns:instanceID</tns:instanceID>"+
+						  "</tns:"+wf_name+"Response></bpel:literal>").getBytes())).getDocumentElement();
+				
+				BpelFromExpression from = new BpelFromExpression(literalElement);
+			    copy.setFrom(from);
+	            BpelToVariable to = new BpelToVariable("output");
+	            to.setPart("parameters");
+	            
+	            copy.setTo(to);
+	            response_assign.addCopy(copy);
+	        //******************************************
+	            BpelFromVariable from2 = new BpelFromVariable("input");
+	            from2.setPart("parameters");
+	            //document.createCDATASection("<![CDATA[tns:input]]>");		
+	            from2.setQuery("tns:input");
+	            from2.addNamespaceDeclaration("queryLanguage", queryLanguage);
+	            BpelCopy copy2 = new BpelCopy();
+	            copy2.setFrom(from2);
+	            BpelToVariable to2 = new BpelToVariable("output");
+	            to2.setPart("parameters");
+	            to2.setQuery("tns:jobID");
+	            to2.addNamespaceDeclaration("queryLanguage", queryLanguage);
+	            copy2.setTo(to2);
+	            response_assign.addCopy(copy2);
+	
+	            BpelCopy copy3 = new BpelCopy();
+	            CDATASection cdata = document.createCDATASection("string($ode:pid)");
+	            BpelFromExpression from3 = new BpelFromExpression(cdata.cloneNode(true));
+	            
+			    copy3.setFrom(from3);
+	            BpelToVariable to3 = new BpelToVariable("output");
+	            to3.setPart("parameters");
+	            to3.setQuery("tns:instanceID");
+	            to3.addNamespaceDeclaration("queryLanguage", queryLanguage);
+	            copy3.setTo(to3);
+	            response_assign.addCopy(copy3);
+	
+	            /*
+				DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+				DocumentBuilder db = dbf.newDocumentBuilder();
+				Document document = db.newDocument();
+				org.w3c.dom.Element literalElement= db.parse(new ByteArrayInputStream(new String(message).getBytes())).getDocumentElement();
+				
+				BpelFromExpression from = new BpelFromExpression(literalElement);
+			    copy.setFrom(from);
+		        BpelToVariable to = new BpelToVariable(var); 
+		        to.setPart("parameters");
+		        copy.setTo(to);
+		        assign.addCopy(copy);
+		        */
+	            
+		        bpelCompositeActivity.addChild(response_assign);
+		        /*
+		         * ><bpel:copy>
+                <bpel:from><bpel:literal><tns:AdditiveSplittingResponse xmlns:tns="http://additivesplitting.bpelprocess" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <tns:jobID>tns:jobID</tns:jobID>
+  <tns:sub_jobID>tns:sub_jobID</tns:sub_jobID>
+  <tns:result>tns:result</tns:result>
+</tns:AdditiveSplittingResponse>
+</bpel:literal></bpel:from>
+                <bpel:to variable="output" part="payload"></bpel:to>
+            </bpel:copy>
+            <bpel:copy>
+                <bpel:from>
+                    <![CDATA[concat($input.payload/tns:matA_ID, "_", $input.payload/tns:matB_ID,"_",string($ode:pid))]]>
+                </bpel:from>
+                <bpel:to>
+                    <![CDATA[$output.payload/tns:result]]>
+                </bpel:to>
+            </bpel:copy>
+            <bpel:copy>
+                <bpel:from>
+                    <![CDATA[$input.payload/tns:jobID]]>
+                </bpel:from>
+                <bpel:to part="payload" variable="output">
+                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:jobID]]></bpel:query>
+                </bpel:to>
+            </bpel:copy>
+            <bpel:copy>
+                <bpel:from>
+                    <![CDATA[$input.payload/tns:sub_jobID]]>
+                </bpel:from>
+                <bpel:to part="payload" variable="output">
+                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:sub_jobID]]></bpel:query>
+                </bpel:to>
+            </bpel:copy>
+        
+		         */
+		        
+		        
+		  
+		         reply_response = new BpelCompositeReplyActivity("replyResponse");
+		        BpelCorrelation correlation = new BpelCorrelation("no", "JOB_CS");
+		        reply_response.addCorrelation(correlation);
+		        reply_response.setOperation("start");
+		        reply_response.setPartnerLink("client");
+		        reply_response.setVariable("output");
+		        reply_response.setPortType("tns:"+wf_name);
+		        
+		        bpelCompositeActivity.addChild(reply_response);
+		        bpelCompositeActivity.connect(initial_receive, response_assign);
+		        bpelCompositeActivity.connect(response_assign, reply_response);
+		        
+		        last_node = reply_response.getName();
 		        process.setScope(scope);
 		        
 				 //BpelParser bpelParser = new BpelParser();
@@ -282,7 +403,7 @@ public class Workflow {
           
           if(i==1)
           {
-        	  bpelCompositeActivity.connect(initial_receive.getControlOutputPort(),split.getControlInputPort());
+        	  bpelCompositeActivity.connect(reply_response.getControlOutputPort(),split.getControlInputPort());
         	  //bpelCompositeActivity.connect(join.getControlOutputPort(), bpelCompositeActivity.getEndEvent().getControlInputPort());
           }
           last_node = "FlowSplit"+i;
@@ -315,19 +436,22 @@ public class Workflow {
 		BpelFromExpression from = new BpelFromExpression(literalElement);
 	    copy.setFrom(from);
         BpelToVariable to = new BpelToVariable(var); 
-        to.setPart("payload");
+        to.setPart("parameters");
         copy.setTo(to);
         assign.addCopy(copy);
         
         bpelCompositeActivity.addChild(assign);
 	}
-	public void addInvokeActivity(String activ_name, String operation, String pl, String portType, String input)
+	public void addInvokeActivity(String activ_name, String operation, String pl, String portType, String input, String output)
 	{
 		BpelInvokeActivity invoke = new BpelInvokeActivity(activ_name);
         invoke.setOperation(operation);
         invoke.setPartnerLink(pl);
         invoke.setPortType(portType);
         invoke.setInputVariable(input);
+        invoke.setOutputVariable(output);
+        BpelCorrelation corr= new BpelCorrelation("no", "JOB_CS");
+        invoke.addCorrelation(corr);
         bpelCompositeActivity.addChild(invoke);
     }
 	
@@ -343,6 +467,20 @@ public class Workflow {
          callback.addCorrelation(corr_add);
          
          bpelCompositeActivity.addChild(callback);
+    }
+	
+	public void addReplyActivity(String activ_name, String operation, String pl, String portType, String input)
+	{
+		 BpelCompositeReplyActivity reply= new BpelCompositeReplyActivity(activ_name);
+		 reply.setOperation(operation);
+		 reply.setPartnerLink(pl);
+		 reply.setPortType(portType);
+		 reply.setVariable(input);
+         
+         BpelCorrelation corr_add= new BpelCorrelation("no", "JOB_CS");
+         reply.addCorrelation(corr_add);
+         
+         bpelCompositeActivity.addChild(reply);
     }
 	
 	public void connect(String activ1_name, String activ2_name)
@@ -464,7 +602,32 @@ public class Workflow {
 	
 	public void deploy(String url)
 	{
-		//
+		//Copy AdditiveSplitting wsdl and broker wsdl files to directory
+		
+		File additive_splittingWSDL = new File(SOCConfiguration.WSDLS_PATH+"/AdditiveSplittingArtifacts.wsdl");
+		String filename = additive_splittingWSDL.getName();
+		
+		File additive_copy = new File(folder_Path+"/"+wf_name+"/"+filename);
+		
+		File brokerWSDL = new File(SOCConfiguration.WSDLS_PATH+"/BrokerServices.wsdl");
+		String brokerfilename = brokerWSDL.getName();
+		
+		File broker_copy = new File(folder_Path+"/"+wf_name+"/"+brokerfilename);
+		
+		File cloudWSDL = new File(SOCConfiguration.WSDLS_PATH+"/CloudServices.wsdl");
+		String cloudfilename = cloudWSDL.getName();
+		
+		File cloud_copy = new File(folder_Path+"/"+wf_name+"/"+cloudfilename);
+		
+		try {
+			FileUtils.copyFile(additive_splittingWSDL, additive_copy);
+			FileUtils.copyFile(brokerWSDL, broker_copy);
+			FileUtils.copyFile(cloudWSDL, cloud_copy);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		//********************************
 		//DEPLOY
 		String zipTo_Path= folder_Path+"/"+wf_name+".zip" ;
@@ -500,7 +663,7 @@ public class Workflow {
 
 
 	public void setBroker_services_url(String broker_services_url) {
-		this.broker_services_url = broker_services_url;
+		this.broker_services_url = broker_services_url;//+"/BrokerServices/services/MatServ?wsdl";
 	}
 
 

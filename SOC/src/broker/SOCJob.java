@@ -1,9 +1,8 @@
-package securerest;
+package broker;
 
 import java.util.ArrayList;
 import java.util.Date;
 
-import broker.JobType;
 
 public class SOCJob {
 
@@ -12,6 +11,7 @@ public class SOCJob {
 	private String userToken;
 	private SOCJobStatus status;
 	private JobType type;
+	private String bpel_instanceID;
 	
 	private String job_Id;
 
@@ -111,5 +111,19 @@ public class SOCJob {
 	 */
 	public void setType(JobType type) {
 		this.type = type;
+	}
+
+	/**
+	 * @return the bpel_instanceID
+	 */
+	public String getBpel_instanceID() {
+		return bpel_instanceID;
+	}
+
+	/**
+	 * @param bpel_instanceID the bpel_instanceID to set
+	 */
+	public void setBpel_instanceID(String bpel_instanceID) {
+		this.bpel_instanceID = bpel_instanceID;
 	}
 }

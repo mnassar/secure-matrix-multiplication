@@ -11,6 +11,8 @@ import java.util.StringTokenizer;
 
 import org.apache.mahout.math.hadoop.SequenceFileWriterJob;
 
+import com.google.gson.Gson;
+
 
 
 import securerest.MatrixOP;
@@ -41,7 +43,7 @@ public class AdditiveSplitter {
 		
 		public AdditiveSplitter(BrokerSOCResource mat)
 		{
-			matrix = new BrokerSOCResource(mat);
+			matrix = mat;
 			orig_mat = new String(mat.getFile_path());
 			SOCConfiguration conf = new SOCConfiguration();
 			
@@ -51,8 +53,8 @@ public class AdditiveSplitter {
 		public void Split(Location loc_split1, Location loc_split2) 
 		{
 			
-			splits[0] = new String(SOCConfiguration.BROKER_STORAGE_PATH+"/"+matrix.getResource_id()+"_"+((MatrixMeta)matrix.getResource_meta()).getnRows()+"_"+((MatrixMeta)matrix.getResource_meta()).getnColumns()+"_1.csv");
-			splits[1] = new String(SOCConfiguration.BROKER_STORAGE_PATH+"/"+matrix.getResource_id()+"_"+((MatrixMeta)matrix.getResource_meta()).getnRows()+"_"+((MatrixMeta)matrix.getResource_meta()).getnColumns()+"_2.csv");
+			splits[0] = new String(SOCConfiguration.BROKER_STORAGE_PATH+"/"+matrix.getResource_id()+"_"+((MatrixMeta)matrix.getResource_meta()).getnRows()+"_"+((MatrixMeta)matrix.getResource_meta()).getnColumns()+"_1");
+			splits[1] = new String(SOCConfiguration.BROKER_STORAGE_PATH+"/"+matrix.getResource_id()+"_"+((MatrixMeta)matrix.getResource_meta()).getnRows()+"_"+((MatrixMeta)matrix.getResource_meta()).getnColumns()+"_2");
 			
 			
 			try {
@@ -144,5 +146,16 @@ public class AdditiveSplitter {
 			
 		}
 		
+		public static void main(String[] args)
+		{
+			String json= "{\"resource_id\":\"95d5d956-3bfb-4f79-a602-8f85672486ad\",\"locations\":[{\"url\":\"hdfs://localhost:54310\"},{\"url\":\"hdfs://localhost:54310\"}],\"storage_protocol\":\"ADDITIVE_SPLITTING\",\"user_token\":\"farida\",\"file_path\":\"/home/farida/Documents/SOC/resources/95d5d956-3bfb-4f79-a602-8f85672486ad\",\"resource_meta\":{\"nRows\":10,\"nColumns\":10,\"dataType\":\"decimal\",\"type\":\"matrix\"}}";
+			Gson gson = new Gson();
+			
+			BrokerSOCResource mat = gson.fromJson(json, BrokerSOCResource.class);
+			System.out.println(mat.getResource_meta().getType());
+			System.out.println(new MatrixMeta(mat.getResource_meta()).getnColumns());
+			AdditiveSplitter splitter = new AdditiveSplitter(mat); 
+			splitter.Split(new Location("hdfs://localhost:54310"), new Location("hdfs://localhost:54310"));
+		}
 		
 }

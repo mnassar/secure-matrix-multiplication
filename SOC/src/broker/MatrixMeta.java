@@ -1,5 +1,7 @@
 package broker;
 
+import com.google.gson.Gson;
+
 public class MatrixMeta extends ResourceMeta {
 
 	public MatrixMeta(int nRows, int nColumns, String dataType) {
@@ -44,4 +46,13 @@ public class MatrixMeta extends ResourceMeta {
 		this.dataType = dataType;
 	}
 	
+	public static void main(String[] args)
+	{
+		String meta = "{\"nRows\":10,\"nColumns\":10,\"dataType\":\"decimal\",\"type\":\"matrix\"}";
+
+		Gson gson = new  Gson();
+		
+		MatrixMeta mat_meta = gson.fromJson(meta, MatrixMeta.class);
+		System.out.println(mat_meta.getType()+":"+mat_meta.getnRows()+","+mat_meta.getnColumns()+"/"+mat_meta.getDataType());
+	}
 }
