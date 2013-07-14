@@ -263,14 +263,14 @@ public class ProcessConnection extends org.apache.axis2.client.Stub
                                }
                         /**                     * field for Op_id                   */
 
-                                    protected int localOp_id ;
+                                    protected String localOp_id ;
                                 
 
                            /**
                            * Auto generated getter method
                            * @return int
                            */
-                           public  int getOp_id(){
+                           public  String getOp_id(){
                                return localOp_id;
                            }
 
@@ -280,7 +280,7 @@ public class ProcessConnection extends org.apache.axis2.client.Stub
                                * Auto generated setter method
                                * @param param Op_id
                                */
-                               public void setOp_id(int param){
+                               public void setOp_id(String param){
                             
                                             this.localOp_id=param;
                                     
@@ -291,21 +291,21 @@ public class ProcessConnection extends org.apache.axis2.client.Stub
                         /**
                         * field for Job_id
                         */
-                       protected int localJob_id ;
+                       protected String localJob_id ;
                                 
 
                            /**
                            * Auto generated getter method
                            * @return int
                            */
-                           public  int getJob_id(){
+                           public  String getJob_id(){
                                return localJob_id;
                            }
      /**
                                * Auto generated setter method
                                * @param param Job_id
                                */
-                               public void setJob_id(int param){
+                               public void setJob_id(String param){
                             
                                             this.localJob_id=param;
                                }
@@ -387,7 +387,7 @@ public class ProcessConnection extends org.apache.axis2.client.Stub
                                     nmspace = namespace;
                                     writeStartElement(null, nmspace, "op_id", xmlWriter);
                              
-                                               if (localOp_id==java.lang.Integer.MIN_VALUE) {
+                                               if (localOp_id==null) {
                                            
                                                          throw new org.apache.axis2.databinding.ADBException("op_id cannot be null!!");
                                                       
@@ -400,7 +400,7 @@ public class ProcessConnection extends org.apache.axis2.client.Stub
                                     nmspace = this.namespace;
                                     writeStartElement(null, nmspace, "job_id", xmlWriter);
                              
-                                               if (localJob_id==java.lang.Integer.MIN_VALUE) {
+                                               if (localJob_id==null) {
                                            
                                                          throw new org.apache.axis2.databinding.ADBException("job_id cannot be null!!");
                                                       
@@ -730,7 +730,7 @@ public class ProcessConnection extends org.apache.axis2.client.Stub
                                     java.lang.String content = reader.getElementText();
                                     
                                               object.setOp_id(
-                                                    org.apache.axis2.databinding.utils.ConverterUtil.convertToInt(content));
+                                                    content);
                                               
                                         reader.next();
                                     
@@ -755,7 +755,7 @@ public class ProcessConnection extends org.apache.axis2.client.Stub
                                     java.lang.String content = reader.getElementText();
                                     
                                               object.setJob_id(
-                                                    org.apache.axis2.databinding.utils.ConverterUtil.convertToInt(content));
+                                                    content);
                                               
                                         reader.next();
                                     
