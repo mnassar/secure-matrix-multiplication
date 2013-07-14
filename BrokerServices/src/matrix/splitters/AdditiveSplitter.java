@@ -11,10 +11,16 @@ import java.util.StringTokenizer;
 
 import org.apache.mahout.math.hadoop.SequenceFileWriterJob;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 
 import broker.BrokerSOCResource;
 import broker.Location;
 import broker.MatrixMeta;
+import broker.MetadataStoreConnection;
+import broker.ResourceMeta;
+import broker.ResourceMetaAdapter;
 import broker.SOCConfiguration;
 
 
@@ -31,7 +37,12 @@ public class AdditiveSplitter {
 		
 		public AdditiveSplitter(String csv_orig_mat)
 		{
-			orig_mat = new String(csv_orig_mat);
+			SOCConfiguration conf = new SOCConfiguration();
+			orig_mat = new String(SOCConfiguration.BROKER_STORAGE_PATH+"/"+csv_orig_mat);
+			
+			matrix = new BrokerSOCResource(csv_orig_mat);
+			//Just for testing .. should read the ile and get matrix size
+			matrix.setResource_meta(new MatrixMeta(10, 10, "Integer"));
 			n= 2; // n=2 splits only to split to more do re-splitting for the results
 			splits = new String[n];
 		}
@@ -240,5 +251,44 @@ public class AdditiveSplitter {
 			
 		}
 
+		public static void main(String[] args)
+		{
+			SOCConfiguration conf = new SOCConfiguration();
+			
+			
+			BrokerSOCResource A = new BrokerSOCResource("A");
+			A.setResource_meta(new MatrixMeta(10, 10, "Integer"));
+			
+			A.setFile_path(SOCConfiguration.BROKER_STORAGE_PATH+"/"+"A");
+			AdditiveSplitter splitter = new AdditiveSplitter(A);
+			
+
+			BrokerSOCResource B = new BrokerSOCResource("B");
+		    B.setResource_meta(new MatrixMeta(10, 10, "Integer"));
+		    B.setFile_path(SOCConfiguration.BROKER_STORAGE_PATH+"/"+"B");
+			AdditiveSplitter splitter2 = new AdditiveSplitter(B);
+			
+			MetadataStoreConnection conn;
+				try {
+					
+					conn = new MetadataStoreConnection(SOCConfiguration.METADATA_STORE_URL);
+					Gson gson  = new Gson();
+     			GsonBuilder builder = new GsonBuilder();
+			    builder.registerTypeAdapter(ResourceMeta.class   , new ResourceMetaAdapter());
+			    gson = builder.create();
+			
+			    conn.addSOCResource(A);
+			    conn.addSOCResource(B);
+     			
+					conn.close();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+			
+			splitter.Split(new Location("hdfs://localhost:54310"), new Location("hdfs://localhost:54310"));
+			splitter2.Split(new Location("hdfs://localhost:54310"), new Location("hdfs://localhost:54310"));
+		}
 		
 }
