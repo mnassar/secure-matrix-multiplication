@@ -101,8 +101,14 @@ import broker.SOCConfiguration;
              					try {
              						System.out.println(SOCConfiguration.METADATA_STORE_URL);
              						conn = new MetadataStoreConnection(SOCConfiguration.METADATA_STORE_URL);
-             						matA = new Gson().fromJson(conn.getSOCResource(matA_ID),BrokerSOCResource.class);
-             						matB = new Gson().fromJson(conn.getSOCResource(matB_ID),BrokerSOCResource.class);
+             						Gson gson  = new Gson();
+                         			GsonBuilder builder = new GsonBuilder();
+            					    builder.registerTypeAdapter(ResourceMeta.class   , new ResourceMetaAdapter());
+            					    gson = builder.create();
+            					
+                         			matA = gson.fromJson(conn.getSOCResource(matA_ID),BrokerSOCResource.class);
+                         			matB = gson.fromJson(conn.getSOCResource(matB_ID),BrokerSOCResource.class);
+                         			
              						conn.close();
              					} catch (Exception e) {
              						// TODO Auto-generated catch block
@@ -133,7 +139,7 @@ import broker.SOCConfiguration;
              						config.set("mapred.job.tracker", "http://"+server_ip1+":"+jobtracker_port);
              						UserGroupInformation.setConfiguration(config);
              						final Configuration conf = config;
-             						UserGroupInformation ugi = UserGroupInformation.createRemoteUser("hadoop");// UserGroupInformation.getLoginUser());
+             						UserGroupInformation ugi = UserGroupInformation.createRemoteUser("farida");// UserGroupInformation.getLoginUser());
              						ugi.doAs(new PrivilegedExceptionAction<Void>() {
              							public Void run() throws Exception {
 
@@ -173,10 +179,10 @@ import broker.SOCConfiguration;
              									// TODO Auto-generated catch block
              									e3.printStackTrace();
              								}
-             								final String pathA = "/"+add_request.getAdd_list()[0].getSplitName()+"/part-00000";
-             								final String pathB = "/"+add_request.getAdd_list()[1].getSplitName()+"/part-00000";
-             								final String pathC = "/"+add_request.getAdd_list()[2].getSplitName()+"/part-00000";
-             								final String pathD = "/"+add_request.getAdd_list()[3].getSplitName()+"/part-00000";
+             								final String pathA = "/"+add_request.getAdd_list()[0].getSplitName()+"/part-m-00000";
+             								final String pathB = "/"+add_request.getAdd_list()[1].getSplitName()+"/part-m-00000";
+             								final String pathC = "/"+add_request.getAdd_list()[2].getSplitName()+"/part-m-00000";
+             								final String pathD = "/"+add_request.getAdd_list()[3].getSplitName()+"/part-m-00000";
 
 
 
@@ -262,7 +268,7 @@ import broker.SOCConfiguration;
              											StringTokenizer tokenzier4 = new StringTokenizer(sCurrentLine4, ",");
              											//    	         	       				 					
 
-             											int j = 0; //Integer.parseInt(mat_size)-1;
+             											int j = nCols-1;
 
              											while( tokenzier1.hasMoreTokens()| tokenzier2.hasMoreTokens() |tokenzier3.hasMoreTokens() |tokenzier4.hasMoreTokens() )
              											{ 
@@ -366,7 +372,7 @@ import broker.SOCConfiguration;
 
              												result_row.put(j, val1 + val2 + val3 + val4);
              												//fw2.append("\n col "+j+": " +val1 +val2+val3+val4+"\n");
-             												j++; 				
+             												j--; 				
 
              											}
 
@@ -430,7 +436,7 @@ import broker.SOCConfiguration;
              					System.out.println("CALL BACK STARTED");
              					Callback_1 callback = new Callback_1();
 
-
+             					callback.setJobID(jobID);
              					callback.setOp_ID(add_request.getOp_id());
              					callback.setSub_jobID(jobID);
              					callback.setCloud_url(SOCConfiguration.BROKER_URL);
@@ -606,8 +612,8 @@ import broker.SOCConfiguration;
              			try {
 
              				AdditiveSplitter splitter = new AdditiveSplitter(matA);
-             				splitter.Split(clouds.get(0), clouds.get(1));
-             				splitter.Split(clouds.get(2), clouds.get(3));
+             				splitter.Split(clouds.get(0),clouds.get(2), clouds.get(1), clouds.get(3));
+             				
              				matA.setLocations(clouds);
              				String matA_filenamepart= matrixA_ID+"_"+((MatrixMeta)matA.getResource_meta()).getnRows()+"_"+((MatrixMeta)matA.getResource_meta()).getnColumns()+"_";
              				splitA_names.add(matA_filenamepart+"1");
@@ -616,8 +622,7 @@ import broker.SOCConfiguration;
              				splitA_names.add(matA_filenamepart+"2");
 
              				splitter = new AdditiveSplitter(matB);
-             				splitter.Split(clouds.get(0), clouds.get(1));
-             				splitter.Split(clouds.get(3), clouds.get(2));
+             				splitter.Split(clouds.get(0),clouds.get(3), clouds.get(1) , clouds.get(2));
              				matB.setLocations(clouds);
 
              				String matB_filenamepart= matrixB_ID+"_"+((MatrixMeta)matB.getResource_meta()).getnRows()+"_"+((MatrixMeta)matB.getResource_meta()).getnColumns()+"_";
