@@ -32,9 +32,10 @@ public class Log {
 		FileWriter fw;
 		try {
 		
-			fw = new FileWriter(log.getAbsoluteFile());
+			fw = new FileWriter(log.getAbsoluteFile(),true);
 			BufferedWriter bw = new BufferedWriter(fw);
-			bw.append("At Broker Services: "+string_to_write);
+			bw.write("\nAt Broker Services: "+string_to_write+"\n");
+			bw.close();
 			fw.close();
 			
 
@@ -42,6 +43,13 @@ public class Log {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+	}
+	
+	public static void main(String[] args)
+	{
+		Log log = new Log("/home/farida/Documents/SOC/logs");
+		log.write("Hello");
 		
 	}
 }
