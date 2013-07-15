@@ -134,11 +134,11 @@
      part of the port type defintions
      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->    
     <message name="AdditiveSplittingRequestMessage">
-        <part name="payload" element="tns:AdditiveSplittingRequest"/>
+        <part name="parameters" element="tns:AdditiveSplittingRequest"/>
     </message>
     
     <message name="AdditiveSplittingResponseMessage">
-        <part name="payload" element="tns:AdditiveSplittingResponse"/>
+        <part name="parameters" element="tns:AdditiveSplittingResponse"/>
     </message>
 
 	<message name="callbackRequestMessage_0">
@@ -212,10 +212,10 @@
 
 
 <vprop:property name="jobid_CS" type="p:string"/>
-<vprop:propertyAlias messageType="tns:AdditiveSplittingRequestMessage" part="payload" propertyName="tns:jobid_CS">
+<vprop:propertyAlias messageType="tns:AdditiveSplittingRequestMessage" part="parameters" propertyName="tns:jobid_CS">
 <vprop:query>/tns:jobID</vprop:query>
 </vprop:propertyAlias>
-<vprop:propertyAlias messageType="tns:AdditiveSplittingResponseMessage" part="payload" propertyName="tns:jobid_CS">
+<vprop:propertyAlias messageType="tns:AdditiveSplittingResponseMessage" part="parameters" propertyName="tns:jobid_CS">
 <vprop:query>/tns:jobID</vprop:query>
 </vprop:propertyAlias>
 <!--
@@ -238,10 +238,10 @@
 -->
 
 <vprop:property name="sub_jobid_CS" type="p:string"/>
-<vprop:propertyAlias messageType="tns:AdditiveSplittingRequestMessage" part="payload" propertyName="tns:sub_jobid_CS">
+<vprop:propertyAlias messageType="tns:AdditiveSplittingRequestMessage" part="parameters" propertyName="tns:sub_jobid_CS">
 <vprop:query>/tns:sub_jobID</vprop:query>
 </vprop:propertyAlias>
-<vprop:propertyAlias messageType="tns:AdditiveSplittingResponseMessage" part="payload" propertyName="tns:sub_jobid_CS">
+<vprop:propertyAlias messageType="tns:AdditiveSplittingResponseMessage" part="parameters" propertyName="tns:sub_jobid_CS">
 <vprop:query>/tns:sub_jobID</vprop:query>
 </vprop:propertyAlias>
 <vprop:propertyAlias messageType="tns:callbackRequestMessage_0" part="parameters" propertyName="tns:sub_jobid_CS">

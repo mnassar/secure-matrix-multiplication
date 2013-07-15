@@ -45,7 +45,7 @@ targetNamespace="http://www.cloudservices.org/MatServ/">
   </wsdl:binding>
   <wsdl:service name="MatServ">
     <wsdl:port binding="ws:CloudServicesBinding" name="CloudServicesPort">
-      <soap:address location="http://10.160.2.24:8080/CloudServices/services/MatServ"/>
+      <soap:address location="http://localhost:8080/CloudServices/services/MatServ"/>
     </wsdl:port>
   </wsdl:service>
 </wsdl:definitions>

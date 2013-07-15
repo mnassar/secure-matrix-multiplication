@@ -230,7 +230,7 @@
   </extensions>
   <extensions>
     <extendedObject href="AdditiveSplitting.bpel#/"/>
-    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ProcessExtension" modificationStamp="1372244142000"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:ProcessExtension" modificationStamp="1373879749000"/>
   </extensions>
   <extensions>
     <extendedObject href="AdditiveSplitting.bpel#//@activity/@activities.1"/>
@@ -366,6 +366,10 @@
   </extensions>
   <extensions>
     <extendedObject href="AdditiveSplitting.bpel#//@activity/@activities.5/@copy.12"/>
+    <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
+  </extensions>
+  <extensions>
+    <extendedObject href="AdditiveSplitting.bpel#//@activity/@activities.1/@copy.4"/>
     <extensionObject xsi:type="org.eclipse.bpel.ui.uiextensionmodel:CopyExtension"/>
   </extensions>
 </extensionmodel:ExtensionMap>
