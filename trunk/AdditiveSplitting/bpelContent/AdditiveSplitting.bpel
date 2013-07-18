@@ -264,9 +264,10 @@
         <bpel:receive name="Receive" partnerLink="callback_PL" operation="resplit_callBack" portType="tns:AdditiveSplitting" variable="callbackRequest_0">
             <bpel:correlations>
                 <bpel:correlation set="OP0_CS" initiate="no"></bpel:correlation>
-                <bpel:correlation set="SUB_JOB_CS" initiate="no"></bpel:correlation>
+                <bpel:correlation set="SUB_JOB_CS" initiate="no"></bpel:correlation> 
             </bpel:correlations>
         </bpel:receive>
+        
         
         <bpel:flow name="Flow">
             <bpel:sequence name="A1B1">
@@ -443,7 +444,14 @@
                             
                             
                             
-                            <![CDATA[$callbackRequest_0.parameters/tns:split[1]/tns:splitA_name]]>
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            <![CDATA[$callbackRequest_0.parameters/tns:split[1]/tns:splitA_name/text()]]>
                         </bpel:from>
                         <bpel:to part="parameters" variable="A1B1_PLRequest">
                             <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[matA_ID]]></bpel:query>
@@ -504,7 +512,14 @@
                             
                             
                             
-                            <![CDATA[$callbackRequest_0.parameters/tns:split[1]/tns:splitB_name]]>
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            <![CDATA[$callbackRequest_0.parameters/tns:split[1]/tns:splitB_name/text()]]>
                         </bpel:from>
                         <bpel:to part="parameters" variable="A1B1_PLRequest">
                             <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[matB_ID]]></bpel:query>
@@ -645,7 +660,23 @@
                             
                             
                             
-                            <![CDATA[trimWhitespace($callbackRequest_0.parameters/tns:split[1]/tns:cloud_url/text())]]>
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            <![CDATA[$callbackRequest_0.parameters/tns:split[1]/tns:cloud_url/text()]]>
                         </bpel:from>
                         <bpel:to partnerLink="OnCloud1_PL"></bpel:to>
                     </bpel:copy>
@@ -806,7 +837,14 @@
                             
                             
                             
-                            <![CDATA[$callbackRequest_0.parameters/tns:split[2]/tns:splitA_name]]>
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            <![CDATA[$callbackRequest_0.parameters/tns:split[2]/tns:splitA_name/text()]]>
                         </bpel:from>
                         <bpel:to part="parameters" variable="A2B2_PLRequest">
                             <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[matA_ID]]></bpel:query>
@@ -853,7 +891,14 @@
                             
                             
                             
-                            <![CDATA[$callbackRequest_0.parameters/tns:split[2]/tns:splitB_name]]>
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            <![CDATA[$callbackRequest_0.parameters/tns:split[2]/tns:splitB_name/text()]]>
                         </bpel:from>
                         <bpel:to part="parameters" variable="A2B2_PLRequest">
                             <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[matB_ID]]></bpel:query>
@@ -972,7 +1017,9 @@
                             
                             
                             
-                            <![CDATA[trimWhitespace($callbackRequest_0.parameters/tns:split[2]/tns:cloud_url/text())]]>
+                            
+                            
+                            <![CDATA[$callbackRequest_0.parameters/tns:split[2]/tns:cloud_url/text()]]>
                         </bpel:from>
                         <bpel:to partnerLink="OnCloud2_PL"></bpel:to>
                     </bpel:copy>
@@ -995,7 +1042,7 @@
                     partnerLink="callback_PL" portType="tns:AdditiveSplitting" variable="callbackRequest_2">
                     <bpel:correlations>
                         <bpel:correlation initiate="no" set="OP2_CS"/>
-                        <bpel:correlation set="SUB_JOB_CS" initiate="no"></bpel:correlation>
+                        <bpel:correlation set="SUB_JOB_CS" initiate="no"></bpel:correlation> 
                     </bpel:correlations>
                 </bpel:receive>
                 
@@ -1132,7 +1179,14 @@
                             
                             
                             
-                            <![CDATA[$callbackRequest_0.parameters/tns:split[3]/tns:splitA_name]]>
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            <![CDATA[$callbackRequest_0.parameters/tns:split[3]/tns:splitA_name/text()]]>
                         </bpel:from>
                         <bpel:to part="parameters" variable="A1B2_PLRequest">
                             <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[matA_ID]]></bpel:query>
@@ -1179,7 +1233,14 @@
                             
                             
                             
-                            <![CDATA[$callbackRequest_0.parameters/tns:split[3]/tns:splitB_name]]>
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            <![CDATA[$callbackRequest_0.parameters/tns:split[3]/tns:splitB_name/text()]]>
                         </bpel:from>
                         <bpel:to part="parameters" variable="A1B2_PLRequest">
                             <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[matB_ID]]></bpel:query>
@@ -1300,7 +1361,9 @@
                             
                             
                             
-                            <![CDATA[trimWhitespace($callbackRequest_0.parameters/tns:split[3]/tns:cloud_url/text())]]>
+                            
+                            
+                            <![CDATA[$callbackRequest_0.parameters/tns:split[3]/tns:cloud_url/text()]]>
                         </bpel:from>
                         <bpel:to partnerLink="OnCloud3_PL"></bpel:to>
                     </bpel:copy>
@@ -1323,8 +1386,8 @@
                 <bpel:receive name="CB_A1B2" operation="callBack_Operation1"
                     partnerLink="callback_PL" portType="tns:AdditiveSplitting" variable="callbackRequest_3">
                     <bpel:correlations>
-                        <bpel:correlation initiate="no" set="SUB_JOB_CS"/>
-                        <bpel:correlation set="OP3_CS" initiate="no"></bpel:correlation>
+                        <bpel:correlation initiate="no" set="OP3_CS"/>
+                         <bpel:correlation set="SUB_JOB_CS" initiate="no"></bpel:correlation>
                     </bpel:correlations>
                 </bpel:receive>
                 
@@ -1461,7 +1524,18 @@
                             
                             
                             
-                            <![CDATA[$callbackRequest_0.parameters/tns:split[4]/tns:splitA_name]]>
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            <![CDATA[$callbackRequest_0.parameters/tns:split[4]/tns:splitA_name/text()]]>
                         </bpel:from>
                         <bpel:to part="parameters" variable="A2B1_PLRequest">
                             <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[matA_ID]]></bpel:query>
@@ -1508,7 +1582,18 @@
                             
                             
                             
-                            <![CDATA[$callbackRequest_0.parameters/tns:split[4]/tns:splitB_name]]>
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+                            <![CDATA[$callbackRequest_0.parameters/tns:split[4]/tns:splitB_name/text()]]>
                         </bpel:from>
                         <bpel:to part="parameters" variable="A2B1_PLRequest">
                             <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[matB_ID]]></bpel:query>
@@ -1627,7 +1712,13 @@
                             
                             
                             
-                            <![CDATA[trimWhitespace($callbackRequest_0.parameters/tns:split[4]/tns:cloud_url/text())]]>
+                            
+                            
+                            
+                            
+                            
+                            
+                            <![CDATA[$callbackRequest_0.parameters/tns:split[4]/tns:cloud_url/text()]]>
                         </bpel:from>
                         <bpel:to partnerLink="OnCloud4_PL"></bpel:to>
                     </bpel:copy>
@@ -1651,14 +1742,15 @@
                 <bpel:receive name="CB_A2B1" operation="callBack_Operation1"
                     partnerLink="callback_PL" portType="tns:AdditiveSplitting" variable="callbackRequest_4">
                     <bpel:correlations>
-                        <bpel:correlation initiate="no" set="SUB_JOB_CS"/>
-                        <bpel:correlation set="OP4_CS" initiate="no"></bpel:correlation>
+                        <bpel:correlation initiate="no" set="OP4_CS"/>
+                         <bpel:correlation set="SUB_JOB_CS" initiate="no"></bpel:correlation>
                     </bpel:correlations>
                 </bpel:receive>
                 
                 
                 
             </bpel:sequence>
+            
         </bpel:flow>
         
         
