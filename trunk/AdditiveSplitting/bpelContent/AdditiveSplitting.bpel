@@ -41,17 +41,20 @@
                      myRole="AdditiveSplittingProvider"
                      
                      />
-         <bpel:partnerLink name="OnCloud1_PL"
-                     partnerLinkType="tns:Cloud_PL"
-                     partnerRole="CloudServicesProvider"
-                     />
+    
           <bpel:partnerLink name="OnBroker_PL"
                      partnerLinkType="tns:Broker_PL"
                      partnerRole="BrokerServicesProvider"
                      />
+                     
+         <!--                   <bpel:partnerLink name="OnCloud1_PL"
+                     partnerLinkType="tns:Cloud_PL"
+                     partnerRole="CloudServicesProvider"
+                     />
         <bpel:partnerLink name="OnCloud2_PL" partnerLinkType="tns:Cloud_PL" partnerRole="CloudServicesProvider"></bpel:partnerLink>
         <bpel:partnerLink name="OnCloud3_PL" partnerLinkType="tns:Cloud_PL" partnerRole="CloudServicesProvider"></bpel:partnerLink>
         <bpel:partnerLink name="OnCloud4_PL" partnerLinkType="tns:Cloud_PL" partnerRole="CloudServicesProvider"></bpel:partnerLink>
+        -->
     </bpel:partnerLinks>
     
   
@@ -257,7 +260,7 @@
         </bpel:assign>
         <bpel:invoke name="InvokeResplit" partnerLink="OnBroker_PL" operation="resplit" portType="ns1:MatServ" inputVariable="resplit_PLRequest">
             <bpel:correlations>
-                <bpel:correlation set="OP0_CS" initiate="yes" ></bpel:correlation>
+                <bpel:correlation set="OP0_CS" initiate="yes" pattern="request" ></bpel:correlation>
             </bpel:correlations>
         </bpel:invoke>
         
@@ -270,7 +273,9 @@
         
         
         <bpel:flow name="Flow">
-            <bpel:sequence name="A1B1">
+            
+        <bpel:scope name="Scope">
+                <bpel:sequence name="A1B1">
                 <bpel:assign name="Assign1" validate="no">
                     
                     <bpel:copy>
@@ -691,16 +696,14 @@
                         </bpel:to>
                     </bpel:copy>
                 </bpel:assign>       
-                <bpel:invoke name="Mult_A1B1" operation="multiply"
-                    partnerLink="OnCloud1_PL" portType="ns:MatServ" inputVariable="A1B1_PLRequest">
+                <bpel:invoke name="Mult_A1B1" partnerLink="OnCloud1_PL" operation="multiply" portType="ns:MatServ" inputVariable="A1B1_PLRequest">
                     <bpel:correlations>
-                        <bpel:correlation set="OP1_CS" initiate="yes" ></bpel:correlation>
+                        <bpel:correlation set="OP1_CS" initiate="yes" pattern="request"></bpel:correlation>
                     </bpel:correlations>
                 </bpel:invoke>
-                <bpel:receive name="CB_A1_B1" operation="callBack_Operation1"
-                    partnerLink="client" portType="tns:AdditiveSplitting" variable="callbackRequest_1">
+                <bpel:receive name="CB_A1_B1" operation="callBack_Operation1" partnerLink="client" portType="tns:AdditiveSplitting" variable="callbackRequest_1">
                     <bpel:correlations>
-                        <bpel:correlation initiate="no" set="OP1_CS"/>
+                        <bpel:correlation initiate="no" set="OP1_CS" />
                         <bpel:correlation set="SUB_JOB_CS" initiate="no"></bpel:correlation>
                     </bpel:correlations>
                 </bpel:receive>
@@ -708,7 +711,11 @@
                 
                 
             </bpel:sequence>
-            <bpel:sequence name="A2B2">
+                <bpel:partnerLinks>
+                    <bpel:partnerLink name="OnCloud1_PL" partnerLinkType="tns:Cloud_PL" partnerRole="CloudServicesProvider"></bpel:partnerLink>
+                </bpel:partnerLinks>
+            </bpel:scope><bpel:scope name="Scope1">
+                <bpel:sequence name="A2B2">
                         
                 <bpel:assign name="Assign2" validate="no"><bpel:copy>
                         <bpel:from><bpel:literal xml:space="preserve"><ws:multiply xmlns:ws="http://www.cloudservices.org/MatServ/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -1035,13 +1042,12 @@
                 </bpel:assign>
                 <bpel:invoke name="Mult_A2B2" partnerLink="OnCloud2_PL" operation="multiply" portType="ns:MatServ" inputVariable="A2B2_PLRequest">
                     <bpel:correlations>
-                        <bpel:correlation set="OP2_CS" initiate="yes" ></bpel:correlation>
+                        <bpel:correlation set="OP2_CS" initiate="yes" pattern="request"></bpel:correlation>
                     </bpel:correlations>
                 </bpel:invoke>
-                <bpel:receive name="CB_A2B2" operation="callBack_Operation1"
-                    partnerLink="callback_PL" portType="tns:AdditiveSplitting" variable="callbackRequest_2">
+                <bpel:receive name="CB_A2B2" operation="callBack_Operation1" partnerLink="callback_PL" portType="tns:AdditiveSplitting" variable="callbackRequest_2">
                     <bpel:correlations>
-                        <bpel:correlation initiate="no" set="OP2_CS"/>
+                        <bpel:correlation initiate="no" set="OP2_CS" />
                         <bpel:correlation set="SUB_JOB_CS" initiate="no"></bpel:correlation> 
                     </bpel:correlations>
                 </bpel:receive>
@@ -1049,8 +1055,11 @@
                 
                 
             </bpel:sequence>
-            <bpel:sequence name="A1B2">
-                 <bpel:assign name="Assign3" validate="no">
+                <bpel:partnerLinks>
+                    <bpel:partnerLink name="OnCloud2_PL" partnerLinkType="tns:Cloud_PL" partnerRole="CloudServicesProvider"></bpel:partnerLink>
+                </bpel:partnerLinks>
+            </bpel:scope><bpel:scope name="Scope2">
+                <bpel:sequence name="A1B2"><bpel:assign name="Assign3" validate="no">
                     
                     <bpel:copy>
                         <bpel:from><bpel:literal xml:space="preserve"><ws:multiply xmlns:ws="http://www.cloudservices.org/MatServ/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -1383,18 +1392,22 @@
                         <bpel:correlation set="OP3_CS" initiate="yes" ></bpel:correlation>
                     </bpel:correlations>
                 </bpel:invoke>
-                <bpel:receive name="CB_A1B2" operation="callBack_Operation1"
-                    partnerLink="callback_PL" portType="tns:AdditiveSplitting" variable="callbackRequest_3">
+                <bpel:receive name="CB_A1B2" operation="callBack_Operation1" partnerLink="callback_PL" portType="tns:AdditiveSplitting" variable="callbackRequest_3">
                     <bpel:correlations>
-                        <bpel:correlation initiate="no" set="OP3_CS"/>
+                        <bpel:correlation initiate="no" set="OP3_CS" />
                          <bpel:correlation set="SUB_JOB_CS" initiate="no"></bpel:correlation>
                     </bpel:correlations>
                 </bpel:receive>
                 
                 
                 
-            </bpel:sequence>
-            <bpel:sequence name="A2B1">
+            
+                </bpel:sequence>
+                <bpel:partnerLinks>
+                    <bpel:partnerLink name="OnCloud3_PL" partnerLinkType="tns:Cloud_PL" partnerRole="CloudServicesProvider"></bpel:partnerLink>
+                </bpel:partnerLinks>
+            </bpel:scope><bpel:scope name="Scope3">
+                <bpel:sequence name="A2B1">
                  <bpel:assign name="Assign4" validate="no">
                     
                     <bpel:copy>
@@ -1736,13 +1749,12 @@
               
                       <bpel:invoke name="Mult_A2B1" partnerLink="OnCloud4_PL" operation="multiply" portType="ns:MatServ" inputVariable="A2B1_PLRequest">
                     <bpel:correlations>
-                        <bpel:correlation set="OP4_CS" initiate="yes" ></bpel:correlation>
+                        <bpel:correlation set="OP4_CS" initiate="yes" pattern="request"></bpel:correlation>
                     </bpel:correlations>
                 </bpel:invoke>
-                <bpel:receive name="CB_A2B1" operation="callBack_Operation1"
-                    partnerLink="callback_PL" portType="tns:AdditiveSplitting" variable="callbackRequest_4">
+                <bpel:receive name="CB_A2B1" operation="callBack_Operation1" partnerLink="callback_PL" portType="tns:AdditiveSplitting" variable="callbackRequest_4">
                     <bpel:correlations>
-                        <bpel:correlation initiate="no" set="OP4_CS"/>
+                        <bpel:correlation initiate="no" set="OP4_CS" />
                          <bpel:correlation set="SUB_JOB_CS" initiate="no"></bpel:correlation>
                     </bpel:correlations>
                 </bpel:receive>
@@ -1750,8 +1762,10 @@
                 
                 
             </bpel:sequence>
-            
-        </bpel:flow>
+                <bpel:partnerLinks>
+                    <bpel:partnerLink name="OnCloud4_PL" partnerLinkType="tns:Cloud_PL" partnerRole="CloudServicesProvider"></bpel:partnerLink>
+                </bpel:partnerLinks>
+            </bpel:scope></bpel:flow>
         
         
         
@@ -2387,7 +2401,7 @@
         <bpel:invoke name="Add"
             operation="add" partnerLink="OnBroker_PL" portType="ns1:MatServ" inputVariable="add_PLRequest">
             <bpel:correlations>
-                <bpel:correlation set="OP5_CS" initiate="yes" ></bpel:correlation>
+                <bpel:correlation set="OP5_CS" initiate="yes" pattern="request" ></bpel:correlation>
             </bpel:correlations>
         </bpel:invoke>
         <bpel:receive name="Receive2" operation="callBack_Operation1"
