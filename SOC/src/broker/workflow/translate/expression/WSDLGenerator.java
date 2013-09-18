@@ -22,7 +22,9 @@ import org.jdom.input.DOMBuilder;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 import org.unify_framework.abstract_syntax.Node;
+import org.unify_framework.instances.bpel.BpelCompositeInvokeActivity;
 import org.unify_framework.instances.bpel.BpelCompositeReceiveActivity;
+import org.unify_framework.instances.bpel.BpelCorrelationSet;
 import org.unify_framework.instances.bpel.BpelPartnerLink;
 import org.unify_framework.instances.bpel.BpelVariable;
 import org.unify_framework.instances.bpel.BpelVariableMessageType;
@@ -143,10 +145,6 @@ public class WSDLGenerator  {
 	
 	public void initialize(Workflow wf)
 	{
-		
-		
-		
-		
 		addNameSpace("",  "http://schemas.xmlsoap.org/wsdl/" );
 		addNameSpace("ns1", wf.getAdditiveSplitting_namespace() );
 		addNameSpace("ns2", wf.getBroker_namespace() );
@@ -193,21 +191,21 @@ public class WSDLGenerator  {
 				sequence.put("sub_jobid", "string");
 				sequence.put("result", "string");
 				
-				//********************* Remains to check if it is already found don't add it
+				//*********************  check if it is already found don't add it
 				////////******************************
 				boolean added= false;
 				for (int i=0; i< schema.getChildNodes().getLength();i++)
 				{
 					Element node = (Element)schema.getChildNodes().item(i);
 				//	System.out.println(node.getAttribute("name") );
-					if(node.getAttribute("name").equals(((BpelVariableMessageType)v).getMessageType().substring(4, ((BpelVariableMessageType)v).getMessageType().length()-8)))
+					if(node.getAttribute("name").equals(((BpelVariableMessageType)v).getMessageType().substring(4, ((BpelVariableMessageType)v).getMessageType().length()-7)))
 						added =true;
 				}
 				if(!added)
-					addComplexType(((BpelVariableMessageType)v).getMessageType().substring(4, ((BpelVariableMessageType)v).getMessageType().length()-8), sequence);
+					addComplexType(((BpelVariableMessageType)v).getMessageType().substring(4, ((BpelVariableMessageType)v).getMessageType().length()-7), sequence);
 				
 				sequence.clear();
-				sequence.put("parameters",((BpelVariableMessageType)v).getMessageType().substring(4, ((BpelVariableMessageType)v).getMessageType().length()-8));
+				sequence.put("parameters",((BpelVariableMessageType)v).getMessageType().substring(4, ((BpelVariableMessageType)v).getMessageType().length()-7));
 				
 				addMessage(((BpelVariableMessageType)v).getMessageType().substring(4), sequence);
 				
@@ -216,17 +214,36 @@ public class WSDLGenerator  {
 		}
 		
 		addProperty("jobid_CS", "p:string");
-		addPropertyAlias(wf.getWf_name()+"RequestMessage", "parameters", "jobid_CS", "/tns:jobID");
-		addPropertyAlias(wf.getWf_name()+"ResponseMessage", "parameters", "jobid_CS", "/tns:jobID");
-		
+		addPropertyAlias("tns:"+wf.getWf_name()+"RequestMessage", "parameters", "jobid_CS", "/tns:jobID");
+		addPropertyAlias("tns:"+wf.getWf_name()+"ResponseMessage", "parameters", "jobid_CS", "/tns:jobID");
+		addPropertyAlias("ns1:AdditiveSplittingRequestMessage", "parameters", "jobid_CS", "/ns1:jobID");
+		addPropertyAlias("ns1:AdditiveSplittingResponseMessage", "parameters", "jobid_CS", "/ns1:jobID");
+		addPropertyAlias("ns2:addRequest", "parameters", "jobid_CS", "/ns2:job_id");
+		addPropertyAlias("ns2:addResponse", "parameters", "jobid_CS", "/ns2:job_id");
+	
 		for(BpelVariable v: wf.getVariables())
 		{
 			if(((BpelVariableMessageType)v).getMessageType().startsWith("tns:"))
 			{
-				addPropertyAlias(((BpelVariableMessageType)v).getMessageType().substring(4), "parameters", "jobid_CS", "/tns:job_id");
+				addPropertyAlias(((BpelVariableMessageType)v).getMessageType(), "parameters", "jobid_CS", "/tns:job_id");
 			}
 		}
 		
+		//Add property subjob_InvokeCounter and property alias for each invocation message
+		for(BpelCorrelationSet c : wf.getProcess().getCorrelationSets())
+		{
+			String property = c.getName().toLowerCase();
+			if(c.getName().equals("JOB_CS")) continue;
+			addProperty(property, "p:string");
+			addPropertyAlias("ns1:AdditiveSplittingRequestMessage", "parameters", property, "/ns1:sub_jobID");
+			addPropertyAlias("ns1:AdditiveSplittingResponseMessage", "parameters", property, "/ns1:sub_jobID");
+
+			addPropertyAlias("ns2:addRequest", "parameters", property, "/ns2:op_id");
+			addPropertyAlias("ns2:addResponse", "parameters", property, "/ns2:op_id");
+
+		}
+
+		////////////////////////////////
 		
 		addBinding(wf.getWf_name()+"Binding", wf.getWf_name());
 		//Add operations and binding operations
@@ -237,7 +254,7 @@ public class WSDLGenerator  {
 				if(((BpelCompositeReceiveActivity)n).getOperation().equals("start"))
 					addTwoWaysOperation(((BpelCompositeReceiveActivity)n).getOperation(), wf.getWf_name()+"RequestMessage",wf.getWf_name()+"ResponseMessage", wf.getWf_name());
 				else
-					addOneWayOperation(((BpelCompositeReceiveActivity)n).getOperation(), ((BpelCompositeReceiveActivity)n).getOperation()+"Request", wf.getWf_name());
+					addOneWayOperation(((BpelCompositeReceiveActivity)n).getOperation(), ((BpelCompositeReceiveActivity)n).getOperation()+"RequestMessage", wf.getWf_name());
 				
 				addBindingOperation(((BpelCompositeReceiveActivity)n).getOperation(), wf.getProcess().getTargetNamespace()+"/"+((BpelCompositeReceiveActivity)n).getOperation(), wf.getWf_name()+"Binding");
 			}
@@ -484,13 +501,14 @@ public class WSDLGenerator  {
 		propertyAlias = doc.getDocumentElement();
 
 		propertyAlias.setPrefix("vprop");
-		propertyAlias.setAttribute("messageType","tns:"+messageType);
+		propertyAlias.setAttribute("messageType",messageType);
 		propertyAlias.setAttribute("part",part);
 		propertyAlias.setAttribute("propertyName","tns:"+propertyName);
 
 		if(queryString!= null)
 		{
 			Element query = doc.createElement("query");
+			
 			query.setTextContent(queryString);
 			propertyAlias.appendChild(query);
 		}
@@ -547,7 +565,7 @@ public class WSDLGenerator  {
 	
 	public void addOneWayOperation(String name, String inputMessageName,  String portType)
 	{
-	QName messageqname= new QName(targetNamespace, portType);
+		QName messageqname= new QName(targetNamespace, portType);
 		
 		OperationImpl operation = (OperationImpl)definition.createOperation();
 		operation.setName(name);

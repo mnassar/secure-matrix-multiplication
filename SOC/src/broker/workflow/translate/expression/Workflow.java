@@ -26,6 +26,7 @@ import org.unify_framework.instances.bpel.BpelAndSplit;
 import org.unify_framework.instances.bpel.BpelAssignActivity;
 import org.unify_framework.instances.bpel.BpelAtomicActivity;
 import org.unify_framework.instances.bpel.BpelCompositeActivity;
+import org.unify_framework.instances.bpel.BpelCompositeInvokeActivity;
 import org.unify_framework.instances.bpel.BpelCompositeReceiveActivity;
 import org.unify_framework.instances.bpel.BpelCompositeReplyActivity;
 import org.unify_framework.instances.bpel.BpelCopy;
@@ -128,8 +129,8 @@ public class Workflow {
 				Broker_PL  = new BpelPartnerLink("Broker_PL", "tns:Broker_PLT", null, "BrokerServicesProvider");
 				process.addPartnerLink(Broker_PL);
 				
-			//	CALLBACK_PL = new BpelPartnerLink("CALLBACK_PL", "tns:"+process.getName(), process.getName()+"Provider", null);
-				//process.addPartnerLink(CALLBACK_PL);
+				CALLBACK_PL = new BpelPartnerLink("CALLBACK_PL", "tns:"+process.getName(), process.getName()+"Provider", null);
+				process.addPartnerLink(CALLBACK_PL);
 				///
 				JOB_CS= new BpelCorrelationSet("JOB_CS", "tns:jobid_CS");
 				process.addCorrelationSet(JOB_CS);
@@ -179,7 +180,7 @@ public class Workflow {
 	            BpelFromVariable from2 = new BpelFromVariable("input");
 	            from2.setPart("parameters");
 	            //document.createCDATASection("<![CDATA[tns:input]]>");		
-	            from2.setQuery("tns:input");
+	            from2.setQuery("tns:jobID");
 	            from2.addNamespaceDeclaration("queryLanguage", queryLanguage);
 	            BpelCopy copy2 = new BpelCopy();
 	            copy2.setFrom(from2);
@@ -202,19 +203,7 @@ public class Workflow {
 	            copy3.setTo(to3);
 	            response_assign.addCopy(copy3);
 	
-	            /*
-				DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-				DocumentBuilder db = dbf.newDocumentBuilder();
-				Document document = db.newDocument();
-				org.w3c.dom.Element literalElement= db.parse(new ByteArrayInputStream(new String(message).getBytes())).getDocumentElement();
-				
-				BpelFromExpression from = new BpelFromExpression(literalElement);
-			    copy.setFrom(from);
-		        BpelToVariable to = new BpelToVariable(var); 
-		        to.setPart("parameters");
-		        copy.setTo(to);
-		        assign.addCopy(copy);
-		        */
+	         
 	            
 		        bpelCompositeActivity.addChild(response_assign);
 		        /*
@@ -387,7 +376,13 @@ public class Workflow {
 		return false;
 			
 	}
-	
+
+	public void addCorrelationSet(String name, String property)
+	{
+		BpelCorrelationSet CS= new BpelCorrelationSet(name, property);
+		process.addCorrelationSet(CS);
+		
+	}
 	public void addParallelflow(int i)
 	{
 	
@@ -442,16 +437,55 @@ public class Workflow {
         
         bpelCompositeActivity.addChild(assign);
 	}
-	public void addInvokeActivity(String activ_name, String operation, String pl, String portType, String input, String output)
+	
+	public void addAssignToProperty(String activ_name, String property,String value, String var) throws ParserConfigurationException, SAXException, IOException
 	{
-		BpelInvokeActivity invoke = new BpelInvokeActivity(activ_name);
+	
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		DocumentBuilder db = dbf.newDocumentBuilder();
+		Document document = db.newDocument();
+
+		BpelCopy copy = new BpelCopy();
+		//CDATASection cdata = document.createCDATASection("string($"+var+".parameters/"+value+")");
+		//CDATASection cdata = document.createCDATASection(value);
+		
+		org.w3c.dom.Element literalElement= db.parse(new ByteArrayInputStream(new String(value).getBytes())).getDocumentElement();
+		//
+//		BpelFromExpression from = new BpelFromExpression(cdata.cloneNode(true));
+		BpelFromExpression from = new BpelFromExpression(literalElement);
+		copy.setFrom(from);
+		
+		BpelToVariable to = new BpelToVariable(var);
+		//to.setPart("parameters");
+		//to.setQuery("tns:instanceID");
+		to.setProperty(property);
+		//to.addNamespaceDeclaration("queryLanguage", queryLanguage);, 
+		copy.setTo(to);
+		
+		((BpelAssignActivity)bpelCompositeActivity.getChild(activ_name)).addCopy(copy);
+
+
+	}
+	/*
+	 *   <bpel:copy>
+			<bpel:from>
+                <![CDATA[string(1)]]>
+            </bpel:from>
+            <bpel:to property="tns:op1_CS" variable="A1B1_PLRequest"></bpel:to>
+         </bpel:copy>
+	 */
+	public void addInvokeActivity(String activ_name, String operation, String pl, String portType, String input, String SUB_JOB_CS)
+	{
+		BpelCompositeInvokeActivity invoke = new BpelCompositeInvokeActivity(activ_name);
         invoke.setOperation(operation);
         invoke.setPartnerLink(pl);
         invoke.setPortType(portType);
         invoke.setInputVariable(input);
-        invoke.setOutputVariable(output);
+      //  invoke.setOutputVariable(output);
         BpelCorrelation corr= new BpelCorrelation("no", "JOB_CS");
         invoke.addCorrelation(corr);
+        BpelCorrelation corr2= new BpelCorrelation("no", SUB_JOB_CS);
+        invoke.addCorrelation(corr2);
         bpelCompositeActivity.addChild(invoke);
     }
 	

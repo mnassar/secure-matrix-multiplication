@@ -73,7 +73,11 @@ public Response storeResource(SOCResource resource)
 		//@FormParam("file") InputStream uploadedInputStream,
 		//@FormParam("file") FormDataContentDisposition fileDetail) {
 		SOCConfiguration conf = new SOCConfiguration();
-		String resource_id = UUID.randomUUID().toString();
+		
+		Random r= new Random();
+		String resource_id = new Integer(r.nextInt(10000)).toString();
+		
+		//String resource_id = UUID.randomUUID().toString();
 		
 		String uploadedFileLocation = SOCConfiguration.BROKER_STORAGE_PATH +"/"+ resource_id;
 

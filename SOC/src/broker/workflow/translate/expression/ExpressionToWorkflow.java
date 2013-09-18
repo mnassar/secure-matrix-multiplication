@@ -329,6 +329,7 @@ public class ExpressionToWorkflow {
 			}
 			else
 			{
+				int output= 0;
 				//Create ASSIGN Activity 
 				//ADD INVOKE and Callback RECEIVE activities
 				if(curr_node.toString().contains("*"))
@@ -338,91 +339,7 @@ public class ExpressionToWorkflow {
 					MetadataStoreConnection conn;
 					try {
 						conn = new MetadataStoreConnection(SOCConfiguration.METADATA_STORE_URL);
-						BrokerSOCResource result = new BrokerSOCResource(left_operand.getResource_id()+right_operand.getResource_id());
-						result.setFile_path(SOCConfiguration.BROKER_STORAGE_PATH+"/"+result.getResource_id());
-						AdditiveSplitter splitter = new AdditiveSplitter(result);
-						SOCConfiguration conf = new SOCConfiguration();
-						Location loc_split1 = conf.getRandomCloud();
-						Location loc_split2 ;
-						while((loc_split2= conf.getRandomCloud())!=loc_split1);
-						//splitter.Split(loc_split1, loc_split2);
-						result.addLocation(loc_split1);
-						result.addLocation(loc_split2);
-						boolean added = conn.addSOCResource(result);
-						
-						conn.close();
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					//*************************88 for testing only ***************
-					
-					if(left_operand.getStorage_protocol() == StorageProtocol.ADDITIVE_SPLITTING)
-					{
-					//**************************8
-						//check if resplitting is needed : is done now in the additive splitting protocol itself
-						///**************************8
-						
-						//boolean added =exp_wf.addNamespace("ns"+namespace_counter, exp_wf.getAdditive_splitting_process().getTargetNamespace());
-						//if(added== true) namespace_counter++;
-					//assign additive splitting message request
-						String request_str= "<bpel:literal><tns:AdditiveSplittingRequest xmlns:tns=\""+exp_wf.getAdditiveSplitting_namespace()+"\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">"+
-								  "<tns:jobID>"+exp_wf.getWf_name()+"</tns:jobID>"+
-								  "<tns:sub_jobID>"+UUID.randomUUID().toString()+"</tns:sub_jobID>"+
-								  "<tns:matA>"+left_operand.getResource_id()+"</tns:matA>"+
-								  "<tns:matB>"+right_operand.getResource_id()+"</tns:matB>"+
-								  "</tns:AdditiveSplittingRequest></bpel:literal>";
-					
-						int input = var_counter;
-						exp_wf.addMessageVariable("var"+input, "ns1:AdditiveSplittingRequestMessage"); // reading variable type may be done from parsing the additive splitting bpel file and getting the variable type but this would be complicated and would take time, while they are not supposed to change 
-						exp_wf.addAssign("Assign"+assign_counter, request_str, "var"+input);
-						
-					
-						int output = ++var_counter ;
-						exp_wf.addMessageVariable("var"+output, "ns1:AdditiveSplittingResponseMessage");   
-					
-						
-					//Invoke additive splitting process   activ_name, operation, pl, portType, input
-						
-						exp_wf.addInvokeActivity("Invoke"+invoke_counter, "initiate", exp_wf.AdditiveSplitting_PL.getName(), "ns1:AdditiveSplitting", "var"+input, "var"+output);
-						
-						
-					}
-					//else OTHER PROTOCOLS
-			///
-				
-					
-					
-					
-					
-					//receive callback
-					//exp_wf.addCallbackActivity("Callback"+receive_counter, "callback"+receive_counter, "CALLBACK_PL", "tns:"+exp_wf.getWf_name(), "var"+var_counter);
-					
-					
-					exp_wf.connect("Assign"+assign_counter, "Invoke"+invoke_counter);
-					//exp_wf.connect("Invoke"+invoke_counter, "Callback"+receive_counter );
-					//////exp_wf.connectToFlow(current_flow, "Assign"+assign_counter, "Callback"+receive_counter);
-					exp_wf.connectToLastNode("Assign"+assign_counter);
-					if(current_flow >0)
-						exp_wf.connectToFlow(flow_stack.get(current_flow-1), "Invoke"+invoke_counter );
-					else
-						exp_wf.connectToEnd("Invoke"+invoke_counter );
-					
-					assign_counter++;
-					invoke_counter++;
-					receive_counter++;
-					var_counter++;
-					
-				}
-				else if(curr_node.toString().contains("+"))
-				{
-					
-					//****
-					//for testing only .. this should be updated and added to broker services 
-					MetadataStoreConnection conn;
-					try {
-						conn = new MetadataStoreConnection(SOCConfiguration.METADATA_STORE_URL);
-						BrokerSOCResource result = new BrokerSOCResource(left_operand.getResource_id()+right_operand.getResource_id());
+						BrokerSOCResource result = new BrokerSOCResource(left_operand.getResource_id()+"_"+right_operand.getResource_id());
 						result.setFile_path(SOCConfiguration.BROKER_STORAGE_PATH+"/"+result.getResource_id());
 						AdditiveSplitter splitter = new AdditiveSplitter(result);
 						SOCConfiguration conf = new SOCConfiguration();
@@ -441,15 +358,102 @@ public class ExpressionToWorkflow {
 					}
 					//************************* for testing only ***************
 					
+					if(left_operand.getStorage_protocol() == StorageProtocol.ADDITIVE_SPLITTING)
+					{
+					//*************************
+						//check if resplitting is needed : is done now in the additive splitting protocol itself
+						///**************************8
+						
+						//boolean added =exp_wf.addNamespace("ns"+namespace_counter, exp_wf.getAdditive_splitting_process().getTargetNamespace());
+						//if(added== true) namespace_counter++;
+					//assign additive splitting message request
+						String sub_jobID = UUID.randomUUID().toString();
+						String request_str= "<bpel:literal><ws:AdditiveSplittingRequest xmlns:ws=\""+exp_wf.getAdditiveSplitting_namespace()+"\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">"+
+								  "<ws:jobID>" + exp_wf.getWf_name() + "</ws:jobID>"+
+								  "<ws:sub_jobID>" + sub_jobID +"</ws:sub_jobID>"+
+								  "<ws:matA_ID>"+left_operand.getResource_id()+"</ws:matA_ID>"+
+								  "<ws:matB_ID>"+right_operand.getResource_id()+"</ws:matB_ID>"+
+								  "</ws:AdditiveSplittingRequest></bpel:literal>";
+					
+						int input = var_counter;
+						exp_wf.addMessageVariable("var"+input, "ns1:AdditiveSplittingRequestMessage"); // reading variable type may be done from parsing the additive splitting bpel file and getting the variable type but this would be complicated and would take time, while they are not supposed to change 
+						exp_wf.addAssign("Assign"+assign_counter, request_str, "var"+input);
+					//	exp_wf.addAssignToProperty("Assign"+assign_counter, "tns:subjob_"+invoke_counter, "<bpel:literal xml:space=\"preserve\"><![CDATA["+sub_jobID+"]]></bpel:literal>", "var"+input);
+					
+						
+						
+					//Invoke additive splitting process   activ_name, operation, pl, portType, input
+						exp_wf.addCorrelationSet("SUBJOB_"+invoke_counter, "tns:subjob_"+invoke_counter);
+						exp_wf.addInvokeActivity("Invoke"+invoke_counter, "initiate", exp_wf.AdditiveSplitting_PL.getName(), "ns1:AdditiveSplitting", "var"+input,  "SUBJOB_"+invoke_counter);
+						
+						
+					}
+					//else OTHER PROTOCOLS
+			///
+				
+					
+					
+					
+					output = ++var_counter ;
+					exp_wf.addMessageVariable("var"+output, "tns:callback"+receive_counter+"RequestMessage");   
+				
+					//receive callback
+					exp_wf.addCallbackActivity("Callback"+receive_counter, "callback"+receive_counter, "CALLBACK_PL", "tns:"+exp_wf.getWf_name(), "var"+output);
+					
+					
+					exp_wf.connect("Assign"+assign_counter, "Invoke"+invoke_counter);
+					exp_wf.connect("Invoke"+invoke_counter, "Callback"+receive_counter );
+					//////exp_wf.connectToFlow(current_flow, "Assign"+assign_counter, "Callback"+receive_counter);
+					exp_wf.connectToLastNode("Assign"+assign_counter);
+					if(current_flow >0)
+						exp_wf.connectToFlow(flow_stack.get(current_flow-1), "Callback"+receive_counter  );
+					else
+						exp_wf.connectToEnd("Callback"+receive_counter );
+					
+					assign_counter++;
+					invoke_counter++;
+					receive_counter++;
+					var_counter++;
+					
+				}
+				else if(curr_node.toString().contains("+"))
+				{
+					
+					//****
+					//for testing only .. this should be updated and added to broker services 
+					MetadataStoreConnection conn;
+					try {
+						conn = new MetadataStoreConnection(SOCConfiguration.METADATA_STORE_URL);
+						BrokerSOCResource result = new BrokerSOCResource(left_operand.getResource_id()+"_"+right_operand.getResource_id());
+						result.setFile_path(SOCConfiguration.BROKER_STORAGE_PATH+"/"+result.getResource_id());
+						AdditiveSplitter splitter = new AdditiveSplitter(result);
+						SOCConfiguration conf = new SOCConfiguration();
+						Location loc_split1 = conf.getRandomCloud();
+						Location loc_split2 ;
+						while((loc_split2= conf.getRandomCloud())!=loc_split1);
+						//splitter.Split(loc_split1, loc_split2);
+						result.addLocation(loc_split1);
+						result.addLocation(loc_split2);
+						boolean added = conn.addSOCResource(result);
+						conn.close();
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					
+					//************************* for testing only ***************
+					
 					//assign add broker message request
 					
-					String request_str= "<bpel:literal><tns:add xmlns:tns=\""+exp_wf.getBroker_namespace()+ "\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">"
-                     +"<op_id>"+current_flow +"</op_id>"
+					String request_str= "<bpel:literal><bs:add xmlns:bs=\""+exp_wf.getBroker_namespace()+ "\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">"
+                     +"<op_id>"+invoke_counter+"</op_id>"
                      +"<job_id>"+exp_wf.getWf_name() +"</job_id>"
-                     + "<matA_ID>"+left_operand.getResource_id()+"</matA_ID>"
+                     +"<add_list> <cloudURL>"+SOCConfiguration.BROKER_URL +"</cloudURL> <splitName>"+ left_operand.getResource_id()+"</splitName>  </add_list>"
+					 +"<add_list>  <cloudURL>"+SOCConfiguration.BROKER_URL +"</cloudURL> <splitName>"+ right_operand.getResource_id()+"</splitName>  </add_list>"
+                     +"<matA_ID>"+left_operand.getResource_id()+"</matA_ID>"
                      +"<matB_ID>"+right_operand.getResource_id()+"</matB_ID>"
                      +"<callback>"+"Callback"+receive_counter+"</callback>"
-                     +"</tns:add></bpel:literal>";
+                     +"</bs:add></bpel:literal>";
 					
 /*
 					 * <ws:add xmlns:ws="http://www.brokerservices.org/MatServ/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -465,28 +469,32 @@ public class ExpressionToWorkflow {
                     int input = var_counter;
 					exp_wf.addMessageVariable("var"+input, "ns2:addRequest"); // reading variable type may be done from parsing the additive splitting bpel file and getting the variable type but this would be complicated and would take time, while they are not supposed to change 
 					exp_wf.addAssign("Assign"+assign_counter, request_str, "var"+input);
-			
-					int output = ++var_counter;
+					
+					//exp_wf.addAssignToProperty("Assign"+assign_counter, "tns:subjob_"+invoke_counter,  "<bpel:literal xml:space=\"preserve\"><![CDATA["+invoke_counter+"]]></bpel:literal>", "var"+input);
+					
+					output = ++var_counter;
 					exp_wf.addMessageVariable("var"+output, "ns2:addResponse");   
+					
 					//Invoke broker webservice		
-					exp_wf.addInvokeActivity("Invoke"+invoke_counter, "add", exp_wf.Broker_PL.getName(), "ns2:BrokerServices", "var"+ input,  "var"+ output );
-			
+					exp_wf.addCorrelationSet("SUBJOB_"+invoke_counter, "tns:subjob_"+invoke_counter);
+					exp_wf.addInvokeActivity("Invoke"+invoke_counter, "add", exp_wf.Broker_PL.getName(), "ns2:MatServ", "var"+ input,  "SUBJOB_"+invoke_counter );
 					
-					
-					
+					output = ++var_counter ;
+					exp_wf.addMessageVariable("var"+output, "tns:callback"+receive_counter+"RequestMessage");   
+				
 					//receive callback
-					//exp_wf.addCallbackActivity("Callback"+receive_counter, "callback"+receive_counter, "CALLBACK_PL", "tns:"+exp_wf.getWf_name(), "var"+assign_counter);
+					exp_wf.addCallbackActivity("Callback"+receive_counter, "callback"+receive_counter, "CALLBACK_PL", "tns:"+exp_wf.getWf_name(), "var"+output);
 					
 					exp_wf.connect("Assign"+assign_counter, "Invoke"+invoke_counter);
 					
-					//exp_wf.connect("Invoke"+invoke_counter, "Callback"+receive_counter );
-				///	//exp_wf.connectBetweenFlow(current_flow, 1, "Assign"+assign_counter, "Callback"+receive_counter);
+					exp_wf.connect("Invoke"+invoke_counter, "Callback"+receive_counter );
+					//exp_wf.connectBetweenFlow(current_flow, 1, "Assign"+assign_counter, "Callback"+receive_counter);
 					
 					exp_wf.connectToLastNode("Assign"+assign_counter);
 					if(current_flow >0)
-						exp_wf.connectToFlow(flow_stack.get(current_flow-1), "Invoke"+invoke_counter );
+						exp_wf.connectToFlow(flow_stack.get(current_flow-1), "Callback"+receive_counter );
 					else
-						exp_wf.connectToEnd("Invoke"+invoke_counter );
+						exp_wf.connectToEnd("Callback"+receive_counter);
 					
 					assign_counter++;
 					invoke_counter++;

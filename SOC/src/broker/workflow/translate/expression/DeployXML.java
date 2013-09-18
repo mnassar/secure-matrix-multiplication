@@ -92,6 +92,15 @@ public class DeployXML {
 		provide.appendChild(service);
 
 		process.appendChild(provide);
+		
+		provide = doc.createElement("provide");
+		provide.setAttribute("partnerLink", "CALLBACK_PL");
+		service = doc.createElement("service");
+		service.setAttribute("name","soc."+workflow.getWf_name()+".workflow:"+workflow.getWf_name()+"Service");
+		service.setAttribute("port", workflow.getWf_name()+"Port");
+		provide.appendChild(service);
+
+		process.appendChild(provide);
 	}
 	
 	private void addServicesPL()
