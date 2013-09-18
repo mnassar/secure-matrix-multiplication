@@ -6,6 +6,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.xml.sax.SAXException;
 
 import broker.BrokerSOCResource;
+import broker.DataType;
 import broker.JobType;
 import broker.MatrixMeta;
 import broker.ResourceMeta;
@@ -29,7 +30,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
-
 
 import securerest.MatrixOP;
 import sun.net.www.http.HttpClient;
@@ -55,39 +55,39 @@ public class RESTClient {
  
     public static void main(String[] args) throws ParserConfigurationException, SAXException, IOException {
  
-    	
-        ClientConfig config = new DefaultClientConfig();
-     //   config.getClasses().add(JSONRootElementProvider.class);
-        config.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);
-        Client client = Client.create(config);
-        WebResource service = client.resource(REST_URI);
- 
-      
-        System.out.println("---------------------------------------------------");
-        
+    	//REST_URL is a string holding the broker url for the rest services of SOC
+    	//USER_TOKEN is a string holding the user specific token received upon subscribing to the broker
+    	SOCClient soc = new SOCClient(REST_URI);
+        boolean connected = soc.connect();
         SOCResource resource = new SOCResource(StorageProtocol.ADDITIVE_SPLITTING);
 		resource.setUser_token("farida");
 		resource.setFile_path("/home/farida/Documents/A1");
-		MatrixMeta meta = new MatrixMeta(10,10,"decimal");
+		MatrixMeta meta = new MatrixMeta(10,10,DataType.INTEGER);
 		resource.setResource_meta(meta);
-        addResource(service, resource);
-        System.out.println("Output of get JSON resource object: "+ getResource(service));
+        
+		resourceID = soc.addResource(resource);
+//        System.out.println("Output of get JSON resource object: "+ getResource(service));
         String resourceA = new String(resourceID);
      
-        addResource(service, resource);
+        resourceID = soc.addResource(resource);
+       
+        
         String resourceAA = new String(resourceID);
         
         System.out.println("---------------------------------------------------");
         resource = new SOCResource(StorageProtocol.ADDITIVE_SPLITTING);
 		resource.setUser_token("farida");
 		resource.setFile_path("/home/farida/Documents/B1");
-		meta = new MatrixMeta(10,10,"decimal");
+		meta = new MatrixMeta(10,10,DataType.INTEGER);
 		resource.setResource_meta(meta);
-        addResource(service, resource);
-        System.out.println("Output of get JSON resource object: "+ getResource(service));
+       
+		resourceID = soc.addResource(resource);
+        
+	//	System.out.println("Output of get JSON resource object: "+ getResource(service));
         String resourceB = new String(resourceID);
         
-        addResource(service, resource);
+        resourceID = soc.addResource(resource);
+        
         String resourceBB = new String(resourceID);
         
         SOCJob job = new SOCJob();
@@ -107,7 +107,7 @@ public class RESTClient {
         job.setUserToken("farida");
        
         
-        addJob(service, job);
+        jobID= soc.addJob(job);
   //      System.out.println("Output of get JSON Job object: "+ getJob(service));
      
     }

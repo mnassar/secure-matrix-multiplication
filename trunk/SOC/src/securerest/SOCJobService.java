@@ -54,6 +54,7 @@ import Jama.Matrix;
 import broker.BrokerSOCResource;
 import broker.JobType;
 import broker.Location;
+import broker.Log;
 import broker.MetadataStoreConnection;
 import broker.ResourceMeta;
 import broker.ResourceMetaAdapter;
@@ -94,10 +95,12 @@ public Response compute(SOCJob job)
 {
 		
 		SOCConfiguration conf = new SOCConfiguration();
+		
+		final Log logfile = new Log(SOCConfiguration.LOG_DIRECTORY);
 		//String job_id = UUID.randomUUID().toString();
 		Random r= new Random();
 		String job_id = new Integer(r.nextInt(10000)).toString();
-		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+		final DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		   //get current date time with Date()
 		   java.util.Date date = new java.util.Date();
 	
@@ -166,7 +169,7 @@ public Response compute(SOCJob job)
 							e.printStackTrace();
 						}
 						//Execute the workflow
-
+						logfile.write("Execution of workflow process starts at : "+ dateFormat.format(new java.util.Date()));
 						try {
 							SOAPConnectionFactory sfc = SOAPConnectionFactory.newInstance();
 							SOAPConnection connection = sfc.createConnection();
@@ -193,11 +196,13 @@ public Response compute(SOCJob job)
 
 						//	System.out.println("\n Soap Request:\n");
 							sm.writeTo(System.out);
+						
 						//	System.out.println();
 
 							URL endpoint = new URL(workflow_generator.getProcessURL());
 							SOAPMessage response = connection.call(sm, endpoint);
 							System.out.println(response.getContentDescription());
+							logfile.write(response.getContentDescription());
 						} catch (Exception ex) {
 							ex.printStackTrace();
 						}
