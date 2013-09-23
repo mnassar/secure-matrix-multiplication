@@ -1,5 +1,15 @@
 package broker;
 
+import org.codehaus.jackson.annotate.JsonSubTypes;
+import org.codehaus.jackson.annotate.JsonTypeInfo;
+
+@JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.WRAPPER_OBJECT, property="type")
+@JsonSubTypes({
+
+      @JsonSubTypes.Type(value=MatrixMeta.class, name="matrix")
+
+  })  
+
 public class ResourceMeta {
 
 	public ResourceMeta(String type) {
