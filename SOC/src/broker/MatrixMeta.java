@@ -1,14 +1,21 @@
 package broker;
 
 import com.google.gson.Gson;
+import org.codehaus.jackson.annotate.JsonTypeName;
 
+@JsonTypeName("matrix")
 public class MatrixMeta extends ResourceMeta {
 
-	public MatrixMeta(int nRows, int nColumns, DataType dataType) {
+	private int nRows;
+	private int nColumns;
+	private String dataType;
+	
+	
+	public MatrixMeta(int nRows, int nColumns, String dataType) {
 		super("matrix");
 		this.nRows = nRows;
 		this.nColumns = nColumns;
-		this.dataType = dataType;
+		this.dataType = new String(dataType);
 	}
 	public MatrixMeta() {
 		super("matrix");
@@ -19,50 +26,45 @@ public class MatrixMeta extends ResourceMeta {
 		super("matrix");
 		this.nRows = ((MatrixMeta)meta).getnRows();
 		this.nColumns = ((MatrixMeta)meta).getnColumns();
-		setDataType(((MatrixMeta)meta).getDataType());
+		this.dataType= ((MatrixMeta)meta).getdataType();
 	
 	}
-	private int nRows;
-	private int nColumns;
-	private DataType dataType;
 	
 
 	public int getnRows() {
-		return nRows;
+		return this.nRows;
 	}
 	public void setnRows(int nRows) {
 		this.nRows = nRows;
 	}
 	public int getnColumns() {
-		return nColumns;
+		return this.nColumns;
 	}
 	public void setnColumns(int nColumns) {
 		this.nColumns = nColumns;
 	}
-	public String getDataTypeString() {
-		return dataType.toString();
+	
+	public String getdataType() {
+		return this.dataType;
 	}
-	public DataType getDataType() {
-		return dataType;
-	}
-	public void setDataType(DataType dataType) {
-		this.dataType = dataType;
-	}
-	public void setDataType(String type) {
-		if(type.equals("INTEGER"))
+	
+	public void setdataType(String dataType) {
+	/*	if(type.equals("INTEGER"))
 			this.dataType = DataType.INTEGER;
 		else if(type.equals("REAL"))
 			this.dataType = DataType.REAL;
 		else if(type.equals("IMAGINARY"))
 			this.dataType = DataType.IMAGINARY;
+			*/
+		this.dataType = new String(dataType);
 	}
 	public static void main(String[] args)
 	{
-		String meta = "{\"nRows\":10,\"nColumns\":10,\"dataType\":\"INTEGER\",\"type\":\"matrix\"}";
+		String meta = "{\"nRows\":10,\"nColumns\":10,\"dataType\":\"decimal\",\"type\":\"matrix\"}";
 
 		Gson gson = new  Gson();
 		
 		MatrixMeta mat_meta = gson.fromJson(meta, MatrixMeta.class);
-		System.out.println(mat_meta.getType()+":"+mat_meta.getnRows()+","+mat_meta.getnColumns()+"/"+mat_meta.getDataTypeString());
+		System.out.println(mat_meta.getType()+":"+mat_meta.getnRows()+","+mat_meta.getnColumns()+"/"+mat_meta.getdataType());
 	}
 }
