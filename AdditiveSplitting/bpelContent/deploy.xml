@@ -3,13 +3,33 @@
   <process name="additivesplitting.bpelprocess:AdditiveSplitting">
     <active>true</active>
     <retired>false</retired>
-    <process-events generate="all"/>
+    <process-events generate="all">
+      <scope-events name="Scope1">
+        <enable-event>correlation</enable-event>
+        <enable-event>scopeHandling</enable-event>
+      </scope-events>
+      <scope-events name="Scope">
+        <enable-event>correlation</enable-event>
+        <enable-event>scopeHandling</enable-event>
+      </scope-events>
+      <scope-events name="Scope2">
+        <enable-event>correlation</enable-event>
+        <enable-event>scopeHandling</enable-event>
+      </scope-events>
+      <scope-events name="Scope3">
+        <enable-event>correlation</enable-event>
+        <enable-event>scopeHandling</enable-event>
+      </scope-events>
+    </process-events>
     <provide partnerLink="client">
       <service name="additivesplitting.bpelprocess:AdditiveSplittingService" port="AdditiveSplittingPort"/>
     </provide>
     <provide partnerLink="callback_PL">
       <service name="additivesplitting.bpelprocess:AdditiveSplittingService" port="AdditiveSplittingPort"/>
     </provide>
+    <invoke partnerLink="client">
+      <service name="additivesplitting.bpelprocess:AdditiveSplittingCallbackService" port="AdditiveSplittingCallbackPort"/>
+    </invoke>
     <invoke partnerLink="OnCloud1_PL">
       <service name="MatServ:MatServ" port="CloudServicesPort"/>
     </invoke>
