@@ -34,27 +34,25 @@
         <bpel:partnerLink name="client"
                      partnerLinkType="tns:AdditiveSplitting"
                      myRole="AdditiveSplittingProvider"
-                     
+                     partnerRole="AdditiveSplittingRequester"
                      />
+                     
         <bpel:partnerLink name="callback_PL"
                      partnerLinkType="tns:AdditiveSplitting"
                      myRole="AdditiveSplittingProvider"
                      
                      />
-    
+         <bpel:partnerLink name="OnCloud1_PL"
+                     partnerLinkType="tns:Cloud_PL"
+                     partnerRole="CloudServicesProvider"
+                     />
           <bpel:partnerLink name="OnBroker_PL"
                      partnerLinkType="tns:Broker_PL"
                      partnerRole="BrokerServicesProvider"
                      />
-                     
-         <!--                   <bpel:partnerLink name="OnCloud1_PL"
-                     partnerLinkType="tns:Cloud_PL"
-                     partnerRole="CloudServicesProvider"
-                     />
         <bpel:partnerLink name="OnCloud2_PL" partnerLinkType="tns:Cloud_PL" partnerRole="CloudServicesProvider"></bpel:partnerLink>
         <bpel:partnerLink name="OnCloud3_PL" partnerLinkType="tns:Cloud_PL" partnerRole="CloudServicesProvider"></bpel:partnerLink>
         <bpel:partnerLink name="OnCloud4_PL" partnerLinkType="tns:Cloud_PL" partnerRole="CloudServicesProvider"></bpel:partnerLink>
-        -->
     </bpel:partnerLinks>
     
   
@@ -83,22 +81,22 @@
         <bpel:variable name="JOB" type="xsd:string"/>
         
         <bpel:variable messageType="tns:callbackRequestMessage_1" name="callbackRequest_1"/>
-        <bpel:variable messageType="tns:callbackRequestMessage_1" name="callbackRequest_2"/>
-        <bpel:variable messageType="tns:callbackRequestMessage_1" name="callbackRequest_3"/>
-		<bpel:variable messageType="tns:callbackRequestMessage_1" name="callbackRequest_4"/>
-		<bpel:variable messageType="tns:callbackRequestMessage_1" name="callbackRequest_5"/>        
+        <bpel:variable messageType="tns:callbackRequestMessage_2" name="callbackRequest_2"/>
+        <bpel:variable messageType="tns:callbackRequestMessage_3" name="callbackRequest_3"/>
+		<bpel:variable messageType="tns:callbackRequestMessage_4" name="callbackRequest_4"/>
+		<bpel:variable messageType="tns:callbackRequestMessage_5" name="callbackRequest_5"/>        
         <bpel:variable  messageType="tns:callbackRequestMessage_0" name="callbackRequest_0"/>
     </bpel:variables>
 
 	 <bpel:correlationSets>
         <!--  <bpel:correlationSet name="JOB_CS" properties="tns:jobid_CS"/>-->
         <bpel:correlationSet name="SUB_JOB_CS" properties="tns:sub_jobid_CS"/>
-        <bpel:correlationSet name="OP1_CS" properties="tns:op1_CS"/>
-        <bpel:correlationSet name="OP2_CS" properties="tns:op2_CS"/>
-        <bpel:correlationSet name="OP3_CS" properties="tns:op3_CS"/>
-        <bpel:correlationSet name="OP4_CS" properties="tns:op4_CS"/>
-        <bpel:correlationSet name="OP5_CS" properties="tns:op5_CS"/>
-        <bpel:correlationSet name="OP0_CS" properties="tns:op0_CS"/>
+        
+        
+        
+        
+        
+        
      </bpel:correlationSets>
     
     <!-- ================================================================= -->         
@@ -111,6 +109,7 @@
         <!-- Receive input from requestor. 
              Note: This maps to operation defined in AdditiveSplitting.wsdl 
              -->
+        
         
         <bpel:receive name="receiveInput" partnerLink="client"
                  portType="tns:AdditiveSplitting"
@@ -126,6 +125,183 @@
         
         
         
+        
+        
+        <!--  <bpel:assign name="Assign" validate="no">
+            <bpel:copy>
+                <bpel:from>
+                    <bpel:literal>
+                        <tns:AdditiveSplittingResponse xmlns:tns="http://additivesplitting.bpelprocess" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><tns:jobID>tns:jobID</tns:jobID>
+  <tns:sub_jobID>tns:sub_jobID</tns:sub_jobID>
+  <tns:result>tns:result</tns:result>
+
+                        </tns:AdditiveSplittingResponse>
+                    </bpel:literal>
+                </bpel:from><bpel:to variable="output" part="parameters"></bpel:to>
+            
+            
+            </bpel:copy>
+            <bpel:copy>
+                <bpel:from>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    <![CDATA[concat($input.parameters/tns:matA_ID, "_", $input.parameters/tns:matB_ID,"_",string($ode:pid))]]>
+                </bpel:from>
+                <bpel:to>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    <![CDATA[$output.parameters/tns:result]]>
+                </bpel:to>
+            </bpel:copy><bpel:copy>
+                <bpel:from>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    <![CDATA[$input.parameters/tns:jobID]]>
+                </bpel:from>
+                <bpel:to part="parameters" variable="output">
+                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:jobID]]></bpel:query>
+                </bpel:to>
+            </bpel:copy>
+            <bpel:copy>
+                <bpel:from>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    <![CDATA[$input.parameters/tns:sub_jobID]]>
+                </bpel:from>
+                <bpel:to part="parameters" variable="output">
+                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:sub_jobID]]></bpel:query>
+                </bpel:to>
+            </bpel:copy>
+        
+        
+        
+        
+        </bpel:assign>-->
+        <!-- 
+        <bpel:reply name="replyOutput" operation="initiate" partnerLink="client" portType="tns:AdditiveSplitting" variable="output">
+            <bpel:correlations>
+                <bpel:correlation set="SUB_JOB_CS" initiate="no"></bpel:correlation>
+            </bpel:correlations>
+        </bpel:reply>-->
         <bpel:assign validate="no" name="AssignResplit">
             <bpel:copy>
                 <bpel:from><bpel:literal xml:space="preserve"><ws:resplit xmlns:ws="http://www.brokerservices.org/MatServ/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -243,40 +419,21 @@
                     <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[matB_ID]]></bpel:query>
                 </bpel:to>
             </bpel:copy>
-            <bpel:copy>
-                <bpel:from>
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    <![CDATA[string(0)]]>
-                </bpel:from>
-                <bpel:to property="tns:op0_CS" variable="resplit_PLRequest"></bpel:to>
-            </bpel:copy>
+            
         </bpel:assign>
         <bpel:invoke name="InvokeResplit" partnerLink="OnBroker_PL" operation="resplit" portType="ns1:MatServ" inputVariable="resplit_PLRequest">
-            <bpel:correlations>
-                <bpel:correlation set="OP0_CS" initiate="yes" pattern="request" ></bpel:correlation>
-            </bpel:correlations>
         </bpel:invoke>
         
         <bpel:receive name="Receive" partnerLink="callback_PL" operation="resplit_callBack" portType="tns:AdditiveSplitting" variable="callbackRequest_0">
             <bpel:correlations>
-                <bpel:correlation set="OP0_CS" initiate="no"></bpel:correlation>
-                <bpel:correlation set="SUB_JOB_CS" initiate="no"></bpel:correlation> 
+                <bpel:correlation set="SUB_JOB_CS" initiate="no"></bpel:correlation>
+                 
             </bpel:correlations>
         </bpel:receive>
         
-        
-        <bpel:flow name="Flow">
-            
-        <bpel:scope name="Scope">
-                <bpel:sequence name="A1B1">
-                <bpel:assign name="Assign1" validate="no">
+          
+        <bpel:flow name="Flow">                                                        <bpel:scope name="Scope">
+                <bpel:sequence name="A1B1"><bpel:assign name="Assign1" validate="no">
                     
                     <bpel:copy>
                         <bpel:from><bpel:literal xml:space="preserve"><ws:multiply xmlns:ws="http://www.cloudservices.org/MatServ/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -540,20 +697,6 @@
                             
                             
                             
-                            <![CDATA[string(1)]]>
-                        </bpel:from>
-                        <bpel:to property="tns:op1_CS" variable="A1B1_PLRequest"></bpel:to>
-                    </bpel:copy>
-                    <bpel:copy>
-                        <bpel:from>
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            
                             
                             
                             
@@ -695,30 +838,26 @@
                             <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[op_id]]></bpel:query>
                         </bpel:to>
                     </bpel:copy>
-                </bpel:assign>       
-                <bpel:invoke name="Mult_A1B1" partnerLink="OnCloud1_PL" operation="multiply" portType="ns:MatServ" inputVariable="A1B1_PLRequest">
-                    <bpel:correlations>
-                        <bpel:correlation set="OP1_CS" initiate="yes" pattern="request"></bpel:correlation>
-                    </bpel:correlations>
+                        
+                        
+                    </bpel:assign>       
+                <bpel:invoke name="Mult_A1B1" operation="multiply" partnerLink="OnCloud1_PL" portType="ns:MatServ" inputVariable="A1B1_PLRequest">
                 </bpel:invoke>
                 <bpel:receive name="CB_A1_B1" operation="callBack_Operation1" partnerLink="client" portType="tns:AdditiveSplitting" variable="callbackRequest_1">
                     <bpel:correlations>
-                        <bpel:correlation initiate="no" set="OP1_CS" />
+                        
                         <bpel:correlation set="SUB_JOB_CS" initiate="no"></bpel:correlation>
                     </bpel:correlations>
                 </bpel:receive>
                 
                 
                 
-            </bpel:sequence>
-                <bpel:partnerLinks>
-                    <bpel:partnerLink name="OnCloud1_PL" partnerLinkType="tns:Cloud_PL" partnerRole="CloudServicesProvider"></bpel:partnerLink>
-                </bpel:partnerLinks>
+            
+                </bpel:sequence>
             </bpel:scope><bpel:scope name="Scope1">
-                <bpel:sequence name="A2B2">
-                        
-                <bpel:assign name="Assign2" validate="no"><bpel:copy>
-                        <bpel:from><bpel:literal xml:space="preserve"><ws:multiply xmlns:ws="http://www.cloudservices.org/MatServ/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                
+                <bpel:sequence name="A2B2"><bpel:assign name="Assign2" validate="no">
+                        <bpel:copy><bpel:from><bpel:literal xml:space="preserve"><ws:multiply xmlns:ws="http://www.cloudservices.org/MatServ/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <op_id>2</op_id>
   <job_id>job_id</job_id>
   <matA_ID>matA_ID</matA_ID>
@@ -726,8 +865,8 @@
   <callback>http://localhost:8080/ode/processes/AdditiveSplitting</callback>
 </ws:multiply></bpel:literal></bpel:from>
                         <bpel:to variable="A2B2_PLRequest" part="parameters"></bpel:to>
-                    </bpel:copy>
-                    <bpel:copy>
+                    
+                        </bpel:copy><bpel:copy>
                         <bpel:from>
                             <![CDATA[$input.parameters/tns:sub_jobID]]>
                         </bpel:from>
@@ -921,20 +1060,6 @@
                             
                             
                             
-                            <![CDATA[string(2)]]>
-                        </bpel:from>
-                        <bpel:to property="tns:op2_CS" variable="A2B2_PLRequest"></bpel:to>
-                    </bpel:copy>
-                    <bpel:copy>
-                        <bpel:from>
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            
                             
                             
                             
@@ -1039,25 +1164,22 @@
                             <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[op_id]]></bpel:query>
                         </bpel:to>
                     </bpel:copy>
-                </bpel:assign>
-                <bpel:invoke name="Mult_A2B2" partnerLink="OnCloud2_PL" operation="multiply" portType="ns:MatServ" inputVariable="A2B2_PLRequest">
-                    <bpel:correlations>
-                        <bpel:correlation set="OP2_CS" initiate="yes" pattern="request"></bpel:correlation>
-                    </bpel:correlations>
+                
+                    </bpel:assign><bpel:invoke name="Mult_A2B2" partnerLink="OnCloud2_PL" operation="multiply" portType="ns:MatServ" inputVariable="A2B2_PLRequest">                
                 </bpel:invoke>
-                <bpel:receive name="CB_A2B2" operation="callBack_Operation1" partnerLink="callback_PL" portType="tns:AdditiveSplitting" variable="callbackRequest_2">
+                <bpel:receive name="CB_A2B2" operation="callBack_Operation2" partnerLink="callback_PL" portType="tns:AdditiveSplitting" variable="callbackRequest_2">
                     <bpel:correlations>
-                        <bpel:correlation initiate="no" set="OP2_CS" />
+                        
                         <bpel:correlation set="SUB_JOB_CS" initiate="no"></bpel:correlation> 
                     </bpel:correlations>
                 </bpel:receive>
                 
                 
                 
-            </bpel:sequence>
-                <bpel:partnerLinks>
-                    <bpel:partnerLink name="OnCloud2_PL" partnerLinkType="tns:Cloud_PL" partnerRole="CloudServicesProvider"></bpel:partnerLink>
-                </bpel:partnerLinks>
+            
+                
+                
+                </bpel:sequence>
             </bpel:scope><bpel:scope name="Scope2">
                 <bpel:sequence name="A1B2"><bpel:assign name="Assign3" validate="no">
                     
@@ -1255,21 +1377,16 @@
                             <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[matB_ID]]></bpel:query>
                         </bpel:to>
                     </bpel:copy>
-                    <bpel:copy>
-                        <bpel:from>
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            <![CDATA[string(3)]]>
-                        </bpel:from>
-                        <bpel:to property="tns:op3_CS" variable="A1B2_PLRequest"></bpel:to>
-                    </bpel:copy>
-                    <bpel:copy>
+                   
+                        <bpel:copy>
+                            <bpel:from>
+                                
+                                
+                                <![CDATA[$callbackRequest_0.parameters/tns:split[3]/tns:cloud_url/text()]]>
+                            </bpel:from>
+                            <bpel:to partnerLink="OnCloud3_PL"></bpel:to>
+                        </bpel:copy>
+                        <bpel:copy>
                         <bpel:from>
                             
                             
@@ -1388,13 +1505,10 @@
                     </bpel:copy>
                 </bpel:assign>       
               <bpel:invoke name="Mult_A1B2" partnerLink="OnCloud3_PL" operation="multiply" portType="ns:MatServ" inputVariable="A1B2_PLRequest">
-                    <bpel:correlations>
-                        <bpel:correlation set="OP3_CS" initiate="yes" ></bpel:correlation>
-                    </bpel:correlations>
                 </bpel:invoke>
-                <bpel:receive name="CB_A1B2" operation="callBack_Operation1" partnerLink="callback_PL" portType="tns:AdditiveSplitting" variable="callbackRequest_3">
+                <bpel:receive name="CB_A1B2" operation="callBack_Operation3" partnerLink="callback_PL" portType="tns:AdditiveSplitting" variable="callbackRequest_3">
                     <bpel:correlations>
-                        <bpel:correlation initiate="no" set="OP3_CS" />
+                        
                          <bpel:correlation set="SUB_JOB_CS" initiate="no"></bpel:correlation>
                     </bpel:correlations>
                 </bpel:receive>
@@ -1403,12 +1517,9 @@
                 
             
                 </bpel:sequence>
-                <bpel:partnerLinks>
-                    <bpel:partnerLink name="OnCloud3_PL" partnerLinkType="tns:Cloud_PL" partnerRole="CloudServicesProvider"></bpel:partnerLink>
-                </bpel:partnerLinks>
+                
             </bpel:scope><bpel:scope name="Scope3">
-                <bpel:sequence name="A2B1">
-                 <bpel:assign name="Assign4" validate="no">
+                <bpel:sequence name="A2B1"><bpel:assign name="Assign4" validate="no">
                     
                     <bpel:copy>
                         <bpel:from><bpel:literal xml:space="preserve"><ws:multiply xmlns:ws="http://www.cloudservices.org/MatServ/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -1612,20 +1723,7 @@
                             <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[matB_ID]]></bpel:query>
                         </bpel:to>
                     </bpel:copy>
-                    <bpel:copy>
-                        <bpel:from>
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            
-                            <![CDATA[string(4)]]>
-                        </bpel:from>
-                        <bpel:to property="tns:op4_CS" variable="A2B1_PLRequest"></bpel:to>
-                    </bpel:copy>
+                    
                     <bpel:copy>
                         <bpel:from>
                             
@@ -1748,38 +1846,274 @@
                 </bpel:assign>       
               
                       <bpel:invoke name="Mult_A2B1" partnerLink="OnCloud4_PL" operation="multiply" portType="ns:MatServ" inputVariable="A2B1_PLRequest">
-                    <bpel:correlations>
-                        <bpel:correlation set="OP4_CS" initiate="yes" pattern="request"></bpel:correlation>
-                    </bpel:correlations>
                 </bpel:invoke>
-                <bpel:receive name="CB_A2B1" operation="callBack_Operation1" partnerLink="callback_PL" portType="tns:AdditiveSplitting" variable="callbackRequest_4">
+                <bpel:receive name="CB_A2B1" operation="callBack_Operation4" partnerLink="callback_PL" portType="tns:AdditiveSplitting" variable="callbackRequest_4">
                     <bpel:correlations>
-                        <bpel:correlation initiate="no" set="OP4_CS" />
+                        
                          <bpel:correlation set="SUB_JOB_CS" initiate="no"></bpel:correlation>
                     </bpel:correlations>
                 </bpel:receive>
                 
                 
                 
-            </bpel:sequence>
-                <bpel:partnerLinks>
-                    <bpel:partnerLink name="OnCloud4_PL" partnerLinkType="tns:Cloud_PL" partnerRole="CloudServicesProvider"></bpel:partnerLink>
-                </bpel:partnerLinks>
+            
+                </bpel:sequence>
+                
             </bpel:scope></bpel:flow>
         
         
+        <!--
         
-        
+        <bpel:assign validate="no" name="Assign1">
+            <bpel:copy>
+                <bpel:from><bpel:literal xml:space="preserve"><tns:callback_1 xmlns:tns="http://additivesplitting.bpelprocess" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <tns:jobID>tns:jobID</tns:jobID>
+  <tns:sub_jobID>tns:sub_jobID</tns:sub_jobID>
+  <tns:op_ID>1</tns:op_ID>
+  <tns:cloud_url>hdfs://localhost:54310</tns:cloud_url>
+  <tns:split_name>A_10_10_1</tns:split_name>
+</tns:callback_1>
+</bpel:literal></bpel:from>
+                <bpel:to variable="callbackRequest_1" part="parameters"></bpel:to>
+            </bpel:copy>
+            <bpel:copy>
+                <bpel:from>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    <![CDATA[$input.parameters/tns:jobID]]>
+                </bpel:from>
+                <bpel:to part="parameters" variable="callbackRequest_1">
+                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:jobID]]></bpel:query>
+                </bpel:to>
+            </bpel:copy>
+            <bpel:copy>
+                <bpel:from>
+                    <![CDATA[$input.parameters/tns:sub_jobID]]>
+                </bpel:from>
+                <bpel:to part="parameters" variable="callbackRequest_1">
+                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:sub_jobID]]></bpel:query>
+                </bpel:to>
+            </bpel:copy>
+            <bpel:copy>
+                <bpel:from><bpel:literal xml:space="preserve"><tns:callback_2 xmlns:tns="http://additivesplitting.bpelprocess" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <tns:jobID>tns:jobID</tns:jobID>
+  <tns:sub_jobID>tns:sub_jobID</tns:sub_jobID>
+  <tns:op_ID>1</tns:op_ID>
+  <tns:cloud_url>hdfs://localhost:54310</tns:cloud_url>
+  <tns:split_name>A_10_10_2</tns:split_name>
+</tns:callback_2>
+</bpel:literal></bpel:from>
+                <bpel:to variable="callbackRequest_2" part="parameters"></bpel:to>
+            </bpel:copy>
+            <bpel:copy>
+                <bpel:from>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    <![CDATA[$input.parameters/tns:jobID]]>
+                </bpel:from>
+                <bpel:to part="parameters" variable="callbackRequest_2">
+                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:jobID]]></bpel:query>
+                </bpel:to>
+            </bpel:copy>
+            <bpel:copy>
+                <bpel:from>
+                    <![CDATA[$input.parameters/tns:sub_jobID]]>
+                </bpel:from>
+                <bpel:to part="parameters" variable="callbackRequest_2">
+                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:sub_jobID]]></bpel:query>
+                </bpel:to>
+            </bpel:copy>
+             <bpel:copy>
+                <bpel:from><bpel:literal xml:space="preserve"><tns:callback_3 xmlns:tns="http://additivesplitting.bpelprocess" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <tns:jobID>tns:jobID</tns:jobID>
+  <tns:sub_jobID>tns:sub_jobID</tns:sub_jobID>
+  <tns:op_ID>3</tns:op_ID>
+  <tns:cloud_url>hdfs://localhost:54310</tns:cloud_url>
+  <tns:split_name>B_10_10_1</tns:split_name>
+</tns:callback_3>
+</bpel:literal></bpel:from>
+                <bpel:to variable="callbackRequest_3" part="parameters"></bpel:to>
+            </bpel:copy>
+            <bpel:copy>
+                <bpel:from>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    <![CDATA[$input.parameters/tns:jobID]]>
+                </bpel:from>
+                <bpel:to part="parameters" variable="callbackRequest_3">
+                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:jobID]]></bpel:query>
+                </bpel:to>
+            </bpel:copy>
+            <bpel:copy>
+                <bpel:from>
+                    <![CDATA[$input.parameters/tns:sub_jobID]]>
+                </bpel:from>
+                <bpel:to part="parameters" variable="callbackRequest_3">
+                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:sub_jobID]]></bpel:query>
+                </bpel:to>
+            </bpel:copy>
+             <bpel:copy>
+                <bpel:from><bpel:literal xml:space="preserve"><tns:callback_4 xmlns:tns="http://additivesplitting.bpelprocess" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <tns:jobID>tns:jobID</tns:jobID>
+  <tns:sub_jobID>tns:sub_jobID</tns:sub_jobID>
+  <tns:op_ID>4</tns:op_ID>
+  <tns:cloud_url>hdfs://localhost:54310</tns:cloud_url>
+  <tns:split_name>B_10_10_2</tns:split_name>
+</tns:callback_4></bpel:literal></bpel:from>
+                <bpel:to variable="callbackRequest_4" part="parameters"></bpel:to>
+            </bpel:copy>
+            <bpel:copy>
+                <bpel:from>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    <![CDATA[$input.parameters/tns:jobID]]>
+                </bpel:from>
+                <bpel:to part="parameters" variable="callbackRequest_4">
+                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:jobID]]></bpel:query>
+                </bpel:to>
+            </bpel:copy>
+            <bpel:copy>
+                <bpel:from>
+                    <![CDATA[$input.parameters/tns:sub_jobID]]>
+                </bpel:from>
+                <bpel:to part="parameters" variable="callbackRequest_4">
+                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:sub_jobID]]></bpel:query>
+                </bpel:to>
+            </bpel:copy>
+        </bpel:assign>
+        -->
         <bpel:assign name="Assign5" validate="no">
             
+            
             <bpel:copy>
-                <bpel:from><bpel:literal xml:space="preserve"><ws:add xmlns:ws="http://www.brokerservices.org/MatServ/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                <bpel:from><bpel:literal><ws:add xmlns:ws="http://www.brokerservices.org/MatServ/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <op_id>5</op_id>
   <job_id>job_id</job_id>
+  <add_list>
+    <cloudURL>cloudURL</cloudURL>
+    <splitName>splitName</splitName>
+  </add_list>
+  <add_list>
+    <cloudURL>cloudURL</cloudURL>
+    <splitName>splitName</splitName>
+  </add_list>
+  <add_list>
+    <cloudURL>cloudURL</cloudURL>
+    <splitName>splitName</splitName>
+  </add_list>
+  <add_list>
+    <cloudURL>cloudURL</cloudURL>
+    <splitName>splitName</splitName>
+  </add_list>
   <matA_ID>matA_ID</matA_ID>
   <matB_ID>matB_ID</matB_ID>
-  <callback>http://localhost:8080/ode/processes/AdditiveSplitting</callback>
-</ws:add></bpel:literal></bpel:from>
+  <callback>callback</callback>
+</ws:add>
+</bpel:literal></bpel:from>
                 <bpel:to variable="add_PLRequest" part="parameters"></bpel:to>
             </bpel:copy>
             <bpel:copy keepSrcElementName="no">
@@ -1870,7 +2204,7 @@
                     </bpel:query>
                 </bpel:to>
             </bpel:copy>
-        
+         
             <bpel:copy>
                 <bpel:from part="parameters" variable="callbackRequest_1">
                     <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:cloud_url]]></bpel:query>
@@ -1943,7 +2277,14 @@
                     
                     
                     
-                    <![CDATA[$add_PLRequest.parameters/ns1:add_list[1]/ns1:cloudURL]]>
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    <![CDATA[$add_PLRequest.parameters/add_list[1]/cloudURL/text()]]>
                 </bpel:to>
             </bpel:copy>
             <bpel:copy>
@@ -2009,9 +2350,10 @@
                     
                     
                     
-                    <![CDATA[$add_PLRequest.parameters/ns1:add_list[1]/ns1:splitName]]>
+                    <![CDATA[$add_PLRequest.parameters/add_list[1]/splitName/text()]]>
                 </bpel:to>
             </bpel:copy>
+            
             <bpel:copy>
                 <bpel:from part="parameters" variable="callbackRequest_2">
                     <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:cloud_url]]></bpel:query>
@@ -2072,7 +2414,7 @@
                     
                     
                     
-                    <![CDATA[$add_PLRequest.parameters/ns1:add_list[2]/ns1:cloudURL]]>
+                    <![CDATA[$add_PLRequest.parameters/add_list[2]/cloudURL/text()]]>
                 </bpel:to>
             </bpel:copy>
             <bpel:copy>
@@ -2134,9 +2476,10 @@
                     
                     
                     
-                    <![CDATA[$add_PLRequest.parameters/ns1:add_list[2]/ns1:splitName]]>
+                    <![CDATA[$add_PLRequest.parameters/add_list[2]/splitName/text()]]>
                 </bpel:to>
             </bpel:copy>
+            
             <bpel:copy>
                 <bpel:from part="parameters" variable="callbackRequest_3">
                     <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:cloud_url]]></bpel:query>
@@ -2197,7 +2540,7 @@
                     
                     
                     
-                    <![CDATA[$add_PLRequest.parameters/ns1:add_list[3]/ns1:cloudURL]]>
+                    <![CDATA[$add_PLRequest.parameters/add_list[3]/cloudURL/text()]]>
                 </bpel:to>
             </bpel:copy>
             <bpel:copy>
@@ -2259,7 +2602,7 @@
                     
                     
                     
-                    <![CDATA[$add_PLRequest.parameters/ns1:add_list[3]/ns1:splitName]]>
+                    <![CDATA[$add_PLRequest.parameters/add_list[3]/splitName/text()]]>
                 </bpel:to>
             </bpel:copy>
             <bpel:copy>
@@ -2322,7 +2665,7 @@
                     
                     
                     
-                    <![CDATA[$add_PLRequest.parameters/ns1:add_list[4]/ns1:cloudURL]]>
+                    <![CDATA[$add_PLRequest.parameters/add_list[4]/cloudURL/text()]]>
                 </bpel:to>
             </bpel:copy>
             <bpel:copy>
@@ -2384,9 +2727,10 @@
                     
                     
                     
-                    <![CDATA[$add_PLRequest.parameters/ns1:add_list[4]/ns1:splitName]]>
+                    <![CDATA[$add_PLRequest.parameters/add_list[4]/splitName/text()]]>
                 </bpel:to>
             </bpel:copy>
+            
             <bpel:copy>
                 <bpel:from>
                     
@@ -2394,17 +2738,17 @@
                     <![CDATA[string(5)]]>
                 </bpel:from>
                 <bpel:to part="parameters" variable="add_PLRequest">
-                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[op_id]]></bpel:query>
+                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+                        <![CDATA[op_id]]>
+                    </bpel:query>
                 </bpel:to>
             </bpel:copy>
+            
         </bpel:assign>
         <bpel:invoke name="Add"
             operation="add" partnerLink="OnBroker_PL" portType="ns1:MatServ" inputVariable="add_PLRequest">
-            <bpel:correlations>
-                <bpel:correlation set="OP5_CS" initiate="yes" pattern="request" ></bpel:correlation>
-            </bpel:correlations>
         </bpel:invoke>
-        <bpel:receive name="Receive2" operation="callBack_Operation1"
+        <bpel:receive name="Receive2" operation="callBack_Operation5"
             partnerLink="callback_PL" portType="tns:AdditiveSplitting" variable="callbackRequest_5">
             <bpel:correlations>
                 <bpel:correlation initiate="no" set="SUB_JOB_CS"/>
@@ -2413,7 +2757,13 @@
  
       
         
-        <bpel:assign name="Assign" validate="no"><bpel:copy>
+        
+        
+        
+        
+        
+        <bpel:assign validate="no" name="Assign">
+            <bpel:copy>
                 <bpel:from><bpel:literal><tns:AdditiveSplittingResponse xmlns:tns="http://additivesplitting.bpelprocess" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <tns:jobID>tns:jobID</tns:jobID>
   <tns:sub_jobID>tns:sub_jobID</tns:sub_jobID>
@@ -2423,168 +2773,38 @@
                 <bpel:to variable="output" part="parameters"></bpel:to>
             </bpel:copy>
             
-            
             <bpel:copy>
-                <bpel:from>
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    <![CDATA[concat($input.parameters/tns:matA_ID, "_", $input.parameters/tns:matB_ID,"_",string($ode:pid))]]>
-                </bpel:from>
-                <bpel:to>
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    <![CDATA[$output.parameters/tns:result]]>
-                </bpel:to>
-            </bpel:copy>
-        
-        
-            
-            <bpel:copy>
-                <bpel:from>
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    <![CDATA[$input.parameters/tns:jobID]]>
+                <bpel:from part="parameters" variable="input">
+                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:jobID]]></bpel:query>
                 </bpel:from>
                 <bpel:to part="parameters" variable="output">
                     <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:jobID]]></bpel:query>
                 </bpel:to>
             </bpel:copy>
             <bpel:copy>
-                <bpel:from>
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    <![CDATA[$input.parameters/tns:sub_jobID]]>
+                <bpel:from part="parameters" variable="input">
+                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:sub_jobID]]></bpel:query>
                 </bpel:from>
                 <bpel:to part="parameters" variable="output">
-                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:sub_jobID]]></bpel:query>
+                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+                        <![CDATA[tns:sub_jobID]]>
+                    </bpel:query>
                 </bpel:to>
             </bpel:copy>
-        
+            <bpel:copy>
+                <bpel:from part="parameters" variable="callbackRequest_5">
+                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:split_name]]></bpel:query>
+                </bpel:from>
+                <bpel:to part="parameters" variable="output">
+                    <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[tns:result]]></bpel:query>
+                </bpel:to>
+            </bpel:copy>
         </bpel:assign>
-        <bpel:reply name="replyOutput" operation="initiate" partnerLink="client" portType="tns:AdditiveSplitting" variable="output"><bpel:correlations>
-                <bpel:correlation set="SUB_JOB_CS" initiate="no"></bpel:correlation>
-            </bpel:correlations>
+        <bpel:invoke name="AdditiveSplitCallback" partnerLink="client" portType="tns:AdditiveSplittingCallback"  operation="onResult" 
+                inputVariable="output"></bpel:invoke> 
+         
+              
         
-        </bpel:reply>
     </bpel:sequence>
 </bpel:process>
 
