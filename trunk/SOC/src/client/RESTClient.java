@@ -11,6 +11,7 @@ import broker.JobType;
 import broker.MatrixMeta;
 import broker.ResourceMeta;
 import broker.SOCJob;
+import broker.SOCJobStatus;
 import broker.SOCResource;
 import broker.SOCResourceAlias;
 import broker.StorageProtocol;
@@ -58,27 +59,27 @@ public class RESTClient {
     	//REST_URL is a string holding the broker url for the rest services of SOC
     	//USER_TOKEN is a string holding the user specific token received upon subscribing to the broker
     	SOCClient soc = new SOCClient(REST_URI);
-        boolean connected = soc.connect();
+    	soc.setUsername("farida");
+        soc.setPassword("yasmine_123");
+    	boolean connected = soc.connect();
         SOCResource resource = new SOCResource(StorageProtocol.ADDITIVE_SPLITTING);
 		resource.setUser_token("farida");
 		resource.setFile_path("/home/farida/Documents/A1");
-		MatrixMeta meta = new MatrixMeta(10,10,DataType.INTEGER);
+		MatrixMeta meta = new MatrixMeta(10,10,"INTEGER");
 		resource.setResource_meta(meta);
         
 		resourceID = soc.addResource(resource);
-//        System.out.println("Output of get JSON resource object: "+ getResource(service));
+//      System.out.println("Output of get JSON resource object: "+ getResource(service));
         String resourceA = new String(resourceID);
-     
         resourceID = soc.addResource(resource);
        
-        
         String resourceAA = new String(resourceID);
         
         System.out.println("---------------------------------------------------");
         resource = new SOCResource(StorageProtocol.ADDITIVE_SPLITTING);
 		resource.setUser_token("farida");
 		resource.setFile_path("/home/farida/Documents/B1");
-		meta = new MatrixMeta(10,10,DataType.INTEGER);
+		meta = new MatrixMeta(10,10,"INTEGER");
 		resource.setResource_meta(meta);
        
 		resourceID = soc.addResource(resource);
@@ -107,7 +108,23 @@ public class RESTClient {
         job.setUserToken("farida");
        
         
+        
+        
         jobID= soc.addJob(job);
+        
+        SOCJobStatus status = soc.getJobStatus(jobID);
+        System.out.println("Status of the job is "+ status.getJobStatus());
+        System.out.println("Submission date of the job is "+ status.getJobSubmissionDate());
+        System.out.println("Completion date of the job is "+ status.getJobCompletionDate());
+        System.out.println("Result ID of the job is "+ status.getResultID());
+        
+        String run_time = soc.getJobRunTime(jobID);
+        System.out.println("Total runtime of the job is "+ run_time);
+        
+        String result = status.getResultID();
+        String download_directory ="/home/farida/Downloads";
+        
+        boolean download_started = soc.getResource(result, download_directory);
   //      System.out.println("Output of get JSON Job object: "+ getJob(service));
      
     }
