@@ -7,6 +7,7 @@ public class SOCResource {
 	private String user_token;
 	private String file_path;
 	private ResourceMeta resource_meta;
+	private Boolean available;
 	
 	public ResourceMeta getResource_meta() {
 		return resource_meta;
@@ -16,9 +17,7 @@ public class SOCResource {
 			this.resource_meta =  new broker.MatrixMeta(resource_meta);
 		else
 			this.resource_meta =  new ResourceMeta(resource_meta.getType());
-		
 	}
-	
 	
 	public void setResource_meta(broker.MatrixMeta resource_meta) {
 		this.resource_meta = new broker.MatrixMeta(resource_meta);
@@ -75,6 +74,17 @@ public class SOCResource {
 	{
 		
 	}
-	
+	/**
+	 * @return the available
+	 */
+	public Boolean getAvailable() {
+		return available;
+	}
+	/**
+	 * @param available the available to set
+	 */
+	public void setAvailable(Boolean available) {
+		this.available = available;
+	}
 
 }

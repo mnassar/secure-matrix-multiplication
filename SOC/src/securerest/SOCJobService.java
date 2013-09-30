@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -41,6 +42,12 @@ import javax.xml.soap.SOAPMessage;
 
 import matrix.splitters.AdditiveSplitter;
 
+import org.apache.axiom.om.OMAbstractFactory;
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.soap.SOAPEnvelope;
+import org.apache.axiom.soap.SOAPFactory;
+import org.apache.axis2.AxisFault;
+import org.apache.axis2.client.ServiceClient;
 import org.codehaus.jackson.map.*;
 import org.nfunk.jep.ParseException;
 import org.xml.sax.SAXException;
@@ -148,9 +155,17 @@ public Response compute(SOCJob job)
 						    builder.registerTypeAdapter(ResourceMeta.class   , new ResourceMetaAdapter());
 						    gson = builder.create();
 							BrokerSOCResource resourceObj = gson.fromJson(resource, BrokerSOCResource.class);
-							translator.addExpressionVariable(alias,resourceObj);
+							if(resourceObj.getAvailable())
+								translator.addExpressionVariable(alias,resourceObj);
+							else
+							{
+								job_to_start.getStatus().setJobStatus("Failed to start: one or more of the resources are not ready!");
+								conn.updateSOCJob(job_to_start);
+								conn.close();
+								return;
+							}
 						}
-						conn.close();
+						
 						ExpressionToWorkflow workflow_generator = new ExpressionToWorkflow(translator);
 						workflow_generator.initialise();
 						try {
@@ -170,85 +185,83 @@ public Response compute(SOCJob job)
 						}
 						//Execute the workflow
 						logfile.write("Execution of workflow process starts at : "+ dateFormat.format(new java.util.Date()));
+
+						org.apache.axis2.client.ServiceClient _serviceClient;
 						try {
-							SOAPConnectionFactory sfc = SOAPConnectionFactory.newInstance();
-							SOAPConnection connection = sfc.createConnection();
+							_serviceClient = new org.apache.axis2.client.ServiceClient();
+							_serviceClient.getOptions().setTo(new org.apache.axis2.addressing.EndpointReference(
+									workflow_generator.getProcessURL()));
+							_serviceClient.getOptions().setUseSeparateListener(false);
+							org.apache.axis2.context.MessageContext _messageContext = null;
 
-							MessageFactory mf = MessageFactory.newInstance();
-							SOAPMessage sm = mf.createMessage();
 
-							SOAPHeader sh = sm.getSOAPHeader();
-							SOAPBody sb = sm.getSOAPBody();
-							sh.detachNode();
-							QName bodyName = new QName(workflow_generator.getWorkflowNamespace(), "expjob_"+job_to_start.getJob_Id()+"Request", "tns");
-							SOAPBodyElement bodyElement = sb.addBodyElement(bodyName);
-							QName qn = new QName("expression");
+							org.apache.axis2.client.OperationClient _operationClient = _serviceClient.createClient(ServiceClient.ANON_OUT_IN_OP);
+							_operationClient.getOptions().setAction("http://soc.expjob_"+workflow_generator.getJob_ID()+".workflow/start");
+							_operationClient.getOptions().setExceptionToBeThrownOnSOAPFault(true);
+
+
+
+							//addPropertyToOperationClient(_operationClient,org.apache.axis2.description.WSDL2Constants.ATTR_WHTTP_QUERY_PARAMETER_SEPARATOR,"&");
+
+							org.apache.axiom.soap.SOAPEnvelope env = null;
+							_messageContext = new org.apache.axis2.context.MessageContext();
+
+
+							SOAPFactory soapFactory = OMAbstractFactory.getSOAP11Factory();
+
+
+							env = soapFactory.getDefaultEnvelope();
+
+						//	env.setLocalName("expjob_2301Request");
+							OMElement omElement = soapFactory.createOMElement(new QName("http://soc.expjob_"+workflow_generator.getJob_ID()+".workflow","expjob_"+workflow_generator.getJob_ID()+"Request","q0"));
+							OMElement omElement1 = soapFactory.createOMElement(new QName("http://soc.expjob_"+workflow_generator.getJob_ID()+".workflow","expression","q0"));
+							omElement1.setText(job_to_start.getExpression());
 							
-							SOAPElement quotation = bodyElement.addChildElement(qn);
-
-							quotation.addTextNode(job_to_start.getExpression());
-
-							qn = new QName("jobID");
+							OMElement omElement2 = soapFactory.createOMElement(new QName("http://soc.expjob_"+workflow_generator.getJob_ID()+".workflow","jobID","q0"));
+							omElement2.setText(job_to_start.getJob_Id());
 							
-							SOAPElement job = bodyElement.addChildElement(qn);
+							env.getBody().addChild(omElement);
+							env.getBody().getFirstElement().addChild(omElement1);
+							env.getBody().getFirstElement().addChild(omElement2);
 
-							job.addTextNode(job_to_start.getJob_Id());
 
-						//	System.out.println("\n Soap Request:\n");
-							sm.writeTo(System.out);
-						
-						//	System.out.println();
+							//adding SOAP soap_headers
+							_serviceClient.addHeadersToEnvelope(env);
+							// create message context with that soap envelope
 
-							URL endpoint = new URL(workflow_generator.getProcessURL());
-							SOAPMessage response = connection.call(sm, endpoint);
-							System.out.println(response.getContentDescription());
-							logfile.write(response.getContentDescription());
-						} catch (Exception ex) {
-							ex.printStackTrace();
-						}
-						/*
-						try {
-							String soapXml = "<?xml version=\"1.0\" encoding=\"utf-16\"?>"+
-						"<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\">"
-						+ "<soap:Body><expjob_"+job_to_start.getJob_Id()+"Request> "
-						+"<expression>"+ job_to_start.getExpression()+"</expression>"
-						+"<jobID>"+job_to_start.getJob_Id()+"</jobID>"
-						+"</expjob_"+job_to_start.getJob_Id()+"Request>"  
-						+"</soap:Body></soap:Envelope>";
+							env.writeTextTo(new PrintWriter(System.out), true);
+							_messageContext.setEnvelope(env);
 
-							java.net.URL url = new java.net.URL(workflow_generator.getProcessURL());
-							java.net.URLConnection url_conn = url.openConnection();
-							// Set the necessary header fields
-							url_conn.setRequestProperty("SOAPAction", SOCConfiguration.BROKER_URL+"/ode/processes/expjob_"+job_to_start.getJob_Id());
-							url_conn.setDoOutput(true);
-							// Send the request
-							java.io.OutputStreamWriter wr = new java.io.OutputStreamWriter(url_conn.getOutputStream());
-							wr.write(soapXml);
-							wr.flush();
-							// Read the response
-							java.io.BufferedReader rd = new java.io.BufferedReader(new java.io.InputStreamReader(url_conn.getInputStream()));
-							String line;
+							// add the message contxt to the operation client
+							_operationClient.addMessageContext(_messageContext);
 
-							while ((line = rd.readLine()) != null) { System.out.println(line);  }
-						} catch (MalformedURLException e) {
+							_operationClient.execute(true);
+
+
+							if (_messageContext.getTransportOut() != null) {
+								SOAPEnvelope response = _messageContext.getEnvelope();
+								System.out.println(response); 
+								_messageContext.getTransportOut().getSender().cleanup(_messageContext);
+								job_to_start.getStatus().setJobStatus("Job in progress ....");
+								conn.updateSOCJob(job_to_start);
+								conn.close();
+							}
+
+						} catch (AxisFault e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
-*/
-						
-						
+						conn.close();
 					}
 					else // couldn't connect to database
 					{
 						System.out.println("Operation didn't complete, problem connecting to the data store");
 					}
-		
    				}
-	
-   			}
+			}
 		 }).start();
 		//return the job id used by the broker  to compute the expression			
 		

@@ -8,21 +8,9 @@ public class SOCJobStatus {
 	private Date jobCompletionDate; //  1/1/2012 13:00,
 	private Date jobSubmissionDate;  // 1/1/2012 12:00,
 	
-	private String resultUrl; // http://broker/resource/result123
+	private String resultID; // http://broker/resource/result123
 
-	/**
-	 * @return the resultUrl
-	 */
-	public String getResultUrl() {
-		return resultUrl;
-	}
-
-	/**
-	 * @param resultUrl the resultUrl to set
-	 */
-	public void setResultUrl(String resultUrl) {
-		this.resultUrl = resultUrl;
-	}
+	
 
 	/**
 	 * @return the jobSubmissionDate
@@ -69,5 +57,13 @@ public class SOCJobStatus {
 	public SOCJobStatus(Date jobSubmissionDate) {
 		super();
 		this.jobSubmissionDate = jobSubmissionDate;
+	}
+
+	public String getResultID() {
+		return resultID;
+	}
+
+	public void setResultID(String resultID) {
+		this.resultID = resultID;
 	}
 }

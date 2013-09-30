@@ -25,7 +25,6 @@ public class BrokerSOCResource extends SOCResource{
 		if(locations!=null)
 			locations.add(loc);
 	}
-	
 	public BrokerSOCResource(String resource_id) {
 	
 		this.resource_id = resource_id;
@@ -33,21 +32,20 @@ public class BrokerSOCResource extends SOCResource{
 	}
 	public BrokerSOCResource(String resource_id, ArrayList<Location> locations,
 			ResourceMeta resource_meta) {
-		//super();
 		this.resource_id = resource_id;
 		this.locations = locations;
-		
 		this.setResource_meta( resource_meta);
 	}
 	
 	public BrokerSOCResource(BrokerSOCResource resource) {
-		//super();
 		this.resource_id = resource.getResource_id();
 		this.locations = resource.getLocations();
 		this.setFile_path(resource.getFile_path());
-	    this.setResource_meta( (MatrixMeta)resource.getResource_meta());
 		this.setStorage_protocol(resource.getStorage_protocol());
 		this.setUser_token(resource.getUser_token());
+		
+		if(resource.getResource_meta().getType().equals("matrix"))
+			 this.setResource_meta( new MatrixMeta(((MatrixMeta)resource.getResource_meta()).getnRows(), ((MatrixMeta)resource.getResource_meta()).getnColumns(), ((MatrixMeta)resource.getResource_meta()).getdataType()));
 	}
 	public BrokerSOCResource(StorageProtocol storage_protocol, String user_token) {
 		
@@ -60,16 +58,8 @@ public class BrokerSOCResource extends SOCResource{
 		 super(resource.getStorage_protocol(), resource.getUser_token());
 		 locations = new ArrayList<Location>();
 		 if(resource.getResource_meta().getType().equals("matrix"))
-			 this.setResource_meta( new MatrixMeta(((MatrixMeta)resource.getResource_meta()).getnRows(), ((MatrixMeta)resource.getResource_meta()).getnColumns(), ((MatrixMeta)resource.getResource_meta()).getDataType()));
+			 this.setResource_meta( new MatrixMeta(((MatrixMeta)resource.getResource_meta()).getnRows(), ((MatrixMeta)resource.getResource_meta()).getnColumns(), ((MatrixMeta)resource.getResource_meta()).getdataType()));
 	}
 	
-	/*public ResourceMeta getResource_meta()
-	{
-		
-		if(super.getResource_meta().getType().equals("matrix"))
-			return new MatrixMeta(((MatrixMeta)super.getResource_meta()).getnRows(), ((MatrixMeta)super.getResource_meta()).getnColumns(), ((MatrixMeta)super.getResource_meta()).getDataType());
-		return super.getResource_meta();
-	}
-	*/
 
 }

@@ -141,6 +141,27 @@ public class MetadataStoreConnection {
 		return null;
 	}
 
+	public int updateSOCJob(SOCJob job)
+
+	{
+		Gson gson = new Gson();
+
+		String job_json = gson.toJson(job);
+
+		PreparedStatement statement;
+		try {
+			
+			String query= "UPDATE jobs SET job ='"+job_json+"' WHERE job_id='"+ job.getJob_Id()+"'";
+			System.out.println(query);
+			statement = connect.prepareStatement(query);
+			return  statement.executeUpdate();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return 0;
+	}
 
 	public void close() {
 		try {

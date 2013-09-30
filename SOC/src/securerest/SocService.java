@@ -72,7 +72,7 @@ public Response storeResource(SOCResource resource)
 {
 		//@FormParam("file") InputStream uploadedInputStream,
 		//@FormParam("file") FormDataContentDisposition fileDetail) {
-		SOCConfiguration conf = new SOCConfiguration();
+		final SOCConfiguration conf = new SOCConfiguration();
 		
 		Random r= new Random();
 		String resource_id = new Integer(r.nextInt(10000)).toString();
@@ -86,9 +86,11 @@ public Response storeResource(SOCResource resource)
 		resourceOnBroker.setFile_path(uploadedFileLocation);
 		
 		
-		///////////////// Read Matrix from file and store it to the broker grid ftp server
+		/*
+		///////////////// Read Matrix from file and store it to the broker  ftp server
 		// UPLOAD ... will be replaced by the GridFTP or  alternative code to upload the file
 		///////////////////////////////////
+		 * ------------->>>>>>>>>>>>>>>>>> now done in SOCCLient with sftp >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>.
 		InputStream uploadedInputStream;
 		try {
 			uploadedInputStream = new FileInputStream(new File(resource.getFile_path()));
@@ -97,23 +99,33 @@ public Response storeResource(SOCResource resource)
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+		*/
 
-		String output = "File uploaded via Jersey based RESTFul Webservice to: " + uploadedFileLocation;
+		final BrokerSOCResource broker_res = new BrokerSOCResource(resourceOnBroker);
+		//Wait for the file to be uploaded to split it
+		new Thread(new Runnable() {
+			public void run() {
+				
+			File uploadedfile = new File(broker_res.getFile_path());
+			while(!uploadedfile.exists());
+		
+			broker_res.setAvailable(true);
+			
+			String output = "File uploaded via Jersey based RESTFul Webservice to: " + broker_res.getFile_path();
 
 		//do the splitting of file into two files if additive splitting
 		//and save the  splits on the cloud
-		if(resource.getStorage_protocol() == StorageProtocol.ADDITIVE_SPLITTING)
+		if(broker_res.getStorage_protocol() == StorageProtocol.ADDITIVE_SPLITTING)
 		{
-			AdditiveSplitter splitter = new AdditiveSplitter(resourceOnBroker);
+			AdditiveSplitter splitter = new AdditiveSplitter(broker_res);
 			
 			Location loc_split1 = conf.getRandomCloud();
 			Location loc_split2 ;
 			while((loc_split2= conf.getRandomCloud())!=loc_split1);
 			
 			splitter.Split(loc_split1, loc_split2);
-			resourceOnBroker.addLocation(loc_split1);
-			resourceOnBroker.addLocation(loc_split2);
+			broker_res.addLocation(loc_split1);
+			broker_res.addLocation(loc_split2);
 		}
 		
 		
@@ -122,7 +134,7 @@ public Response storeResource(SOCResource resource)
 		MetadataStoreConnection conn;
 		try {
 			conn = new MetadataStoreConnection(SOCConfiguration.METADATA_STORE_URL);
-			conn.addSOCResource(resourceOnBroker);
+			conn.addSOCResource(broker_res);
 			conn.close();
 			
 		} catch (Exception e) {
@@ -130,7 +142,7 @@ public Response storeResource(SOCResource resource)
 			e.printStackTrace();
 		}
 		
-	
+			}}).start();
 		
 		//return the resource id used by the broker  to get the matrix			
 		
@@ -163,33 +175,36 @@ private void saveToFile(InputStream uploadedInputStream,
 
 @GET
 @Path("/{resourceID}") //+resource_id
-@Produces(MediaType.TEXT_PLAIN)
-public String getResource(@PathParam("resourceID") String resourceID ) {
+@Produces(MediaType.APPLICATION_JSON)
+public BrokerSOCResource getResource(@PathParam("resourceID") String resourceID ) {
   	
 	SOCConfiguration conf = new SOCConfiguration();
+	BrokerSOCResource resource = null ;
 	try {
 		MetadataStoreConnection conn = new MetadataStoreConnection(SOCConfiguration.METADATA_STORE_URL);
 		String resource_metadata= conn.getSOCResource(resourceID);
 		conn.close();
-		BrokerSOCResource resource ;
+		
 		Gson gson = new Gson();
 		resource = gson.fromJson(resource_metadata, BrokerSOCResource.class);
 		
 		String fileLocation = SOCConfiguration.BROKER_STORAGE_PATH +"/"+ resource.getResource_id();
 		
 		File brokerfile = new File(fileLocation);
-		if(brokerfile.exists())
-		{
-			//copy directly to client
-		}
-		else
+		if(!brokerfile.exists())
 		{
 			//Get the splits locations and add them to get the original file
+			if(resource.getStorage_protocol() == StorageProtocol.ADDITIVE_SPLITTING)
+			{
+				AdditiveSplitter splitter = new AdditiveSplitter(resource);
+				splitter.Combine(resource.getLocations().get(0), resource.getLocations().get(1));
+			
+			}
 		}
 		
 		String message = resource.getResource_id() + " saved !";
 		
-		return message;
+		return resource;
 		
 	} catch (Exception e) {
 		// TODO Auto-generated catch block
