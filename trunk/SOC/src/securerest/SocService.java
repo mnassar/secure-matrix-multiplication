@@ -33,6 +33,7 @@ import matrix.splitters.AdditiveSplitter;
 import org.codehaus.jackson.map.*;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.sun.jersey.core.header.FormDataContentDisposition;
 
 import Jama.Matrix;
@@ -40,6 +41,8 @@ import Jama.Matrix;
 import broker.BrokerSOCResource;
 import broker.Location;
 import broker.MetadataStoreConnection;
+import broker.ResourceMeta;
+import broker.ResourceMetaAdapter;
 import broker.SOCConfiguration;
 import broker.SOCResource;
 import broker.StorageProtocol;
@@ -107,6 +110,7 @@ public Response storeResource(SOCResource resource)
 			public void run() {
 				
 			File uploadedfile = new File(broker_res.getFile_path());
+
 			while(!uploadedfile.exists());
 		
 			broker_res.setAvailable(true);
@@ -174,7 +178,7 @@ private void saveToFile(InputStream uploadedInputStream,
 
 
 @GET
-@Path("/{resourceID}") //+resource_id
+@Path("{resourceID}") //+resource_id
 @Produces(MediaType.APPLICATION_JSON)
 public BrokerSOCResource getResource(@PathParam("resourceID") String resourceID ) {
   	
@@ -186,6 +190,9 @@ public BrokerSOCResource getResource(@PathParam("resourceID") String resourceID 
 		conn.close();
 		
 		Gson gson = new Gson();
+		GsonBuilder builder = new GsonBuilder();
+		builder.registerTypeAdapter(ResourceMeta.class   , new ResourceMetaAdapter());
+		gson = builder.create();
 		resource = gson.fromJson(resource_metadata, BrokerSOCResource.class);
 		
 		String fileLocation = SOCConfiguration.BROKER_STORAGE_PATH +"/"+ resource.getResource_id();

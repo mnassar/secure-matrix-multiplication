@@ -26,7 +26,7 @@ public class ExpressionTranslator {
 	public ExpressionTranslator(String job_id, String expression)
 	{
 
-		setJob_ID("job_"+ job_id);
+		setJob_ID(job_id);
 		setExpression(expression);
 		variables_map = new HashMap<String, BrokerSOCResource>();
 	}

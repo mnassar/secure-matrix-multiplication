@@ -51,7 +51,7 @@ public class SOCJobStatus {
 	 * @param jobStatus the jobStatus to set
 	 */
 	public void setJobStatus(String jobStatus) {
-		this.jobStatus = jobStatus;
+		this.jobStatus = new String(jobStatus);
 	}
 
 	public SOCJobStatus(Date jobSubmissionDate) {
@@ -59,11 +59,15 @@ public class SOCJobStatus {
 		this.jobSubmissionDate = jobSubmissionDate;
 	}
 
+	public SOCJobStatus(String jobStatus) {
+		this.jobStatus= new String(jobStatus);
+	}
+	
 	public String getResultID() {
 		return resultID;
 	}
 
 	public void setResultID(String resultID) {
-		this.resultID = resultID;
+		this.resultID = new String(resultID);
 	}
 }

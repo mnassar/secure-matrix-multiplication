@@ -599,10 +599,10 @@ public class WSDLGenerator  {
 
 		if(queryString!= null)
 		{
-			Element query = doc.createElement("query");
-
+			Element query = doc.createElement("vprop:query");
 			query.setTextContent(queryString);
 			propertyAlias.appendChild(query);
+			
 		}
 		// show the schema w3c element via conversion JDOM Element and coversion to string
 		DOMBuilder jdbuilder = new org.jdom.input.DOMBuilder();
