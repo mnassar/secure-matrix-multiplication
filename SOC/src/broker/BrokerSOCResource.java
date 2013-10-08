@@ -29,12 +29,14 @@ public class BrokerSOCResource extends SOCResource{
 	
 		this.resource_id = resource_id;
 		this.locations = new ArrayList<Location>();
+		//this.setAvailable(false);
 	}
 	public BrokerSOCResource(String resource_id, ArrayList<Location> locations,
 			ResourceMeta resource_meta) {
 		this.resource_id = resource_id;
 		this.locations = locations;
 		this.setResource_meta( resource_meta);
+		//this.setAvailable(true);
 	}
 	
 	public BrokerSOCResource(BrokerSOCResource resource) {
@@ -43,6 +45,7 @@ public class BrokerSOCResource extends SOCResource{
 		this.setFile_path(resource.getFile_path());
 		this.setStorage_protocol(resource.getStorage_protocol());
 		this.setUser_token(resource.getUser_token());
+		this.setAvailable(resource.getAvailable());
 		
 		if(resource.getResource_meta().getType().equals("matrix"))
 			 this.setResource_meta( new MatrixMeta(((MatrixMeta)resource.getResource_meta()).getnRows(), ((MatrixMeta)resource.getResource_meta()).getnColumns(), ((MatrixMeta)resource.getResource_meta()).getdataType()));

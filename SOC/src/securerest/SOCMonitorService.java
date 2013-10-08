@@ -49,9 +49,13 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import broker.BrokerSOCResource;
+import broker.MetadataStoreConnection;
 import broker.SOCConfiguration;
+import broker.SOCJob;
 import broker.SOCJobStatus;
 
+import com.google.gson.Gson;
 import com.sun.xml.internal.stream.events.XMLEventAllocatorImpl;
 
 
@@ -67,185 +71,264 @@ import java.util.concurrent.TimeUnit;
 public class SOCMonitorService {
 
 	protected final static ObjectMapper defaultMapper = new ObjectMapper();
-	 private ServiceClientUtil _client;
+	private ServiceClientUtil _client;
 
 	@POST
 	@Path("/getRunTime")
 	@Consumes (MediaType.TEXT_PLAIN)
 	@Produces(MediaType.TEXT_PLAIN)
 	public String getProcessInstanceExecutionTime(String jobID) {
-	  	
-		String instanceID =null; //should be get from the metadataStore
-		
-		/****************************
- 	    * NEEDS UPDATE
- 	    */
-		
-		String duration = null;
-		_client = new ServiceClientUtil();
-		OMElement root = _client.buildMessage("getInstanceInfo", new String[] {"iid"}, new String[] {instanceID});
-		OMElement result =null;
-        try {
-			
-        	   result = sendToIM(root);
-        	   
-        	   String status = result.getAttributeValue(new QName(Namespaces.ODE_PMAPI, "status"));//getFirstElement().getFirstChildWithName(new QName(Namespaces.ODE_PMAPI, "instance-info"))
-               //.getFirstChildWithName(new QName(Namespaces.ODE_PMAPI, "status")).getText();
-	 
-	   DateFormat xsdDF = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
-	   
-	   String start_time= result.getAttributeValue(new QName(Namespaces.ODE_PMAPI, "dt-started"));//result.getFirstElement().getFirstChildWithName(new QName(Namespaces.ODE_PMAPI, "instance-info"))
-               //.getFirstChildWithName(new QName(Namespaces.ODE_PMAPI, "dt-started")).getText();
-	 
-	   String end_date = result.getAttributeValue(new QName(Namespaces.ODE_PMAPI, "dt-last-active"));//result.getFirstElement().getFirstChildWithName(new QName(Namespaces.ODE_PMAPI, "instance-info"))
-              // .getFirstChildWithName(new QName(Namespaces.ODE_PMAPI, "dt-last-active")).getText();
 
-	   		System.out.println("Started the process with id "+instanceID + "\n result: "+result.getText()); //" with status "+ status + " \n start time : "+ start_time + " \n last active time :" + end_date );
-			 return result.toStringWithConsume();
-		} catch (AxisFault | XMLStreamException  e) {
+		SOCConfiguration conf = new SOCConfiguration();
+		MetadataStoreConnection conn;
+		SOCJob job = null;
+		try {
+			conn = new MetadataStoreConnection(SOCConfiguration.METADATA_STORE_URL);
+			String job_json = conn.getSOCJob(jobID);
+			
+			Gson gson = new Gson();
+			job = gson.fromJson(job_json, SOCJob.class);
+			
+			String instanceID =null; //should be get from the metadataStore
+
+			if(job !=null)
+				instanceID = job.getBpel_instanceID();
+			else
+				return "No job instance with this ID is found!!";
+
+			String duration = null;
+			_client = new ServiceClientUtil();
+			OMElement root = _client.buildMessage("getInstanceInfo", new String[] {"iid"}, new String[] {instanceID});
+			OMElement result =null;
+			Date sDate = null;
+			Date eDate =null;
+			try {
+
+				result = sendToIM(root);
+				String[] response = parseXML(result.toStringWithConsume());
+				DateFormat xsdDF = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+				//Date format: 2013-04-01T22:50:38.877-07:00
+				//<axis2ns363:getInstanceInfoResponse xmlns:axis2ns363="http://www.apache.org/ode/pmapi"><instance-info><ns:iid xmlns:ns="http://www.apache.org/ode/pmapi/types/2006/08/02/">26451</ns:iid><ns:pid xmlns:ns="http://www.apache.org/ode/pmapi/types/2006/08/02/">{http://matrix.bpelprocess}WF_Process-28</ns:pid><ns:process-name xmlns:ns="http://www.apache.org/ode/pmapi/types/2006/08/02/" xmlns:mat="http://matrix.bpelprocess">mat:WF_Process</ns:process-name><ns:root-scope xmlns:ns="http://www.apache.org/ode/pmapi/types/2006/08/02/" siid="26501" status="ACTIVE" name="__PROCESS_SCOPE:WF_Process" modelId="76" /><ns:status xmlns:ns="http://www.apache.org/ode/pmapi/types/2006/08/02/">ACTIVE</ns:status><ns:dt-started xmlns:ns="http://www.apache.org/ode/pmapi/types/2006/08/02/">2013-04-01T22:50:38.877-07:00</ns:dt-started><ns:dt-last-active xmlns:ns="http://www.apache.org/ode/pmapi/types/2006/08/02/">2013-04-01T22:50:41.098-07:00</ns:dt-last-active> .....
+				sDate = xsdDF.parse(response[1]); 
+				eDate= xsdDF.parse(response[2]);
+
+				job.setJobCompletionDate(eDate);
+				job.getStatus().setJobStatus(response[0]);
+		//		long diffInMillies = eDate.getTime() - sDate.getTime();
+	    //		long difference = TimeUnit.SECONDS.convert(diffInMillies,TimeUnit.MILLISECONDS);
+
+				long diffInMillies = eDate.getTime() - job.getStatus().getJobSubmissionDate().getTime();
+				long difference = TimeUnit.SECONDS.convert(diffInMillies,TimeUnit.MILLISECONDS);
+
+				duration = String.valueOf(difference);
+
+				conn.updateSOCJob(job);
+				conn.close();
+				
+				return duration;
+			} catch (AxisFault | XMLStreamException  e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	  	return "Not Found";
+		
+		return "No job instance with this ID is found!!";
 	}
 
-	
+
 	@POST
 	@Path("/getStatus")
 	@Consumes (MediaType.TEXT_PLAIN)
-	@Produces(MediaType.APPLICATION_JSON)
-	public SOCJobStatus getProcessInstanceTimeStatus(String jobID) {
-	  	
-		String instanceID =null; //should be get from the metadataStore
-		
-		String duration = null;
-		_client = new ServiceClientUtil();
-		OMElement root = _client.buildMessage("getInstanceInfo", new String[] {"iid"}, new String[] {instanceID});
-		OMElement result =null;
-        try {
+	@Produces(MediaType.TEXT_PLAIN)
+	public String getProcessInstanceStatus(String jobID) {
+
+		SOCConfiguration conf = new SOCConfiguration();
+		MetadataStoreConnection conn;
+		SOCJob job = null;
+		try {
+			conn = new MetadataStoreConnection(SOCConfiguration.METADATA_STORE_URL);
+			String job_json = conn.getSOCJob(jobID);
 			
-        	   result = sendToIM(root);
-        	   String[] response = parseXML(result.toStringWithConsume());
-        	   
-        	   /****************************
-        	    * NEEDS UPDATE
-        	    */
-        	   //get job status data from  meta_data_store
-        	   SOCJobStatus status = new SOCJobStatus(new Date(Date.parse(response[0])));
-        	   
-        	   ///****************************
-        	 //  return response;
-		} catch (AxisFault | XMLStreamException  e) {
+			Gson gson = new Gson();
+			job = gson.fromJson(job_json, SOCJob.class);
+			if(job!=null)
+				return job.getStatus().getJobStatus();
+			else
+				return new String("No job instance with this ID is found!!");
+			/*
+			String instanceID =null; //should be get from the metadataStore
+
+			if(job !=null)
+				instanceID = job.getBpel_instanceID();
+			else
+				return new String("No job instance with this ID is found!!");
+
+			String duration = null;
+			_client = new ServiceClientUtil();
+			OMElement root = _client.buildMessage("getInstanceInfo", new String[] {"iid"}, new String[] {instanceID});
+			OMElement result =null;
+			try {
+
+				result = sendToIM(root);
+				String[] response = parseXML(result.toStringWithConsume());
+
+				DateFormat xsdDF = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+				Date eDate= xsdDF.parse(response[2]);
+
+				job.setJobCompletionDate(eDate);
+				job.getStatus().setJobStatus(response[0]);
+				
+				conn.updateSOCJob(job);
+				conn.close();
+				
+				return response[0]; //Status of the job
+				
+				
+			} catch (AxisFault | XMLStreamException  e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			*/
+  		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	  	return null;
+		return null;
 	}
-	
+
+	@POST
+	@Path("/getResult")
+	@Consumes (MediaType.TEXT_PLAIN)
+	@Produces(MediaType.TEXT_PLAIN)
+	public String getJobResultID(String jobID) {
+
+		SOCConfiguration conf = new SOCConfiguration();
+		MetadataStoreConnection conn;
+		SOCJob job = null;
+		try {
+			conn = new MetadataStoreConnection(SOCConfiguration.METADATA_STORE_URL);
+			String job_json = conn.getSOCJob(jobID);
+			
+			Gson gson = new Gson();
+			job = gson.fromJson(job_json, SOCJob.class);
+			
+			conn.close();
+			
+			return job.getStatus().getResultID();
+			 
+  		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return "No job instance with this ID is found!!";
+	}
+
 	@GET
 	@Path("/get")
 	@Produces(MediaType.TEXT_PLAIN)
 	public String getLastInstanceExecutionTime() {
-	  	
+
+		SOCConfiguration conf = new SOCConfiguration();
 		String duration = new String("Don't exist");
 		_client = new ServiceClientUtil();
 		OMElement root = _client.buildMessage("getInstanceInfo", new String[] {"iid"}, new String[] {"26451"});
 		OMElement result = null;
-		
-        try {
+
+		try {
+
+			result = sendToIM(root);
+			String status = result.getAttributeValue(new QName(Namespaces.ODE_PMAPI, "status"));//getFirstElement().getFirstChildWithName(new QName(Namespaces.ODE_PMAPI, "instance-info"))
+			//.getFirstChildWithName(new QName(Namespaces.ODE_PMAPI, "status")).getText();
+
+			DateFormat xsdDF = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+
+			String start_time= result.getAttributeValue(new QName(Namespaces.ODE_PMAPI, "dt-started"));//result.getFirstElement().getFirstChildWithName(new QName(Namespaces.ODE_PMAPI, "instance-info"))
+			//.getFirstChildWithName(new QName(Namespaces.ODE_PMAPI, "dt-started")).getText();
+
+			String end_date = result.getAttributeValue(new QName(Namespaces.ODE_PMAPI, "dt-last-active"));//result.getFirstElement().getFirstChildWithName(new QName(Namespaces.ODE_PMAPI, "instance-info"))
+			// .getFirstChildWithName(new QName(Namespaces.ODE_PMAPI, "dt-last-active")).getText();
+
 			
-        		result = sendToIM(root);
-        	 	String status = result.getAttributeValue(new QName(Namespaces.ODE_PMAPI, "status"));//getFirstElement().getFirstChildWithName(new QName(Namespaces.ODE_PMAPI, "instance-info"))
-		                //.getFirstChildWithName(new QName(Namespaces.ODE_PMAPI, "status")).getText();
-			 
-			   DateFormat xsdDF = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
-			   
-			   String start_time= result.getAttributeValue(new QName(Namespaces.ODE_PMAPI, "dt-started"));//result.getFirstElement().getFirstChildWithName(new QName(Namespaces.ODE_PMAPI, "instance-info"))
-		                //.getFirstChildWithName(new QName(Namespaces.ODE_PMAPI, "dt-started")).getText();
-			 
-			   String end_date = result.getAttributeValue(new QName(Namespaces.ODE_PMAPI, "dt-last-active"));//result.getFirstElement().getFirstChildWithName(new QName(Namespaces.ODE_PMAPI, "instance-info"))
-		               // .getFirstChildWithName(new QName(Namespaces.ODE_PMAPI, "dt-last-active")).getText();
-		
-			   System.out.println("Started the process with id "+26451 + "\n result: "+result.getText()); //" with status "+ status + " \n start time : "+ start_time + " \n last active time :" + end_date );
-		
+
 		} catch (AxisFault  e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	  	try {
+		try {
+			
 			return result.toStringWithConsume();
 		} catch (XMLStreamException e) {
 			// TODO Auto-generated catch block
-		
+
 			e.printStackTrace();
 		}
-	  	
-	  	return "Not found";
+
+		return "Not found";
 	}
-	
-	 private static String[] parseXML(String result)
-	    {
-	    	  DocumentBuilder db;
-				try {
-					db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-					 InputSource is = new InputSource();
-					    is.setCharacterStream(new StringReader(result));
 
-					    org.w3c.dom.Document doc = db.parse(is);
-						
-					    NodeList nodes = doc.getElementsByTagName("instance-info");
+	private  String[] parseXML(String result)
+	{
+		DocumentBuilder db;
+		try {
+			db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+			InputSource is = new InputSource();
+			is.setCharacterStream(new StringReader(result));
 
-					    for (int i = 0; i < nodes.getLength(); i++) {
-					      Element element = (Element) nodes.item(i);
+			org.w3c.dom.Document doc = db.parse(is);
 
-					      NodeList name = element.getElementsByTagName("ns:status");
-					      Element line = (Element) name.item(0);
-					     String status =new String(((CharacterData)line.getFirstChild()).getData()); 
-					      
-					      NodeList firstPath = element.getElementsByTagName("ns:dt-started");
-					      line = (Element) firstPath.item(0);
-					      String start_date=new String(((CharacterData)line.getFirstChild()).getData());
-					      
-					      NodeList secondPath = element.getElementsByTagName("ns:dt-last-active");
-					      line = (Element) secondPath.item(0);
-					      String end_date=new String(((CharacterData)line.getFirstChild()).getData());
-					      DateFormat xsdDF = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
-					      //Date format: 2013-04-01T22:50:38.877-07:00
-					      //<axis2ns363:getInstanceInfoResponse xmlns:axis2ns363="http://www.apache.org/ode/pmapi"><instance-info><ns:iid xmlns:ns="http://www.apache.org/ode/pmapi/types/2006/08/02/">26451</ns:iid><ns:pid xmlns:ns="http://www.apache.org/ode/pmapi/types/2006/08/02/">{http://matrix.bpelprocess}WF_Process-28</ns:pid><ns:process-name xmlns:ns="http://www.apache.org/ode/pmapi/types/2006/08/02/" xmlns:mat="http://matrix.bpelprocess">mat:WF_Process</ns:process-name><ns:root-scope xmlns:ns="http://www.apache.org/ode/pmapi/types/2006/08/02/" siid="26501" status="ACTIVE" name="__PROCESS_SCOPE:WF_Process" modelId="76" /><ns:status xmlns:ns="http://www.apache.org/ode/pmapi/types/2006/08/02/">ACTIVE</ns:status><ns:dt-started xmlns:ns="http://www.apache.org/ode/pmapi/types/2006/08/02/">2013-04-01T22:50:38.877-07:00</ns:dt-started><ns:dt-last-active xmlns:ns="http://www.apache.org/ode/pmapi/types/2006/08/02/">2013-04-01T22:50:41.098-07:00</ns:dt-last-active> .....
-					      Date sDate = xsdDF.parse(start_date); 
-						   Date eDate= xsdDF.parse(end_date);
-						   
-						   long diffInMillies = eDate.getTime() - sDate.getTime();
-						    long difference = TimeUnit.SECONDS.convert(diffInMillies,TimeUnit.MILLISECONDS);
-						    
-						    String duration = String.valueOf(difference);
-						    String[] response = new String[2];
-						    response[0] = new String(duration);
-						    response[1] = new String(status);
-					      return  response;
-					     
-					    }
-				} catch (SAXException | IOException | ParserConfigurationException | ParseException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				return null;
-	    }
-	    
+			NodeList nodes = doc.getElementsByTagName("instance-info");
+
+			for (int i = 0; i < nodes.getLength(); i++) {
+				Element element = (Element) nodes.item(i);
+
+				NodeList name = element.getElementsByTagName("ns:status");
+				Element line = (Element) name.item(0);
+				String status =new String(((CharacterData)line.getFirstChild()).getData()); 
+
+				NodeList firstPath = element.getElementsByTagName("ns:dt-started");
+				line = (Element) firstPath.item(0);
+				String start_date=new String(((CharacterData)line.getFirstChild()).getData());
+
+				NodeList secondPath = element.getElementsByTagName("ns:dt-last-active");
+				line = (Element) secondPath.item(0);
+				String end_date=new String(((CharacterData)line.getFirstChild()).getData());
+				
+				String[] response = new String[4];
+				//response[0] = new String(duration);
+				response[0] = new String(status);
+				response[1] = new String(start_date);
+				response[2] = new String(end_date);
+				return  response;
+
+			}
+		} catch (SAXException | IOException | ParserConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+
 	private OMElement sendToIM(OMElement msg) throws AxisFault {
 		System.out.println("Calling ODE service ...." );
-		return _client.send(msg, SOCConfiguration.ODE_PATH+"/InstanceManagement/getInstanceInfo");
-				//"// "http://10.160.2.27:8080/ode/processes/InstanceManagement/getInstanceInfo"
-    }
+		return _client.send(msg, SOCConfiguration.BROKER_URL+"/ode/processes/InstanceManagement/getInstanceInfo");
+		//"// "http://10.160.2.27:8080/ode/processes/InstanceManagement/getInstanceInfo"
+	}
 
-/*
+	/*
 	@POST
 	@Path("/post")
 	@Consumes(MediaType.APPLICATION_XML)
 	@Produces(MediaType.TEXT_PLAIN)
 	public String Compute(String op) throws IOException {
 
-	*/	
-		
+	 */	
+
 }
 

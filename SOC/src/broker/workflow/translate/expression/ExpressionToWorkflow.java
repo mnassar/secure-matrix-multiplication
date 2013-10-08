@@ -33,6 +33,7 @@ import broker.MetadataStoreConnection;
 import broker.ResourceMeta;
 import broker.ResourceMetaAdapter;
 import broker.SOCConfiguration;
+import broker.SOCJob;
 import broker.StorageProtocol;
 
 public class ExpressionToWorkflow {
@@ -47,7 +48,8 @@ public class ExpressionToWorkflow {
 	private BrokerSOCResource right_operand;
 	private ArrayList<BrokerSOCResource> result_stack;
 	private int tos;
-	
+	private int nInStack =0;
+	private String result_matrix_ID;
 	private Random sub_wf_job;
 	private int assign_counter;
 	private int var_counter;
@@ -74,7 +76,7 @@ public class ExpressionToWorkflow {
 
 		expression = new String(translator.getExpression());
 		job_ID = new String(translator.getJob_ID());
-		String expwf_process = "exp" + job_ID;
+		String expwf_process = "expjob_" + job_ID;
 
 		SOCConfiguration soc_conf = new SOCConfiguration();
 
@@ -164,11 +166,32 @@ public class ExpressionToWorkflow {
 	}
 
 	public void convert() throws ParserConfigurationException, SAXException,
-			IOException, ParseException {
+	IOException, ParseException {
 		Node exp_tree = j.parse(expression);
 		// // Traverse the expression tree to create the workflow
 		traverse(exp_tree);
 
+		BrokerSOCResource result = new  BrokerSOCResource(result_stack.get(nInStack-1)); 
+		result.setAvailable(false);
+		//result.setStorage_protocol(StorageProtocol.ADDITIVE_SPLITTING);
+		//result.setUser_token(result_stack.get(tos).getUser_token());
+		//tos--;
+
+		result_matrix_ID = result.getResource_id();
+		MetadataStoreConnection conn = null;
+		try {
+			conn = new MetadataStoreConnection(SOCConfiguration.METADATA_STORE_URL);
+			//Update the job with the result ID 
+			String job_json= conn.getSOCJob(job_ID);
+			Gson gson = new Gson();
+			SOCJob job = gson.fromJson(job_json, SOCJob.class);
+			job.getStatus().setResultID(result.getResource_id());
+			conn.updateSOCJob(job);
+			conn.close();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		// SERIALIZE BPEL
 		exp_wf.serialize();
 
@@ -194,11 +217,11 @@ public class ExpressionToWorkflow {
 	 * @throws ParserConfigurationException
 	 */
 	public static void main(String[] args) throws ParserConfigurationException,
-			SAXException, IOException {
+	SAXException, IOException {
 		// TODO Auto-generated method stub
 
 		// String expression = "(A*B+C*D)+(A*D+ B*C)+(A*C+B*D)";
-		String expression = "A*B +C*D";
+		String expression = "A*B+C*D";
 		ExpressionTranslator translator = new ExpressionTranslator(expression);
 		// **********************
 		// read data from the metadata store
@@ -225,7 +248,7 @@ public class ExpressionToWorkflow {
 	}
 
 	public void traverse(Node tree) throws ParserConfigurationException,
-			SAXException, IOException {
+	SAXException, IOException {
 		Node curr_node = tree;
 		Node left_node = null;
 		Node right_node = null;
@@ -234,15 +257,15 @@ public class ExpressionToWorkflow {
 			System.out.println("Node " + curr_node.toString()
 					+ " is a leaf node ");
 			if (curr_node.jjtGetParent().jjtGetNumChildren() == 1) // Unary
-																	// operator
+				// operator
 			{
 				String var_key = new String(curr_node.toString().substring(11,
 						curr_node.toString().length() - 1));
 				left_operand = translator.getExpressionVariable(var_key);
 				right_operand = null;
-			//	result_stack.add(new BrokerSOCResource(left_operand)); 
-			//	tos++;
-			
+				//	result_stack.add(new BrokerSOCResource(left_operand)); 
+				//	tos++;
+
 			} else // Two operands for the Binary operator
 			{
 				if (curr_node.jjtGetParent().jjtGetChild(1) != curr_node) {
@@ -252,8 +275,8 @@ public class ExpressionToWorkflow {
 							11, curr_node.toString().length() - 1));
 
 					left_operand = translator.getExpressionVariable(var_key);
-				//	result_stack.add(new BrokerSOCResource(left_operand)); 
-				//  tos++;
+					//	result_stack.add(new BrokerSOCResource(left_operand)); 
+					//  tos++;
 					System.out.println(left_operand.getResource_id()
 							+ " is the left operand!");
 
@@ -265,9 +288,9 @@ public class ExpressionToWorkflow {
 							11, curr_node.toString().length() - 1));
 
 					right_operand = translator.getExpressionVariable(var_key);
-			    //	result_stack.add(new BrokerSOCResource(right_operand)); 
-				//	tos++;
-					
+					//	result_stack.add(new BrokerSOCResource(right_operand)); 
+					//	tos++;
+
 					System.out.println(right_operand.getResource_id()
 							+ " is the right operand!");
 				}
@@ -313,7 +336,7 @@ public class ExpressionToWorkflow {
 
 		if (left_node != null) {
 			traverse(left_node);
-	
+
 		}
 		if (right_node != null) {
 
@@ -360,15 +383,20 @@ public class ExpressionToWorkflow {
 							+ "/" + result.getResource_id());
 					result.setUser_token(left_operand.getUser_token());
 					result.setResource_meta(left_operand.getResource_meta());
-					AdditiveSplitter splitter = new AdditiveSplitter(result);
-					SOCConfiguration conf = new SOCConfiguration();
-					Location loc_split1 = conf.getRandomCloud();
-					Location loc_split2;
-					while ((loc_split2 = conf.getRandomCloud()) != loc_split1)
-						;
-					// splitter.Split(loc_split1, loc_split2);
-					result.addLocation(loc_split1);
-					result.addLocation(loc_split2);
+					if(left_operand.getStorage_protocol() == StorageProtocol.ADDITIVE_SPLITTING)
+					{
+						AdditiveSplitter splitter = new AdditiveSplitter(result);
+
+						SOCConfiguration conf = new SOCConfiguration();
+						Location loc_split1 = conf.getRandomCloud();
+						Location loc_split2;
+						while ((loc_split2 = conf.getRandomCloud()) != loc_split1)
+							;
+						// splitter.Split(loc_split1, loc_split2);
+						result.addLocation(loc_split1);
+						result.addLocation(loc_split2);
+						result.setStorage_protocol(StorageProtocol.ADDITIVE_SPLITTING);
+					}
 					boolean added = conn.addSOCResource(result);
 
 					conn.close();
@@ -410,31 +438,31 @@ public class ExpressionToWorkflow {
 					int input = var_counter;
 					exp_wf.addMessageVariable("var" + input,
 							"ns1:AdditiveSplittingRequestMessage"); // reading
-																	// variable
-																	// type may
-																	// be done
-																	// from
-																	// parsing
-																	// the
-																	// additive
-																	// splitting
-																	// bpel file
-																	// and
-																	// getting
-																	// the
-																	// variable
-																	// type but
-																	// this
-																	// would be
-																	// complicated
-																	// and would
-																	// take
-																	// time,
-																	// while
-																	// they are
-																	// not
-																	// supposed
-																	// to change
+					// variable
+					// type may
+					// be done
+					// from
+					// parsing
+					// the
+					// additive
+					// splitting
+					// bpel file
+					// and
+					// getting
+					// the
+					// variable
+					// type but
+					// this
+					// would be
+					// complicated
+					// and would
+					// take
+					// time,
+					// while
+					// they are
+					// not
+					// supposed
+					// to change
 					// To add a local partner link to the scope
 					curr_scope += 1;
 					exp_wf.addScope(curr_scope);
@@ -465,8 +493,8 @@ public class ExpressionToWorkflow {
 					exp_wf.addCallbackActivity("Callback" + receive_counter,
 							"onResult", "AdditiveSplittingCB_PL"
 									+ invoke_counter,
-							"ns1:AdditiveSplittingCallback", "var" + output,
-							"SUBJOB_" + invoke_counter, curr_scope);
+									"ns1:AdditiveSplittingCallback", "var" + output,
+									"SUBJOB_" + invoke_counter, curr_scope);
 
 					exp_wf.connectToScopeStart("Assign" + assign_counter,
 							"Scope" + curr_scope);
@@ -517,15 +545,19 @@ public class ExpressionToWorkflow {
 							+ "/" + result.getResource_id());
 					result.setUser_token(left_operand.getUser_token());
 					result.setResource_meta(left_operand.getResource_meta());
-					AdditiveSplitter splitter = new AdditiveSplitter(result);
-					SOCConfiguration conf = new SOCConfiguration();
-					Location loc_split1 = conf.getRandomCloud();
-					Location loc_split2;
-					while ((loc_split2 = conf.getRandomCloud()) != loc_split1)
-						;
-					// splitter.Split(loc_split1, loc_split2);
-					result.addLocation(loc_split1);
-					result.addLocation(loc_split2);
+					if(left_operand.getStorage_protocol()== StorageProtocol.ADDITIVE_SPLITTING)
+					{
+						AdditiveSplitter splitter = new AdditiveSplitter(result);
+						SOCConfiguration conf = new SOCConfiguration();
+						Location loc_split1 = conf.getRandomCloud();
+						Location loc_split2;
+						while ((loc_split2 = conf.getRandomCloud()) != loc_split1)
+							;
+						// splitter.Split(loc_split1, loc_split2);
+						result.addLocation(loc_split1);
+						result.addLocation(loc_split2);
+						result.setStorage_protocol(StorageProtocol.ADDITIVE_SPLITTING);
+					}
 					boolean added = conn.addSOCResource(result);
 					conn.close();
 				} catch (Exception e) {
@@ -567,39 +599,39 @@ public class ExpressionToWorkflow {
 
 				int input = var_counter;
 				exp_wf.addMessageVariable("var" + input, "ns2:addRequest"); // reading
-																			// variable
-																			// type
-																			// may
-																			// be
-																			// done
-																			// from
-																			// parsing
-																			// the
-																			// additive
-																			// splitting
-																			// bpel
-																			// file
-																			// and
-																			// getting
-																			// the
-																			// variable
-																			// type
-																			// but
-																			// this
-																			// would
-																			// be
-																			// complicated
-																			// and
-																			// would
-																			// take
-																			// time,
-																			// while
-																			// they
-																			// are
-																			// not
-																			// supposed
-																			// to
-																			// change
+				// variable
+				// type
+				// may
+				// be
+				// done
+				// from
+				// parsing
+				// the
+				// additive
+				// splitting
+				// bpel
+				// file
+				// and
+				// getting
+				// the
+				// variable
+				// type
+				// but
+				// this
+				// would
+				// be
+				// complicated
+				// and
+				// would
+				// take
+				// time,
+				// while
+				// they
+				// are
+				// not
+				// supposed
+				// to
+				// change
 				exp_wf.addAssign("Assign" + assign_counter, request_str, "var"
 						+ input);
 
@@ -621,13 +653,13 @@ public class ExpressionToWorkflow {
 				output = ++var_counter;
 				exp_wf.addMessageVariable("var" + output, "ns2:addResponse");
 
-//				exp_wf.addPartnerLink("BrokerAdd", "BrokerCB_PL"+ receive_counter);
+				//				exp_wf.addPartnerLink("BrokerAdd", "BrokerCB_PL"+ receive_counter);
 				// receive callback
 				//exp_wf.addCallbackActivity("Callback" + receive_counter,
 				//		"onResult", "BrokerCB_PL" + receive_counter,
-					//	"ns2:BrokerCallback", "var" + output, "BROKER_SUBJOB_"
-						//		+ invoke_counter);
-				
+				//	"ns2:BrokerCallback", "var" + output, "BROKER_SUBJOB_"
+				//		+ invoke_counter);
+
 				exp_wf.addCallbackActivity("Callback" + receive_counter,
 						"callback"+receive_counter, "client",
 						"tns:"+exp_wf.getWf_name() , "var" + output, "BROKER_SUBJOB_"
@@ -661,14 +693,14 @@ public class ExpressionToWorkflow {
 			 */
 
 			if (curr_node.jjtGetParent().jjtGetChild(0) == curr_node) // I am
-																		// the
-																		// left
-																		// hand
-																		// side
-																		// of
-																		// the
-																		// another
-																		// expression
+				// the
+				// left
+				// hand
+				// side
+				// of
+				// the
+				// another
+				// expression
 			{
 				// update left operand with the result ID returned and get
 				// corresponding data from metadata store
@@ -682,28 +714,29 @@ public class ExpressionToWorkflow {
 							+ right_operand.getResource_id());
 					Gson gson = new Gson();
 					GsonBuilder builder = new GsonBuilder();
-				    builder.registerTypeAdapter(ResourceMeta.class   , new ResourceMetaAdapter());
-				    gson = builder.create();
-					
+					builder.registerTypeAdapter(ResourceMeta.class   , new ResourceMetaAdapter());
+					gson = builder.create();
+
 					left_operand = gson.fromJson(res, BrokerSOCResource.class);
 					conn.close();
 					result_stack.add(new BrokerSOCResource(left_operand));
 					tos++;
+					nInStack++;
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 
 			} else if (curr_node.jjtGetParent().jjtGetChild(1) == curr_node) // I
-																				// am
-																				// the
-																				// right
-																				// hand
-																				// side
-																				// of
-																				// the
-																				// another
-																				// expression
+				// am
+				// the
+				// right
+				// hand
+				// side
+				// of
+				// the
+				// another
+				// expression
 			{
 				// update right operand with the result ID returned and get
 				// corresponding data from metadata store
@@ -718,13 +751,14 @@ public class ExpressionToWorkflow {
 							+ right_operand.getResource_id());
 					Gson gson = new Gson();
 					GsonBuilder builder = new GsonBuilder();
-				    builder.registerTypeAdapter(ResourceMeta.class   , new ResourceMetaAdapter());
-				    gson = builder.create();
-					
+					builder.registerTypeAdapter(ResourceMeta.class   , new ResourceMetaAdapter());
+					gson = builder.create();
+
 					right_operand = gson.fromJson(res, BrokerSOCResource.class);
 					conn.close();
 					result_stack.add(new BrokerSOCResource(right_operand));
 					tos++;
+					nInStack++;
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -758,6 +792,20 @@ public class ExpressionToWorkflow {
 
 	public void setExp_wf(Workflow exp_wf) {
 		this.exp_wf = exp_wf;
+	}
+
+	/**
+	 * @return the result_matrix_ID
+	 */
+	public String getResult_matrix_ID() {
+		return result_matrix_ID;
+	}
+
+	/**
+	 * @param result_matrix_ID the result_matrix_ID to set
+	 */
+	public void setResult_matrix_ID(String result_matrix_ID) {
+		this.result_matrix_ID = result_matrix_ID;
 	}
 
 }

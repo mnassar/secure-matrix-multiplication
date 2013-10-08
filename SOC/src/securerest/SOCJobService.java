@@ -77,6 +77,7 @@ import java.net.URI;
 import java.sql.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Iterator;
 import java.util.Random;
 import java.util.UUID;
 
@@ -92,49 +93,50 @@ import java.util.UUID;
 public class SOCJobService {
 
 	protected final static ObjectMapper defaultMapper = new ObjectMapper();
-	
 
-@POST
-@Path("/compute")
-@Consumes(MediaType.APPLICATION_JSON)
 
-public Response compute(SOCJob job)
-{
-		
+	@POST
+	@Path("/compute")
+	@Consumes(MediaType.APPLICATION_JSON)
+
+	public Response compute(SOCJob job)
+	{
 		SOCConfiguration conf = new SOCConfiguration();
-		
+
 		final Log logfile = new Log(SOCConfiguration.LOG_DIRECTORY);
 		//String job_id = UUID.randomUUID().toString();
 		Random r= new Random();
 		String job_id = new Integer(r.nextInt(10000)).toString();
 		final DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-		   //get current date time with Date()
-		   java.util.Date date = new java.util.Date();
-	
+		//get current date time with Date()
+		java.util.Date date = new java.util.Date();
+
 		SOCJob jobOnBroker = new SOCJob(job);
 		jobOnBroker.setJob_Id(job_id);
-		jobOnBroker.setStatus(new SOCJobStatus(date));
-	
+		SOCJobStatus stat= new SOCJobStatus(date);
+		stat.setJobStatus("Job in progress..");
+		jobOnBroker.setStatus(stat);
+
 		//save data in the metadata store
 		MetadataStoreConnection conn;
 		try {
 			conn = new MetadataStoreConnection(SOCConfiguration.METADATA_STORE_URL);
 			conn.addSOCJob(jobOnBroker);
 			conn.close();
-			
+
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	
+
 		final SOCJob job_to_start = new SOCJob(jobOnBroker);
 		//In a thread
-		 new Thread(new Runnable() {
-   			public void run() {
-   	
-   				if(job_to_start.getType() == JobType.MATRIX_COMPUTATION)
-   				{
-   					//parse expression & generate workflow
+		new Thread(new Runnable() {
+			public void run() {
+
+				if(job_to_start.getType() == JobType.MATRIX_COMPUTATION)
+				{
+					//parse expression & generate workflow
 					ExpressionTranslator translator = new ExpressionTranslator(job_to_start.getJob_Id(), job_to_start.getExpression());
 					MetadataStoreConnection conn = null;
 					try {
@@ -152,20 +154,28 @@ public Response compute(SOCJob job)
 							String resource = conn.getSOCResource(resourceID);
 							Gson gson = new Gson();
 							GsonBuilder builder = new GsonBuilder();
-						    builder.registerTypeAdapter(ResourceMeta.class   , new ResourceMetaAdapter());
-						    gson = builder.create();
+							builder.registerTypeAdapter(ResourceMeta.class   , new ResourceMetaAdapter());
+							gson = builder.create();
 							BrokerSOCResource resourceObj = gson.fromJson(resource, BrokerSOCResource.class);
-							if(resourceObj.getAvailable())
+							if(resourceObj!=null && resourceObj.getAvailable())
 								translator.addExpressionVariable(alias,resourceObj);
 							else
 							{
 								job_to_start.getStatus().setJobStatus("Failed to start: one or more of the resources are not ready!");
 								conn.updateSOCJob(job_to_start);
 								conn.close();
+								try {
+									this.finalize();
+								} catch (Throwable e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+								//conn.close();
 								return;
 							}
+
 						}
-						
+conn.close();
 						ExpressionToWorkflow workflow_generator = new ExpressionToWorkflow(translator);
 						workflow_generator.initialise();
 						try {
@@ -212,14 +222,14 @@ public Response compute(SOCJob job)
 
 							env = soapFactory.getDefaultEnvelope();
 
-						//	env.setLocalName("expjob_2301Request");
+							//	env.setLocalName("expjob_2301Request");
 							OMElement omElement = soapFactory.createOMElement(new QName("http://soc.expjob_"+workflow_generator.getJob_ID()+".workflow","expjob_"+workflow_generator.getJob_ID()+"Request","q0"));
 							OMElement omElement1 = soapFactory.createOMElement(new QName("http://soc.expjob_"+workflow_generator.getJob_ID()+".workflow","expression","q0"));
 							omElement1.setText(job_to_start.getExpression());
-							
+
 							OMElement omElement2 = soapFactory.createOMElement(new QName("http://soc.expjob_"+workflow_generator.getJob_ID()+".workflow","jobID","q0"));
 							omElement2.setText(job_to_start.getJob_Id());
-							
+
 							env.getBody().addChild(omElement);
 							env.getBody().getFirstElement().addChild(omElement1);
 							env.getBody().getFirstElement().addChild(omElement2);
@@ -241,10 +251,39 @@ public Response compute(SOCJob job)
 							if (_messageContext.getTransportOut() != null) {
 								SOAPEnvelope response = _messageContext.getEnvelope();
 								System.out.println(response); 
+								Iterator i = response.getBody().getChildElements();
+								String response_job_id=null;
+								String response_instance_id=null;
+
+
+								OMElement elem = (OMElement)i.next();
+								response_job_id= new String(elem.getText());
+								elem = (OMElement)i.next();
+								response_instance_id= new String(elem.getText());
+
+								job_to_start.setBpel_instanceID(response_instance_id);
 								_messageContext.getTransportOut().getSender().cleanup(_messageContext);
 								job_to_start.getStatus().setJobStatus("Job in progress ....");
+								
+								conn = new MetadataStoreConnection(SOCConfiguration.METADATA_STORE_URL);
 								conn.updateSOCJob(job_to_start);
 								conn.close();
+								logfile.write("Job "+ job_to_start.getJob_Id() +": started with ODE instance ID ="+response_instance_id);
+								//wait for result file to be written to update the job status
+								File result_file = new File(SOCConfiguration.BROKER_STORAGE_PATH+"/"+workflow_generator.getResult_matrix_ID());
+
+								while(!result_file.exists());
+
+								try{
+									conn = new MetadataStoreConnection(SOCConfiguration.METADATA_STORE_URL);
+									job_to_start.getStatus().setJobStatus("Job finished!");
+									conn.updateSOCJob(job_to_start);
+									conn.close();
+								}
+								catch(Exception e)
+								{
+									e.printStackTrace();
+								}
 							}
 
 						} catch (AxisFault e) {
@@ -253,49 +292,52 @@ public Response compute(SOCJob job)
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
+						} catch (Exception e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
 						}
-						conn.close();
+						//conn.close();
 					}
 					else // couldn't connect to database
 					{
 						System.out.println("Operation didn't complete, problem connecting to the data store");
 					}
-   				}
+				}
 			}
-		 }).start();
+		}).start();
 		//return the job id used by the broker  to compute the expression			
-		
-			return Response.status(201).entity(jobOnBroker.getJob_Id()).build();
-		}
 
-
-
-
-
-@GET
-@Path("/{jobID}") //+job_id
-@Produces(MediaType.APPLICATION_JSON)
-public SOCJob getJob(@PathParam("jobID") String jobID) {
-  	
-	SOCConfiguration conf = new SOCConfiguration();
-	try {
-		MetadataStoreConnection conn = new MetadataStoreConnection(SOCConfiguration.METADATA_STORE_URL);
-		String job_description= conn.getSOCJob(jobID);
-		conn.close();
-		SOCJob job ;
-		Gson gson = new Gson();
-		job = gson.fromJson(job_description, SOCJob.class);
-
-		return job;
-		
-	} catch (Exception e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
+		return Response.status(201).entity(jobOnBroker.getJob_Id()).build();
 	}
-	return null;
-	
-}
-/*
+
+
+
+
+
+	@GET
+	@Path("/{jobID}") //+job_id
+	@Produces(MediaType.APPLICATION_JSON)
+	public SOCJob getJob(@PathParam("jobID") String jobID) {
+
+		SOCConfiguration conf = new SOCConfiguration();
+		try {
+			MetadataStoreConnection conn = new MetadataStoreConnection(SOCConfiguration.METADATA_STORE_URL);
+			String job_description= conn.getSOCJob(jobID);
+			conn.close();
+			SOCJob job ;
+			Gson gson = new Gson();
+			job = gson.fromJson(job_description, SOCJob.class);
+
+			return job;
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+
+	}
+	/*
 @DELETE
 @Path("/{resource_id}")//+resource_id
 public void deleteResource(@PathParam("resourceID") String resourceID)
@@ -307,12 +349,12 @@ public void deleteResource(@PathParam("resourceID") String resourceID)
 		if(resource_metadata !=null)
 		{
 			BrokerSOCResource resource ;
-			
+
 			Gson gson = new Gson();
 			resource = gson.fromJson(resource_metadata, BrokerSOCResource.class);
-			
+
 			String fileLocation = SOCConfiguration.BROKER_STORAGE_PATH +"/"+ resource.getResource_id();
-		
+
 			File brokerfile = new File(fileLocation);
 			if(brokerfile.exists())
 			{
@@ -322,23 +364,23 @@ public void deleteResource(@PathParam("resourceID") String resourceID)
 			{
 				//Get splits locations and delete them
 			}
-				
+
 		}
 		else
 		{
 			System.out.println("Resource "+ resourceID +" already not found!!");
 		}
 }
-*/
+	 */
 
 
-@POST
-@Path("/job")
-@Consumes(MediaType.APPLICATION_JSON) //Job description
-@Produces(MediaType.TEXT_PLAIN) 
-public Response doOp(MatrixOP op) throws IOException {
+	@POST
+	@Path("/job")
+	@Consumes(MediaType.APPLICATION_JSON) //Job description
+	@Produces(MediaType.TEXT_PLAIN) 
+	public Response doOp(MatrixOP op) throws IOException {
 
-	
+
 		System.out.println(op.toString());	  	
 		String matrix_job = op.getName();
 		String pathA = op.getPathA();
@@ -346,29 +388,29 @@ public Response doOp(MatrixOP op) throws IOException {
 		String callBack = op.getCallBack();
 		//CALL the corresponding mapreduce job should be here
 		if(matrix_job.equals("multiply"))
-		//	; //call the matrix mult job on A and B
+			//	; //call the matrix mult job on A and B
 		{
-	//		br.multiply(pathA,pathB, callBack);
-		
+			//		br.multiply(pathA,pathB, callBack);
+
 		}
 		else if (matrix_job.equals("add"))
 		{
-		//	br.add(pathA,pathB, callBack);
+			//	br.add(pathA,pathB, callBack);
 		}
 		else if (matrix_job.equals("copy"))
 		{
-	//		br.copy(pathA,pathB, callBack);
+			//		br.copy(pathA,pathB, callBack);
 		}
 		return Response.status(201).entity(op.toString()).build();
 	}
-  
-@GET
-@Path("/job/")//+job_id
-@Produces(MediaType.APPLICATION_JSON) 
-public MatrixOP getJobStatus()
-{
-	return new MatrixOP();
-}
 
-  
+	@GET
+	@Path("/job/")//+job_id
+	@Produces(MediaType.APPLICATION_JSON) 
+	public MatrixOP getJobStatus()
+	{
+		return new MatrixOP();
+	}
+
+
 } 

@@ -9,6 +9,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.unify_framework.abstract_syntax.Activity;
+import org.unify_framework.abstract_syntax.Node;
 import org.unify_framework.instances.bpel.BpelPartnerLink;
 import org.unify_framework.instances.bpel.BpelScopeActivity;
 import org.w3c.dom.Attr;
@@ -53,29 +54,65 @@ public class DeployXML {
 		doc = builder.newDocument();
 
 		deploy = doc.createElement("deploy");
-		deploy.setAttribute("xmlns", "http://www.apache.org/ode/schemas/dd/2007/03");
+	
+		deploy.setAttribute("xmlns:AddSplittingNS","http://additivesplitting.bpelprocess");
 		deploy.setAttribute("xmlns:BrokerNS", workflow.getBroker_namespace());
 		deploy.setAttribute("xmlns:soc."+workflow.getWf_name()+".workflow", "http://soc."+workflow.getWf_name()+".workflow");
-		deploy.setAttribute("xmlns:AddSplittingNS","http://additivesplitting.bpelprocess");
+		deploy.setAttribute("xmlns", "http://www.apache.org/ode/schemas/dd/2007/03");
 
 		process = doc.createElement("process");
-		Attr attr = doc.createAttribute("name");
-		attr.setValue("soc."+workflow.getWf_name()+".workflow:"+workflow.getWf_name());
-		process.setAttributeNode(attr);
+	//	Attr attr = doc.createAttribute("name");
+	//	attr.setValue("soc."+workflow.getWf_name()+".workflow:"+workflow.getWf_name());
+	//	process.setAttributeNode(attr);
+		
+		process.setAttribute("name", "soc."+workflow.getWf_name()+".workflow:"+workflow.getWf_name());
+		process.setAttribute("xmlns", "http://www.apache.org/ode/schemas/dd/2007/03");
 
 		deploy.appendChild(process);
-
+		
+		
 		Element active = doc.createElement("active");
 		active.setTextContent("true");
+		active.setAttribute("xmlns", "http://www.apache.org/ode/schemas/dd/2007/03");
 		process.appendChild(active);
 
 		Element retired = doc.createElement("retired");
 		retired.setTextContent("false");
+		retired.setAttribute("xmlns", "http://www.apache.org/ode/schemas/dd/2007/03");
 		process.appendChild(retired);
 
 		Element process_events = doc.createElement("process-events");
 		process_events.setAttribute("generate", "all");
+		process_events.setAttribute("xmlns", "http://www.apache.org/ode/schemas/dd/2007/03");
+		
+		addScopeEvents(process_events);
 		process.appendChild(process_events);
+
+		//deploy.appendChild(process);
+	}
+	
+	public void addScopeEvents(Element process_events)
+	{
+			
+		for(Node activity : workflow.getProcess().getChildren())
+		{
+			if(activity.getClass()==BpelScopeActivity.class)
+			{
+				Element scope_events = doc.createElement("scope-events");
+				
+				scope_events.setAttribute("name", activity.getName());
+				scope_events.setAttribute("xmlns", "http://www.apache.org/ode/schemas/dd/2007/03");
+				Element enable_event = doc.createElement("enable-event");
+				enable_event.setTextContent("correlation");
+				enable_event.setAttribute("xmlns", "http://www.apache.org/ode/schemas/dd/2007/03");
+				scope_events.appendChild(enable_event);
+				enable_event = doc.createElement("enable-event");
+				enable_event.setTextContent("scopeHandling");
+				enable_event.setAttribute("xmlns", "http://www.apache.org/ode/schemas/dd/2007/03");
+				scope_events.appendChild(enable_event);
+				process_events.appendChild(scope_events);
+			}
+		}
 
 	}
 
@@ -117,6 +154,7 @@ public class DeployXML {
 		{
 			deploy_PL = doc.createElement("provide");
 			deploy_PL.setAttribute("partnerLink",PL.getName());
+			deploy_PL.setAttribute("xmlns", "http://www.apache.org/ode/schemas/dd/2007/03");
 			service = doc.createElement("service");
 
 			if(PL.getName().contains("AdditiveSplitting"))
@@ -141,6 +179,8 @@ public class DeployXML {
 			deploy_PL.setAttribute("partnerLink",PL.getName());
 			service = doc.createElement("service");
 
+			deploy_PL.setAttribute("xmlns", "http://www.apache.org/ode/schemas/dd/2007/03");
+			
 			if(PL.getName().contains("AdditiveSplitting"))
 			{
 				service_name = new String("AddSplittingNS:AdditiveSplittingService");
@@ -159,8 +199,10 @@ public class DeployXML {
 		}
 		service.setAttribute("name",service_name);
 		service.setAttribute("port",port_name);
+		service.setAttribute("xmlns", "http://www.apache.org/ode/schemas/dd/2007/03");
+		
 		deploy_PL.appendChild(service);
-
+		
 		process.appendChild(deploy_PL);
 
 	}
@@ -203,6 +245,7 @@ public class DeployXML {
 
 			service.setAttribute("name",service_name);
 			service.setAttribute("port",port_name);
+			service.setAttribute("xmlns", "http://www.apache.org/ode/schemas/dd/2007/03");
 			provide.appendChild(service);
 
 			process.appendChild(provide);
@@ -227,8 +270,10 @@ public class DeployXML {
 		Element service = doc.createElement("service");
 		service.setAttribute("name", "BrokerNS:MatServ");
 		service.setAttribute("port", "BrokerServicesPort");
+		service.setAttribute("xmlns", "http://www.apache.org/ode/schemas/dd/2007/03");
 		invoke.appendChild(service);
-
+		
+		invoke.setAttribute("xmlns", "http://www.apache.org/ode/schemas/dd/2007/03");
 		process.appendChild(invoke);
 
 		invoke = doc.createElement("invoke");
@@ -236,6 +281,8 @@ public class DeployXML {
 		service = doc.createElement("service");
 		service.setAttribute("name", "AddSplittingNS:AdditiveSplittingService");
 		service.setAttribute("port", "AdditiveSplittingPort");
+		service.setAttribute("xmlns", "http://www.apache.org/ode/schemas/dd/2007/03");
+		invoke.setAttribute("xmlns", "http://www.apache.org/ode/schemas/dd/2007/03");
 		invoke.appendChild(service);
 
 		process.appendChild(invoke);
@@ -245,6 +292,7 @@ public class DeployXML {
 
 	public void write()
 	{
+		
 		doc.appendChild(deploy);
 		try{
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();

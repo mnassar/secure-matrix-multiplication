@@ -104,8 +104,6 @@ public class Workflow {
 		process.addNamespaceDeclaration("ns2", Broker_namespace);
 		process.setExitOnStandardFault("yes");
 		process.setSuppressJoinFailure("yes");
-
-		
 	}
 	
 	public void initialize() throws ParserConfigurationException, SAXException, IOException 
