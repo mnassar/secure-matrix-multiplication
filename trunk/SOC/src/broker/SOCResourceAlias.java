@@ -4,6 +4,16 @@ public class SOCResourceAlias {
 
 	private String resource_id;
 	private String alias;
+	
+	public SOCResourceAlias()
+	{
+		super();
+	}
+	public SOCResourceAlias(String resourceID, String alias_name)
+	{
+		resource_id = new String(resourceID);
+		alias = new String(alias_name);
+	}
 	/**
 	 * @return the resource_id
 	 */

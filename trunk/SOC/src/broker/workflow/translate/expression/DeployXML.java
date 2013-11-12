@@ -110,7 +110,21 @@ public class DeployXML {
 				enable_event.setTextContent("scopeHandling");
 				enable_event.setAttribute("xmlns", "http://www.apache.org/ode/schemas/dd/2007/03");
 				scope_events.appendChild(enable_event);
+				enable_event = doc.createElement("enable-event");
+				enable_event.setTextContent("instanceLifecycle");
+				enable_event.setAttribute("xmlns", "http://www.apache.org/ode/schemas/dd/2007/03");
+				scope_events.appendChild(enable_event);
+				enable_event = doc.createElement("enable-event");
+				enable_event.setTextContent("activityLifecycle");
+				enable_event.setAttribute("xmlns", "http://www.apache.org/ode/schemas/dd/2007/03");
+				scope_events.appendChild(enable_event);
+				enable_event = doc.createElement("enable-event");
+				enable_event.setTextContent("dataHandling");
+				enable_event.setAttribute("xmlns", "http://www.apache.org/ode/schemas/dd/2007/03");
+				scope_events.appendChild(enable_event);
 				process_events.appendChild(scope_events);
+			
+				 
 			}
 		}
 

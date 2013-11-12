@@ -226,8 +226,8 @@ public class WSDLGenerator  {
 		addPropertyAlias("tns:"+wf.getWf_name()+"ResponseMessage", "parameters", "jobid_CS", "/tns:jobID");
 		addPropertyAlias("ns1:AdditiveSplittingRequestMessage", "parameters", "jobid_CS", "/ns1:jobID");
 		addPropertyAlias("ns1:AdditiveSplittingResponseMessage", "parameters", "jobid_CS", "/ns1:jobID");
-		addPropertyAlias("ns2:addRequest", "parameters", "jobid_CS", "/ns2:job_id");
-		addPropertyAlias("ns2:addResponse", "parameters", "jobid_CS", "/ns2:job_id");
+		addPropertyAlias("ns2:addRequest", "parameters", "jobid_CS", "/job_id");
+		addPropertyAlias("ns2:addResponse", "parameters", "jobid_CS", "/job_id");
 
 		for(BpelVariable v: wf.getVariables())
 		{
@@ -246,8 +246,8 @@ public class WSDLGenerator  {
 
 			if(c.getName().contains("BROKER"))
 			{
-				addPropertyAlias("ns2:addRequest", "parameters", property, "/ns2:op_id");
-				addPropertyAlias("ns2:addResponse", "parameters", property, "/ns2:op_id");
+				addPropertyAlias("ns2:addRequest", "parameters", property, "/op_id");
+				addPropertyAlias("ns2:addResponse", "parameters", property, "/sub_jobid");
 
 			}
 			else
@@ -287,6 +287,8 @@ public class WSDLGenerator  {
 
 						}
 					addOneWayOperation(((BpelCompositeReceiveActivity)n).getOperation(), variable_msg_type, wf.getWf_name());
+					addBindingOperation(((BpelCompositeReceiveActivity)n).getOperation(), wf.getProcess().getTargetNamespace()+"/"+((BpelCompositeReceiveActivity)n).getOperation(), wf.getWf_name()+"Binding");
+					
 				}
 
 
@@ -300,9 +302,10 @@ public class WSDLGenerator  {
 		{
 			if(pL.getMyRole()!=null)
 			{
-				if(pL.getPartnerLinkType().contains("AdditiveSplitting"))//Additive Splitting Callback PL
-					addPartnerLinkType(pL.getPartnerLinkType().substring(4), pL.getMyRole(), "ns1:AdditiveSplittingCallback");
-				else if(pL.getPartnerLinkType().contains("Broker"))
+			//	if(pL.getPartnerLinkType().contains("AdditiveSplitting"))//Additive Splitting Callback PL
+				//	addPartnerLinkType(pL.getPartnerLinkType().substring(4), pL.getMyRole(), "ns1:AdditiveSplittingCallback");
+				//else
+					if(pL.getPartnerLinkType().contains("Broker"))
 					addPartnerLinkType(pL.getPartnerLinkType().substring(4), pL.getMyRole(), "ns2:BrokerCallback");
 				else
 					addPartnerLinkType(pL.getPartnerLinkType().substring(4), pL.getMyRole(), "tns:"+wf.getWf_name());

@@ -40,6 +40,7 @@ import Jama.Matrix;
 
 import broker.BrokerSOCResource;
 import broker.Location;
+import broker.Log;
 import broker.MetadataStoreConnection;
 import broker.ResourceMeta;
 import broker.ResourceMetaAdapter;
@@ -104,19 +105,24 @@ public Response storeResource(SOCResource resource)
 		}
 		*/
 
+		
 		final BrokerSOCResource broker_res = new BrokerSOCResource(resourceOnBroker);
+		final Log logfile = new Log(SOCConfiguration.LOG_DIRECTORY);
 		//Wait for the file to be uploaded to split it
 		new Thread(new Runnable() {
 			public void run() {
 				
 			File uploadedfile = new File(broker_res.getFile_path());
-
+			
+			logfile.write("Add Resource Service has been called for the resource: "+ broker_res.getResource_id());
+			
 			while(!uploadedfile.exists());
 		
 			broker_res.setAvailable(true);
 			
 			String output = "File uploaded via Jersey based RESTFul Webservice to: " + broker_res.getFile_path();
-
+			logfile.write("File for the resource " + broker_res.getResource_id()+" has been uploaded!!");
+			
 		//do the splitting of file into two files if additive splitting
 		//and save the  splits on the cloud
 		if(broker_res.getStorage_protocol() == StorageProtocol.ADDITIVE_SPLITTING)
@@ -130,6 +136,8 @@ public Response storeResource(SOCResource resource)
 			splitter.Split(loc_split1, loc_split2);
 			broker_res.addLocation(loc_split1);
 			broker_res.addLocation(loc_split2);
+			
+			logfile.write("Resource " + broker_res.getResource_id()+" has been splitted to the clouds:"+loc_split1.getUrl()+","+loc_split2.getUrl());
 		}
 		
 		
@@ -139,6 +147,7 @@ public Response storeResource(SOCResource resource)
 		try {
 			conn = new MetadataStoreConnection(SOCConfiguration.METADATA_STORE_URL);
 			conn.addSOCResource(broker_res);
+			logfile.write("Resource " + broker_res.getResource_id()+" metadata has been added to the metadata store!");
 			conn.close();
 			
 		} catch (Exception e) {
@@ -220,6 +229,28 @@ public BrokerSOCResource getResource(@PathParam("resourceID") String resourceID 
 	return null;
 	
 }
+@GET
+@Path("/test/{resourceID}") //+resource_id
+@Produces(MediaType.TEXT_PLAIN)
+public String test(@PathParam("resourceID") String resourceID ) {
+	
+	SOCConfiguration socConf = new SOCConfiguration("/etc/soc/soc.conf");
+	MetadataStoreConnection conn; String resource ="AAAA";
+	try {
+		conn = new MetadataStoreConnection(SOCConfiguration.METADATA_STORE_URL);
+		resource= conn.getSOCResource(resourceID);
+		Log logfile = new Log(SOCConfiguration.LOG_DIRECTORY);
+		logfile.write(resource);
+		System.out.println(resource);
+	    conn.close(); 
+	} catch (Exception e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+    
+        return resource;
+}
+
 /*
 @DELETE
 @Path("/{resource_id}")//+resource_id

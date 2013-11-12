@@ -18,6 +18,7 @@ public class SOCConfiguration {
 	public static String  BROKER_URL;
 	public static String  METADATA_STORE_URL;
 	public static String  LOG_DIRECTORY;
+	public static String  CLOUD_USER;
 	private ArrayList<Location> clouds;
 	
 	public static String configuration_file = "/etc/soc/soc.conf";
@@ -35,6 +36,7 @@ public class SOCConfiguration {
  
 			while ((sCurrentLine = br.readLine()) != null) {
 				StringTokenizer tokenizer = new StringTokenizer(sCurrentLine);
+				System.out.println(sCurrentLine);
 				String variable = tokenizer.nextToken("="); variable = variable.trim();
 				String path = tokenizer.nextToken(); path  = path.trim();
 			
@@ -46,7 +48,9 @@ public class SOCConfiguration {
 				else if(variable.equals("WSDLS_PATH"))  WSDLS_PATH = new String(path.substring(1,path.length()-1));
 				else if(variable.equals("METADATA_STORE_URL"))  METADATA_STORE_URL = new String(path.substring(1,path.length()-1));
 				else if(variable.equals("LOG_DIRECTORY"))  LOG_DIRECTORY = new String(path.substring(1,path.length()-1));
+				else if(variable.equals("CLOUD_USER"))   CLOUD_USER = new String(path.substring(1,path.length()-1));
 				else if(variable.contains("CLOUD"))  this.clouds.add(new Location(new String(path.substring(1,path.length()-1))))  ;
+				
 			}
  
 		} catch (IOException e) {
@@ -85,11 +89,14 @@ public class SOCConfiguration {
 		int index = r.nextInt(clouds.size());
 		return clouds.get(index);
 	}
-	/*
+	
 	public static void main(String[] args)
 	{
 		SOCConfiguration conf = new SOCConfiguration();
 		System.out.println(conf.getCloud(0).getUrl());
+		System.out.println(SOCConfiguration.LOG_DIRECTORY);
+		System.out.println(SOCConfiguration.CLOUD_USER);
 	}
-	*/
+	
 }
+

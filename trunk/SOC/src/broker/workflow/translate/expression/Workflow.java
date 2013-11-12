@@ -123,8 +123,8 @@ public class Workflow {
 				//TODO: Add necessary PartnerLinks
 				client_PL = new BpelPartnerLink("client", "tns:"+process.getName(), process.getName()+"Provider", null);
 				process.addPartnerLink(client_PL);
-				AdditiveSplitting_PL = new BpelPartnerLink("AdditiveSplitting_PL", "tns:AdditiveSplitting_PLT", null, "AdditiveSplittingServiceProvider");
-				process.addPartnerLink(AdditiveSplitting_PL);
+			//	AdditiveSplitting_PL = new BpelPartnerLink("AdditiveSplitting_PL", "tns:AdditiveSplitting_PLT", null, "AdditiveSplittingServiceProvider");
+			//	process.addPartnerLink(AdditiveSplitting_PL);
 				Broker_PL  = new BpelPartnerLink("Broker_PL", "tns:Broker_PLT", null, "BrokerServicesProvider");
 				process.addPartnerLink(Broker_PL);
 				
@@ -277,10 +277,10 @@ public class Workflow {
 	{
 		if(service.equals("AdditiveSplitting"))
 		{
-			BpelPartnerLink Local_AddSplit_PL = new BpelPartnerLink("AdditiveSplitting_PL"+PL_number, "tns:AdditiveSplitting_PLT", null, "AdditiveSplittingServiceProvider");
+			BpelPartnerLink Local_AddSplit_PL = new BpelPartnerLink("AdditiveSplitting_PL"+PL_number, "ns1:AdditiveSplitting", null, "AdditiveSplittingProvider");
 			((BpelScopeActivity)bpelCompositeActivity.getChild("Scope"+scope)).addPartnerLink(Local_AddSplit_PL);
 			
-			BpelPartnerLink Local_AddSplitCB_PL = new BpelPartnerLink("AdditiveSplittingCB_PL"+PL_number, "tns:AdditiveSplittingCallback_PLT",  "AdditiveSplittingServiceRequester",null);
+			BpelPartnerLink Local_AddSplitCB_PL = new BpelPartnerLink("AdditiveSplittingCB_PL"+PL_number, "ns1:AdditiveSplitting",  "AdditiveSplittingRequester",null);
 			((BpelScopeActivity)bpelCompositeActivity.getChild("Scope"+scope)).addPartnerLink(Local_AddSplitCB_PL);
 			
 		}
@@ -485,9 +485,118 @@ public class Workflow {
         BpelToVariable to = new BpelToVariable(var); 
         to.setPart("parameters");
         copy.setTo(to);
+       
         assign.addCopy(copy);
         
         ((BpelScopeActivity)bpelCompositeActivity.getChild("Scope"+curr_scope)).addChild(assign);
+        
+	}
+	public void  addCopyVariableToAssign(String assign_name, String variable_name, String member_name, String from_variable, String from_part) throws ParserConfigurationException
+	{
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		DocumentBuilder db = dbf.newDocumentBuilder();
+		Document document = db.newDocument();
+		//org.w3c.dom.Element literalElement= db.parse(new ByteArrayInputStream(new String(message).getBytes())).getDocumentElement();
+		 
+        BpelCopy copy = new BpelCopy();
+        
+        
+        BpelFromVariable from = new BpelFromVariable(from_variable);
+        from.setPart("parameters");
+        from.setQuery(from_part);
+        from.addNamespaceDeclaration("queryLanguage", queryLanguage);
+        copy.setFrom(from);
+        
+        BpelToVariable to = new BpelToVariable(variable_name);
+        to.setPart("parameters");
+        to.setQuery(member_name);
+        to.addNamespaceDeclaration("queryLanguage", queryLanguage);
+        copy.setTo(to);
+        
+        ((BpelAssignActivity)(bpelCompositeActivity.getChild(assign_name))).addCopy(copy);
+		
+	}
+	public void  addCopyVariableToAssign(String assign_name, String variable_name, String member_name, String from_variable, String from_part, int curr_scope) throws ParserConfigurationException
+	{
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		DocumentBuilder db = dbf.newDocumentBuilder();
+		Document document = db.newDocument();
+		//org.w3c.dom.Element literalElement= db.parse(new ByteArrayInputStream(new String(message).getBytes())).getDocumentElement();
+		 
+        BpelCopy copy = new BpelCopy();
+        
+        
+        BpelFromVariable from = new BpelFromVariable(from_variable);
+        from.setPart("parameters");
+        from.setQuery(from_part);
+        from.addNamespaceDeclaration("queryLanguage", queryLanguage);
+        copy.setFrom(from);
+        
+        BpelToVariable to = new BpelToVariable(variable_name);
+        to.setPart("parameters");
+        to.setQuery(member_name);
+        to.addNamespaceDeclaration("queryLanguage", queryLanguage);
+        copy.setTo(to);
+        
+        ((BpelAssignActivity)((BpelScopeActivity)bpelCompositeActivity.getChild("Scope"+curr_scope)).getChild(assign_name)).addCopy(copy);
+		
+	}
+	
+	public void addCopyToAssign(String assign_name, String variable_name, String member_name, String value) throws ParserConfigurationException
+	{
+		
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		DocumentBuilder db = dbf.newDocumentBuilder();
+		Document document = db.newDocument();
+		//org.w3c.dom.Element literalElement= db.parse(new ByteArrayInputStream(new String(message).getBytes())).getDocumentElement();
+		 
+        BpelCopy copy = new BpelCopy();
+        
+        CDATASection cdata = document.createCDATASection("string("+value+")");
+        BpelFromExpression from = new BpelFromExpression(cdata.cloneNode(true));
+        
+        copy.setFrom(from);
+        
+        BpelToVariable to = new BpelToVariable(variable_name);
+        to.setPart("parameters");
+        to.setQuery(member_name);
+        to.addNamespaceDeclaration("queryLanguage", queryLanguage);
+        copy.setTo(to);
+        
+        ((BpelAssignActivity)(bpelCompositeActivity.getChild(assign_name))).addCopy(copy);
+	}
+	public void addCopyToAssign(String assign_name, String variable_name, String member_name, String value, int curr_scope) throws ParserConfigurationException
+	{
+		
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		DocumentBuilder db = dbf.newDocumentBuilder();
+		Document document = db.newDocument();
+		//org.w3c.dom.Element literalElement= db.parse(new ByteArrayInputStream(new String(message).getBytes())).getDocumentElement();
+		 
+        BpelCopy copy = new BpelCopy();
+        
+        CDATASection cdata = document.createCDATASection("string("+value+")");
+        BpelFromExpression from = new BpelFromExpression(cdata.cloneNode(true));
+        
+        copy.setFrom(from);
+        
+        BpelToVariable to = new BpelToVariable(variable_name);
+        to.setPart("parameters");
+        to.setQuery(member_name);
+        to.addNamespaceDeclaration("queryLanguage", queryLanguage);
+        copy.setTo(to);
+        
+        ((BpelAssignActivity)((BpelScopeActivity)bpelCompositeActivity.getChild("Scope"+curr_scope)).getChild(assign_name)).addCopy(copy);
+/*
+        <bpel:copy>
+        <bpel:from expressionLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0">
+            
+        <bpel:to part="parameters" variable="var0">
+            <bpel:query queryLanguage="urn:oasis:names:tc:wsbpel:2.0:sublang:xpath1.0"><![CDATA[ns1:sub_jobID]]></bpel:query>
+        </bpel:to>
+    </bpel:copy>
+  */
+    
         
 	}
 	
