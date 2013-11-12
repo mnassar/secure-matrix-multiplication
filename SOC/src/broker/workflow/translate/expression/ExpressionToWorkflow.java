@@ -425,7 +425,7 @@ public class ExpressionToWorkflow {
 							+ exp_wf.getWf_name()
 							+ "</ws:jobID>"
 							+ "<ws:sub_jobID>"
-							+ sub_jobID
+							+ invoke_counter
 							+ "</ws:sub_jobID>"
 							+ "<ws:matA_ID>"
 							+ left_operand.getResource_id()
@@ -470,6 +470,14 @@ public class ExpressionToWorkflow {
 							curr_scope, invoke_counter);
 					exp_wf.addAssign("Assign" + assign_counter, request_str,
 							"var" + input, curr_scope);
+					
+					exp_wf.addCopyVariableToAssign("Assign" + assign_counter, "var" + input, "ns1:jobID", "input","tns:jobID" ,curr_scope);
+					exp_wf.addCopyToAssign("Assign" + assign_counter, "var" + input, "ns1:sub_jobID", (new Integer(invoke_counter)).toString(),curr_scope);
+					exp_wf.addCopyToAssign("Assign" + assign_counter, "var" + input, "ns1:matA_ID", left_operand.getResource_id(),curr_scope);
+					exp_wf.addCopyToAssign("Assign" + assign_counter, "var" + input, "ns1:matB_ID", right_operand.getResource_id(),curr_scope);
+					                             
+                          
+                       
 					// exp_wf.addAssignToProperty("Assign"+assign_counter,
 					// "tns:subjob_"+invoke_counter,
 					// "<bpel:literal xml:space=\"preserve\"><![CDATA["+sub_jobID+"]]></bpel:literal>",
@@ -585,7 +593,7 @@ public class ExpressionToWorkflow {
 						+ "</splitName>  </add_list>" + "<matA_ID>"
 						+ left_operand.getResource_id() + "</matA_ID>"
 						+ "<matB_ID>" + right_operand.getResource_id()
-						+ "</matB_ID>" + "<callback>" + "Callback"
+						+ "</matB_ID>" + "<callback>" +  SOCConfiguration.BROKER_URL+"/ode/processes/"+exp_wf.getWf_name()+"/callback"
 						+ receive_counter + "</callback>"
 						+ "</bs:add></bpel:literal>";
 
@@ -635,6 +643,8 @@ public class ExpressionToWorkflow {
 				exp_wf.addAssign("Assign" + assign_counter, request_str, "var"
 						+ input);
 
+				exp_wf.addCopyVariableToAssign("Assign" + assign_counter, "var" + input, "job_id", "input","tns:jobID" );
+				exp_wf.addCopyToAssign("Assign" + assign_counter, "var" + input, "op_id", (new Integer(invoke_counter)).toString());
 				// exp_wf.addAssignToProperty("Assign"+assign_counter,
 				// "tns:subjob_"+invoke_counter,
 				// "<bpel:literal xml:space=\"preserve\"><![CDATA["+invoke_counter+"]]></bpel:literal>",

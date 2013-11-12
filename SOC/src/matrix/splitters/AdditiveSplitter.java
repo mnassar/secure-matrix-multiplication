@@ -53,6 +53,7 @@ public class AdditiveSplitter {
 			orig_mat = new String(csv_orig_mat);
 			n= 2; 								// n=2 splits only to split to more do re-splitting for the results
 			splits = new String[n];
+			SOCConfiguration conf = new SOCConfiguration();
 		}
 		
 		public AdditiveSplitter(BrokerSOCResource mat)
@@ -66,7 +67,7 @@ public class AdditiveSplitter {
 
 		public void Split(Location loc_split1, Location loc_split2) 
 		{
-			
+			SOCConfiguration socconf = new SOCConfiguration();
 			splits[0] = new String(SOCConfiguration.BROKER_STORAGE_PATH+"/"+matrix.getResource_id()+"_"+((MatrixMeta)matrix.getResource_meta()).getnRows()+"_"+((MatrixMeta)matrix.getResource_meta()).getnColumns()+"_1");
 			splits[1] = new String(SOCConfiguration.BROKER_STORAGE_PATH+"/"+matrix.getResource_id()+"_"+((MatrixMeta)matrix.getResource_meta()).getnRows()+"_"+((MatrixMeta)matrix.getResource_meta()).getnColumns()+"_2");
 			
@@ -163,7 +164,7 @@ public class AdditiveSplitter {
 		
 		public void Combine(final Location loc_split1, final Location loc_split2) 
 		{
-			
+			SOCConfiguration socconf = new SOCConfiguration();
 			
 			try {
 				Configuration config = new Configuration();
@@ -178,7 +179,7 @@ public class AdditiveSplitter {
 				config.set("mapred.job.tracker", "http://"+server_ip1+":"+jobtracker_port);
 				UserGroupInformation.setConfiguration(config);
 				final Configuration conf = config;
-				UserGroupInformation ugi = UserGroupInformation.createRemoteUser("farida");// UserGroupInformation.getLoginUser());
+				UserGroupInformation ugi = UserGroupInformation.createRemoteUser(SOCConfiguration.CLOUD_USER);// UserGroupInformation.getLoginUser());
 				ugi.doAs(new PrivilegedExceptionAction<Void>() {
 					public Void run() throws Exception {
 						
@@ -397,13 +398,15 @@ public class AdditiveSplitter {
 			ArrayList<Location> locs = new ArrayList<Location>();
 			locs.add(new Location("hdfs://localhost:54310"));
 			locs.add(new Location("hdfs://localhost:54310"));
+			SOCConfiguration conf = new SOCConfiguration();
 			//BrokerSOCResource mat = gson.fromJson(json, BrokerSOCResource.class);
-			BrokerSOCResource mat = new BrokerSOCResource("2745", locs, new MatrixMeta(10,10,"INTEGER"));;
+			BrokerSOCResource mat = new BrokerSOCResource("A", locs, new MatrixMeta(10,10,"INTEGER"));;
 			mat.setFile_path(SOCConfiguration.BROKER_STORAGE_PATH+"/"+mat.getResource_id());
 			System.out.println(mat.getResource_meta().getType());
 			System.out.println(new MatrixMeta(mat.getResource_meta()).getnColumns());
-			AdditiveSplitter splitter = new AdditiveSplitter(mat); 
-			splitter.Combine(new Location("hdfs://localhost:54310"), new Location("hdfs://localhost:54310"));
+			AdditiveSplitter splitter = new AdditiveSplitter(mat);
+			splitter.Split(locs.get(0),locs.get(1));
+			//splitter.Combine(new Location("hdfs://localhost:54310"), new Location("hdfs://localhost:54310"));
 		}
 		
 }

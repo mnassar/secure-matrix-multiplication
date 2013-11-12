@@ -1,12 +1,18 @@
 package broker;
 
 import com.google.gson.Gson;
-import org.codehaus.jackson.annotate.JsonTypeName;
 
-@JsonTypeName("matrix")
+import org.codehaus.jackson.annotate.JsonTypeInfo;
+import org.codehaus.jackson.annotate.JsonTypeName;
+//@JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
+//@JsonTypeName("matrix")
+//@JsonTypeName("matrix")
+//@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 public class MatrixMeta extends ResourceMeta {
 
+	//@JsonIgnore
 	private int nRows;
+	//@JsonIgnore
 	private int nColumns;
 	private String dataType;
 	

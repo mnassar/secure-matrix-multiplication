@@ -7,7 +7,20 @@ public class BrokerSOCResource extends SOCResource{
 	
 	private String resource_id;
 	private ArrayList<Location> locations;
+	private Boolean available;
 	
+	/**
+	 * @return the available
+	 */
+	public Boolean getAvailable() {
+		return available;
+	}
+	/**
+	 * @param available the available to set
+	 */
+	public void setAvailable(Boolean available) {
+		this.available = available;
+	}
 	public String getResource_id() {
 		return resource_id;
 	}
@@ -20,6 +33,7 @@ public class BrokerSOCResource extends SOCResource{
 	public void setLocations(ArrayList<Location> locations) {
 		this.locations = locations;
 	}
+	
 	public void addLocation(Location loc)
 	{
 		if(locations!=null)

@@ -8,6 +8,11 @@ public class Location {
 	private String protocol;
 	private String port_no;
 	private String url;
+	
+	public Location()
+	{
+		super();
+	}
 	/**
 	 * @return the ip
 	 */
@@ -25,9 +30,14 @@ public class Location {
 	public Location(String url) {
 		super();
 		this.setUrl(url);
+		System.out.println(url);
 		StringTokenizer tokenizer = new StringTokenizer(url); 
-		this.setProtocol(tokenizer.nextToken(":"));
-		this.setIP(tokenizer.nextToken(":").substring(2));
+		String prot = tokenizer.nextToken(":");
+		System.out.println(prot);
+		this.setProtocol(prot);
+		String ip = tokenizer.nextToken(":").substring(2);
+		System.out.println(ip);
+		this.setIP(ip);
 		this.setPort_no(tokenizer.nextToken());
 	}
 

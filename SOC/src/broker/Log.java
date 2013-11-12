@@ -32,9 +32,9 @@ public class Log {
 		FileWriter fw;
 		try {
 		
-			fw = new FileWriter(log.getAbsoluteFile());
+			fw = new FileWriter(log.getAbsoluteFile(),true);
 			BufferedWriter bw = new BufferedWriter(fw);
-			bw.append("\n"+(new SimpleDateFormat("hh/mm/ss")).format(new Date())+ ": at Broker SOC: "+string_to_write +"\n");
+			bw.write("\n"+(new SimpleDateFormat("hh:mm:ss")).format(new Date())+ ": at Broker SOC: "+string_to_write +"\n");
 			bw.close();
 			fw.close();
 			
