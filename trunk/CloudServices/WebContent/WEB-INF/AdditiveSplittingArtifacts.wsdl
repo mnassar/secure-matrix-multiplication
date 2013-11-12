@@ -1,0 +1,383 @@
+<?xml version="1.0"?>
+<definitions name="AdditiveSplitting"
+        targetNamespace="http://additivesplitting.bpelprocess"
+        xmlns:tns="http://additivesplitting.bpelprocess"
+        xmlns:plnk="http://docs.oasis-open.org/wsbpel/2.0/plnktype"
+        xmlns="http://schemas.xmlsoap.org/wsdl/"
+        xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+        xmlns:ns="http://www.cloudservices.org/MatServ/" 
+		xmlns:ns1="http://www.brokerservices.org/MatServ/"
+		xmlns:p="http://www.w3.org/2001/XMLSchema"
+ 		xmlns:vprop="http://docs.oasis-open.org/wsbpel/2.0/varprop">
+        
+     <import location="BrokerServices.wsdl" namespace="http://www.brokerservices.org/MatServ/"/>
+  	 <import location="CloudServices.wsdl" namespace="http://www.cloudservices.org/MatServ/"/>
+  	    
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     TYPE DEFINITION - List of services participating in this BPEL process 
+     The default output of the BPEL designer uses strings as input and 
+     output to the BPEL Process. But you can define or import any XML 
+     Schema type and use them as part of the message types.
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->    
+    <types>  
+        <schema attributeFormDefault="unqualified" 
+                elementFormDefault="qualified" 
+                targetNamespace="http://additivesplitting.bpelprocess" 
+                xmlns="http://www.w3.org/2001/XMLSchema"
+                >
+                
+            <element name="AdditiveSplittingRequest">
+                <complexType>
+                    <sequence>
+                        <element name="jobID" type="string" />
+                        <element name="sub_jobID" type="string" />
+                        <element name="matA_ID" type="string" />
+                        <element name="matB_ID" type="string" />
+                        
+                    </sequence>
+                </complexType>
+            </element>
+                  
+            <element name="AdditiveSplittingResponse">
+                <complexType>
+                    <sequence>
+                        <element name="jobID" type="string" />
+                        <element name="sub_jobID" type="string" />
+                        <element name="result"  type="string"/>
+                        	
+                    </sequence>
+                </complexType>
+            </element>
+            <element name="callback_0">
+                <complexType>
+                    <sequence>
+                        <element name="jobID" type="string" />
+                        <element name="sub_jobID" type="string" />
+                        <element name="op_ID" type="string" />
+                        <element name="split" minOccurs="1" maxOccurs="4">
+                        <complexType>
+                        	<sequence>
+                        	<element name="cloud_url" type="string"/>
+                        	<element name="splitA_name" type="string"/>
+                        	<element name="splitB_name" type="string"/>
+                        	</sequence>
+                        	</complexType>
+                        </element>
+                    </sequence>
+                </complexType>
+                
+            </element>
+             <element name="callback_1">
+                <complexType>
+                    <sequence>
+                        <element name="jobID" type="string" />
+                        <element name="sub_jobID" type="string" />
+                        <element name="op_ID" type="string" />
+                        <element name="cloud_url" type="string"/>
+                        <element name="split_name" type="string"/>
+                    </sequence>
+                </complexType>
+            </element>
+            <!--<element name="callback_2">
+                <complexType>
+                    <sequence>
+                        <element name="jobID" type="string" />
+                        <element name="sub_jobID" type="string" />
+                        <element name="cloud_url" type="string"/>
+                        <element name="split_name" type="string"/>
+                    </sequence>
+                </complexType>
+            </element>
+            <element name="callback_3">
+                <complexType>
+                    <sequence>
+                        <element name="jobID" type="string" />
+                        <element name="sub_jobID" type="string" />
+                        <element name="cloud_url" type="string"/>
+                        <element name="split_name" type="string"/>
+                    </sequence>
+                </complexType>
+            </element>
+            <element name="callback_4">
+                <complexType>
+                    <sequence>
+                        <element name="jobID" type="string" />
+                        <element name="sub_jobID" type="string" />
+                        <element name="cloud_url" type="string"/>
+                        <element name="split_name" type="string"/>
+                    </sequence>
+                </complexType>
+            </element>
+            <element name="callback_5">
+                <complexType>
+                    <sequence>
+                        <element name="jobID" type="string" />
+                        <element name="sub_jobID" type="string" />
+                        <element name="cloud_url" type="string"/>
+                        <element name="split_name" type="string"/>
+                    </sequence>
+                </complexType>
+            </element>
+            -->
+            <element name="initiateResponse">
+            	<complexType>
+            		<sequence>
+            			<element name="out" type="string"></element>
+            		</sequence>
+            	</complexType>
+            </element>
+        </schema>
+    </types>
+  
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     MESSAGE TYPE DEFINITION - Definition of the message types used as 
+     part of the port type defintions
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->    
+    <message name="AdditiveSplittingRequestMessage">
+        <part name="parameters" element="tns:AdditiveSplittingRequest"/>
+    </message>
+    
+    <message name="AdditiveSplittingResponseMessage">
+        <part name="parameters" element="tns:AdditiveSplittingResponse"/>
+    </message>
+
+	<message name="callbackRequestMessage_0">
+    	<part element="tns:callback_0" name="parameters"/>
+    </message>
+ 	<message name="callbackRequestMessage_1">
+    	<part element="tns:callback_1" name="parameters"/>
+    </message>
+	<!--
+	<message name="callbackRequest_2">
+    	<part element="tns:callback_2" name="parameters"/>
+    </message>
+	<message name="callbackRequest_3">
+    	<part element="tns:callback_3" name="parameters"/>
+    </message>
+    <message name="callbackRequest_4">
+    	<part element="tns:callback_4" name="parameters"/>
+    </message>
+    <message name="callbackRequest_5">
+    	<part element="tns:callback_5" name="parameters"/>
+    </message>
+    -->
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     PORT TYPE DEFINITION - A port type groups a set of operations into
+     a logical service unit.
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- portType implemented by the AdditiveSplitting BPEL process -->
+   
+    <portType name="AdditiveSplitting">
+        <operation name="initiate">
+            <input message="tns:AdditiveSplittingRequestMessage"/>
+            <output message="tns:AdditiveSplittingResponseMessage"/>
+        </operation>
+        <operation name="resplit_callBack">
+    		<input message="tns:callbackRequestMessage_0"/>
+    	</operation>
+        <operation name="callBack_Operation1">
+    		<input message="tns:callbackRequestMessage_1"/>
+    	</operation>
+    	<!-- <operation name="callBack_Operation2">
+    		<input message="tns:callbackRequest_2"/>
+    	</operation>
+    	 <operation name="callBack_Operation3">
+    		<input message="tns:callbackRequest_3"/>
+    	</operation>
+    	 <operation name="callBack_Operation4">
+    		<input message="tns:callbackRequest_4"/>
+    	</operation>
+    	 <operation name="callBack_Operation5">
+    		<input message="tns:callbackRequest_5"/>
+    	</operation>
+    	-->
+    </portType>
+
+    
+
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     PARTNER LINK TYPE DEFINITION
+         the AdditiveSplitting partnerLinkType binds the provider and
+         requester portType into an asynchronous conversation.
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->    
+    <plnk:partnerLinkType name="AdditiveSplitting">
+        <plnk:role name="AdditiveSplittingProvider" portType="tns:AdditiveSplitting"/>
+     </plnk:partnerLinkType>   
+     <plnk:partnerLinkType name="Cloud_PL">
+        <plnk:role name="CloudServicesProvider" portType="ns:MatServ"/>
+    </plnk:partnerLinkType>  
+     <plnk:partnerLinkType name="Broker_PL">
+        <plnk:role name="BrokerServicesProvider" portType="ns1:MatServ"/>
+    </plnk:partnerLinkType>  
+
+
+<vprop:property name="jobid_CS" type="p:string"/>
+<vprop:propertyAlias messageType="tns:AdditiveSplittingRequestMessage" part="parameters" propertyName="tns:jobid_CS">
+<vprop:query>/tns:jobID</vprop:query>
+</vprop:propertyAlias>
+<vprop:propertyAlias messageType="tns:AdditiveSplittingResponseMessage" part="parameters" propertyName="tns:jobid_CS">
+<vprop:query>/tns:jobID</vprop:query>
+</vprop:propertyAlias>
+<!--
+<vprop:propertyAlias messageType="tns:callbackRequestMessage_1" part="parameters" propertyName="tns:jobid_CS">
+<vprop:query>/tns:jobID</vprop:query>
+</vprop:propertyAlias>
+
+<vprop:propertyAlias messageType="tns:callbackRequest_2" part="parameters" propertyName="tns:jobid_CS">
+<vprop:query>/tns:jobID</vprop:query>
+</vprop:propertyAlias>
+<vprop:propertyAlias messageType="tns:callbackRequest_3" part="parameters" propertyName="tns:jobid_CS">
+<vprop:query>/tns:jobID</vprop:query>
+</vprop:propertyAlias>
+<vprop:propertyAlias messageType="tns:callbackRequest_4" part="parameters" propertyName="tns:jobid_CS">
+<vprop:query>/tns:jobID</vprop:query>
+</vprop:propertyAlias>
+<vprop:propertyAlias messageType="tns:callbackRequest_5" part="parameters" propertyName="tns:jobid_CS">
+<vprop:query>/tns:jobID</vprop:query>
+</vprop:propertyAlias>
+-->
+
+<vprop:property name="sub_jobid_CS" type="p:string"/>
+<vprop:propertyAlias messageType="tns:AdditiveSplittingRequestMessage" part="parameters" propertyName="tns:sub_jobid_CS">
+<vprop:query>/tns:sub_jobID</vprop:query>
+</vprop:propertyAlias>
+<vprop:propertyAlias messageType="tns:AdditiveSplittingResponseMessage" part="parameters" propertyName="tns:sub_jobid_CS">
+<vprop:query>/tns:sub_jobID</vprop:query>
+</vprop:propertyAlias>
+<vprop:propertyAlias messageType="tns:callbackRequestMessage_0" part="parameters" propertyName="tns:sub_jobid_CS">
+<vprop:query>/tns:sub_jobID</vprop:query>
+</vprop:propertyAlias>
+<vprop:propertyAlias messageType="tns:callbackRequestMessage_1" part="parameters" propertyName="tns:sub_jobid_CS">
+<vprop:query>/tns:sub_jobID</vprop:query>
+</vprop:propertyAlias>
+<!--
+<vprop:propertyAlias messageType="tns:callbackRequest_2" part="parameters" propertyName="tns:sub_jobid_CS">
+<vprop:query>/tns:sub_jobID</vprop:query>
+</vprop:propertyAlias>
+<vprop:propertyAlias messageType="tns:callbackRequest_3" part="parameters" propertyName="tns:sub_jobid_CS">
+<vprop:query>/tns:sub_jobID</vprop:query>
+</vprop:propertyAlias>
+<vprop:propertyAlias messageType="tns:callbackRequest_4" part="parameters" propertyName="tns:sub_jobid_CS">
+<vprop:query>/tns:sub_jobID</vprop:query>
+</vprop:propertyAlias>
+<vprop:propertyAlias messageType="tns:callbackRequest_5" part="parameters" propertyName="tns:sub_jobid_CS">
+<vprop:query>/tns:sub_jobID</vprop:query>
+</vprop:propertyAlias>
+-->
+<vprop:property name="op1_CS" type="p:string"/>
+<vprop:propertyAlias messageType="ns:multiplyRequest" part="parameters" propertyName="tns:op1_CS">
+<vprop:query>/op_id</vprop:query>
+</vprop:propertyAlias>
+<vprop:propertyAlias messageType="tns:callbackRequestMessage_1" part="parameters" propertyName="tns:op1_CS">
+<vprop:query>/tns:op_ID</vprop:query>
+</vprop:propertyAlias>
+
+<vprop:property name="op2_CS" type="p:string"/>
+<vprop:propertyAlias messageType="ns:multiplyRequest" part="parameters" propertyName="tns:op2_CS">
+<vprop:query>/op_id</vprop:query>
+</vprop:propertyAlias>
+<vprop:propertyAlias messageType="tns:callbackRequestMessage_1" part="parameters" propertyName="tns:op2_CS">
+<vprop:query>/tns:op_ID</vprop:query>
+</vprop:propertyAlias>
+
+<vprop:property name="op3_CS" type="p:string"/>
+<vprop:propertyAlias messageType="ns:multiplyRequest" part="parameters" propertyName="tns:op3_CS">
+<vprop:query>/op_id</vprop:query>
+</vprop:propertyAlias>
+<vprop:propertyAlias messageType="tns:callbackRequestMessage_1" part="parameters" propertyName="tns:op3_CS">
+<vprop:query>/tns:op_ID</vprop:query>
+</vprop:propertyAlias>
+
+<vprop:property name="op4_CS" type="p:string"/>
+<vprop:propertyAlias messageType="ns:multiplyRequest" part="parameters" propertyName="tns:op4_CS">
+<vprop:query>/op_id</vprop:query>
+</vprop:propertyAlias>
+<vprop:propertyAlias messageType="tns:callbackRequestMessage_1" part="parameters" propertyName="tns:op4_CS">
+<vprop:query>/tns:op_ID</vprop:query>
+</vprop:propertyAlias>
+
+<vprop:property name="op5_CS" type="p:string"/>
+<vprop:propertyAlias messageType="ns1:addRequest" part="parameters" propertyName="tns:op5_CS">
+<vprop:query>/op_id</vprop:query>
+</vprop:propertyAlias>
+<vprop:propertyAlias messageType="tns:callbackRequestMessage_1" part="parameters" propertyName="tns:op5_CS">
+<vprop:query>/tns:op_ID</vprop:query>
+</vprop:propertyAlias>
+
+<vprop:property name="op0_CS" type="p:string"/>
+<vprop:propertyAlias messageType="ns1:resplitRequest" part="parameters" propertyName="tns:op0_CS">
+<vprop:query>/op_id</vprop:query>
+</vprop:propertyAlias>
+<vprop:propertyAlias messageType="tns:callbackRequestMessage_0" part="parameters" propertyName="tns:op0_CS">
+<vprop:query>/tns:op_ID</vprop:query>
+</vprop:propertyAlias>
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     BINDING DEFINITION - Defines the message format and protocol details
+     for a web service.
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <binding name="AdditiveSplittingBinding" type="tns:AdditiveSplitting">
+        <soap:binding style="document"
+    		transport="http://schemas.xmlsoap.org/soap/http"/>
+        <operation name="initiate">
+            <soap:operation
+    			soapAction="http://additivesplitting.bpelprocess/initiate"/>
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+        </operation>
+         <operation name="resplit_callBack">
+    		<soap:operation soapAction="http://additivesplitting.bpelprocess/resplit_callBack"/>
+    		<input>
+    			<soap:body use="literal"/>
+    		</input>
+    	</operation>
+        <operation name="callBack_Operation1">
+    		<soap:operation soapAction="http://additivesplitting.bpelprocess/callBack_Operation1"/>
+    		<input>
+    			<soap:body use="literal"/>
+    		</input>
+    	</operation>
+<!--
+    	 <operation name="callBack_Operation2">
+    		<soap:operation soapAction="http://additivesplitting.bpelprocess/callBack_Operation2"/>
+    		<input>
+    			<soap:body use="literal"/>
+    		</input>
+    	</operation>
+    	 <operation name="callBack_Operation3">
+    		<soap:operation soapAction="http://additivesplitting.bpelprocess/callBack_Operation3"/>
+    		<input>
+    			<soap:body use="literal"/>
+    		</input>
+    	</operation>
+    	 <operation name="callBack_Operation4">
+    		<soap:operation soapAction="http://additivesplitting.bpelprocess/callBack_Operation4"/>
+    		<input>
+    			<soap:body use="literal"/>
+    		</input>
+    	</operation>
+    	 <operation name="callBack_Operation5">
+    		<soap:operation soapAction="http://additivesplitting.bpelprocess/callBack_Operation5"/>
+    		<input>
+    			<soap:body use="literal"/>
+    		</input>
+    	</operation>
+    	-->
+    </binding>
+
+   
+<!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     SERVICE DEFINITION - A service groups a set of ports into
+     a service unit.
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <service name="AdditiveSplittingService">
+        <port name="AdditiveSplittingPort" binding="tns:AdditiveSplittingBinding">
+    		<soap:address location="http://localhost:8080/ode/processes/AdditiveSplitting"/>
+        </port>
+    </service>
+
+    
+</definitions>

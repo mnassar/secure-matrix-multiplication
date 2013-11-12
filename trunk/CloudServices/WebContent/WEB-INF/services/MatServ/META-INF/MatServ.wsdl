@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions name="MatServ" targetNamespace="http://www.cloudservices.org/MatServ/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ws="http://www.cloudservices.org/MatServ/">
+  <wsdl:types>
+    <schema targetNamespace="http://www.cloudservices.org/MatServ/" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:ws="http://www.cloudservices.org/MatServ/">
+    	<element name="multiply">
+    		<complexType>
+    			<sequence>
+    				<element name="op_id" type="string"/>
+    				<element name="job_id" type="string"/>
+    				<element name="matA_ID" type="string"/>
+    				<element name="matB_ID" type="string"/>
+    				<element name="callback" type="string"/>
+    			</sequence>
+    		</complexType>
+    	</element>
+
+    	
+    </schema>
+  </wsdl:types>
+  <wsdl:message name="multiplyRequest">
+    <wsdl:part name="parameters" element="ws:multiply">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:portType name="MatServ">
+    <wsdl:operation name="multiply">
+      <wsdl:input message="ws:multiplyRequest">
+    </wsdl:input>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="CloudServicesBinding" type="ws:MatServ">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="multiply">
+      <soap:operation soapAction="http://www.cloudservices.org/MatServ/multiply"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="MatServ">
+    <wsdl:port name="CloudServicesPort" binding="ws:CloudServicesBinding">
+      <soap:address location="http://localhost:8080/CloudServices/services/MatServ"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>
