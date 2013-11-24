@@ -11,6 +11,7 @@ import java.io.IOException;
 import javax.xml.parsers.*;
 import javax.ws.rs.core.MediaType;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.jsontype.NamedType;
 import org.codehaus.jackson.map.module.SimpleModule;
 import org.xml.sax.SAXException;
 
@@ -140,7 +141,8 @@ public class SOCClient {
 		try {
 
 			System.out.println(service.getURI().toString());
-
+			defaultMapper.registerSubtypes(new NamedType(MatrixMeta.class, "matrix"));
+			//defaultMapper.getSerializationConfig().constructSpecializedType(ResourceMeta.class, MatrixMeta.class);
 			String meta_data= defaultMapper.writeValueAsString(resource);
 
 			System.out.println(meta_data);
@@ -588,19 +590,19 @@ public class SOCClient {
 
 	public static void main(String[] args) throws Exception
 	{
-		SOCClient soc = new SOCClient("http://10.160.2.27:8080/SOC/rest");
-		soc.connect();
+	//	SOCClient soc = new SOCClient("http://localhost:8080/SOC/rest");
+	//	soc.connect();
 		
 		  //FTP Test
-		/*FTPClient ftp = new FTPClient();
-		ftp.connect("10.160.2.27");
-		ftp.login("hadoop", "broker_1212");
-		ftp.changeDirectory("/home/hadoop/Documents/SOC/resources");
-		*///String dir = ftp.currentDirectory();
+		FTPClient ftp = new FTPClient();
+		ftp.connect("localhost");
+		ftp.login("farida", "yasmine_123");
+		ftp.changeDirectory("/home/farida/Documents/SOC/resources");
+		//String dir = ftp.currentDirectory();
 		
 		//System.out.println(dir);
 		//client.changeDirectory(newPath);
-	/*
+	
 		String file_name =null;
 		StringTokenizer tokenizer = new StringTokenizer("/home/farida/Documents/A2","/");
 		while(tokenizer.hasMoreTokens())
@@ -608,28 +610,28 @@ public class SOCClient {
 			file_name = tokenizer.nextToken();
 		}
 		ftp.upload(new File("/home/farida/Documents/A2"));
-		ftp.rename(file_name, "uploaded");
+		ftp.rename(file_name, "uploadedA2");
 		ftp.disconnect(true);
-		*/
+		
 		
 		//String res  = soc.getResource("123"); 
 		//System.out.println(res);
 		//String job  = soc.getJobInfo("9533"); 
 		//System.out.println(job);
-		
-final SOCConfiguration conf = new SOCConfiguration();
-		
-		Random r= new Random();
-		String resource_id = new Integer(r.nextInt(10000)).toString();
-		
-		//String resource_id = UUID.randomUUID().toString();
-		
-		String uploadedFileLocation = SOCConfiguration.BROKER_STORAGE_PATH +"/"+ resource_id;
 
-		BrokerSOCResource resourceOnBroker = new BrokerSOCResource(new BrokerSOCResource("1234"));
-		resourceOnBroker.setResource_id(resource_id);
-		resourceOnBroker.setFile_path(uploadedFileLocation);
-		
+//		final SOCConfiguration conf = new SOCConfiguration();
+//
+//		Random r= new Random();
+//		String resource_id = new Integer(r.nextInt(10000)).toString();
+//
+//		//String resource_id = UUID.randomUUID().toString();
+//
+//		String uploadedFileLocation = SOCConfiguration.BROKER_STORAGE_PATH +"/"+ resource_id;
+//
+//		BrokerSOCResource resourceOnBroker = new BrokerSOCResource(new BrokerSOCResource("1234"));
+//		resourceOnBroker.setResource_id(resource_id);
+//		resourceOnBroker.setFile_path(uploadedFileLocation);
+//
 		    
 	}
 }

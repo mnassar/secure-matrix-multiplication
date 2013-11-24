@@ -30,13 +30,13 @@ public class Location {
 	public Location(String url) {
 		super();
 		this.setUrl(url);
-		System.out.println(url);
+		//System.out.println(url);
 		StringTokenizer tokenizer = new StringTokenizer(url); 
 		String prot = tokenizer.nextToken(":");
-		System.out.println(prot);
+		//System.out.println(prot);
 		this.setProtocol(prot);
 		String ip = tokenizer.nextToken(":").substring(2);
-		System.out.println(ip);
+		//System.out.println(ip);
 		this.setIP(ip);
 		this.setPort_no(tokenizer.nextToken());
 	}

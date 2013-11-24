@@ -15,13 +15,13 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 //@JsonIgnoreProperties(ignoreUnknown = true)
 
-/*@JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.WRAPPER_OBJECT, property="type" )
+@JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.PROPERTY, property="type" )
 @JsonSubTypes({
 
-      @JsonSubTypes.Type(value=broker.MatrixMeta.class, name="matrix")
+      @JsonSubTypes.Type(value=MatrixMeta.class, name="matrix")
 
   })
-  */
+  
 //@JsonSubTypes({ @JsonSubTypes.Type(value = MatrixMeta.class, name="matrix")}) 
 public class ResourceMeta {
 
