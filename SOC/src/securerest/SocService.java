@@ -130,8 +130,13 @@ public Response storeResource(SOCResource resource)
 			AdditiveSplitter splitter = new AdditiveSplitter(broker_res);
 			
 			Location loc_split1 = conf.getRandomCloud();
-			Location loc_split2 ;
-			while((loc_split2= conf.getRandomCloud())!=loc_split1);
+			Location loc_split2 = conf.getRandomCloud();
+			
+			
+			//This if for the remote testing
+			//while(loc_split2.getIP().equals(loc_split1.getIP()))
+			//	loc_split2 = conf.getRandomCloud();
+			//////////////////////////////////////
 			
 			splitter.Split(loc_split1, loc_split2);
 			broker_res.addLocation(loc_split1);

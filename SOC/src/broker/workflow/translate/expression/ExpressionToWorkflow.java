@@ -167,7 +167,7 @@ public class ExpressionToWorkflow {
 
 	public void convert() throws ParserConfigurationException, SAXException,
 	IOException, ParseException {
-		Node exp_tree = j.parse(expression);
+		Node exp_tree = j.parseExpression(expression);
 		// // Traverse the expression tree to create the workflow
 		traverse(exp_tree);
 
@@ -221,7 +221,7 @@ public class ExpressionToWorkflow {
 		// TODO Auto-generated method stub
 
 		// String expression = "(A*B+C*D)+(A*D+ B*C)+(A*C+B*D)";
-		String expression = "A*B+C*D";
+		String expression = "A*B+C+D";
 		ExpressionTranslator translator = new ExpressionTranslator(expression);
 		// **********************
 		// read data from the metadata store
@@ -327,11 +327,8 @@ public class ExpressionToWorkflow {
 					// current_flow++;
 					exp_wf.connectFlowToFlow(flow_counter,
 							flow_stack.get(current_flow - 2));
-
 				}
-
 			}
-
 		}
 
 		if (left_node != null) {
@@ -360,11 +357,27 @@ public class ExpressionToWorkflow {
 		if (curr_node.jjtGetNumChildren() == 1) {
 			// Unary operator
 		} else {
-			if(tos!= -1 && tos-1 !=-1)
+			//if(tos!= -1 && tos-1 !=-1)
+			if (curr_node.jjtGetChild(0).getClass() == ASTFunNode.class
+					&& curr_node.jjtGetChild(1).getClass() == ASTFunNode.class)
 			{
 				right_operand = result_stack.get(tos--);
 				left_operand = result_stack.get(tos--);
 			}
+			else if (curr_node.jjtGetChild(0).getClass() == ASTFunNode.class
+					&& curr_node.jjtGetChild(1).getClass() != ASTFunNode.class)
+			{
+				left_operand = result_stack.get(tos--);
+				
+			}
+			else if (curr_node.jjtGetChild(0).getClass() != ASTFunNode.class
+					&& curr_node.jjtGetChild(1).getClass() == ASTFunNode.class)
+			{
+				right_operand = result_stack.get(tos--);
+				
+			}
+			
+			
 			int output = 0;
 			// Create ASSIGN Activity
 			// ADD INVOKE and Callback RECEIVE activities
@@ -389,9 +402,15 @@ public class ExpressionToWorkflow {
 
 						SOCConfiguration conf = new SOCConfiguration();
 						Location loc_split1 = conf.getRandomCloud();
-						Location loc_split2;
-						while ((loc_split2 = conf.getRandomCloud()) != loc_split1)
-							;
+						// Location loc_split2;
+						// while ((loc_split2 = conf.getRandomCloud()) != loc_split1)	;
+
+						Location loc_split2 = conf.getRandomCloud();
+
+						//For remote testing
+						//while (loc_split2.getIP().equals(loc_split1.getIP()))
+						//loc_split2= conf.getRandomCloud();
+						/////////////////////////////////////
 						// splitter.Split(loc_split1, loc_split2);
 						result.addLocation(loc_split1);
 						result.addLocation(loc_split2);
@@ -438,31 +457,9 @@ public class ExpressionToWorkflow {
 					int input = var_counter;
 					exp_wf.addMessageVariable("var" + input,
 							"ns1:AdditiveSplittingRequestMessage"); // reading
-					// variable
-					// type may
-					// be done
-					// from
-					// parsing
-					// the
-					// additive
-					// splitting
-					// bpel file
-					// and
-					// getting
-					// the
-					// variable
-					// type but
-					// this
-					// would be
-					// complicated
-					// and would
-					// take
-					// time,
-					// while
-					// they are
-					// not
-					// supposed
-					// to change
+					// variable type may be done from parsing the additive splitting bpel file
+					// and getting the variable type but this would be complicated and would take
+					// time, while they are not supposed to change
 					// To add a local partner link to the scope
 					curr_scope += 1;
 					exp_wf.addScope(curr_scope);
@@ -470,14 +467,14 @@ public class ExpressionToWorkflow {
 							curr_scope, invoke_counter);
 					exp_wf.addAssign("Assign" + assign_counter, request_str,
 							"var" + input, curr_scope);
-					
+
 					exp_wf.addCopyVariableToAssign("Assign" + assign_counter, "var" + input, "ns1:jobID", "input","tns:jobID" ,curr_scope);
 					exp_wf.addCopyToAssign("Assign" + assign_counter, "var" + input, "ns1:sub_jobID", (new Integer(invoke_counter)).toString(),curr_scope);
 					exp_wf.addCopyToAssign("Assign" + assign_counter, "var" + input, "ns1:matA_ID", left_operand.getResource_id(),curr_scope);
 					exp_wf.addCopyToAssign("Assign" + assign_counter, "var" + input, "ns1:matB_ID", right_operand.getResource_id(),curr_scope);
-					                             
-                          
-                       
+
+
+
 					// exp_wf.addAssignToProperty("Assign"+assign_counter,
 					// "tns:subjob_"+invoke_counter,
 					// "<bpel:literal xml:space=\"preserve\"><![CDATA["+sub_jobID+"]]></bpel:literal>",
@@ -519,8 +516,13 @@ public class ExpressionToWorkflow {
 					if (current_flow > 0)
 						exp_wf.connectToFlow(flow_stack.get(current_flow - 1),
 								"Scope" + curr_scope);
+					else if (current_flow ==0 && flow_stack.size()==0)
+						exp_wf.updateLastNode("Scope" + curr_scope);
 					else
+					{
+						exp_wf.updateLastNode("Scope" + curr_scope);
 						exp_wf.connectToEnd("Scope" + curr_scope);
+					}
 					/*
 					 * exp_wf.connectToLastNode("Assign"+assign_counter);
 					 * if(current_flow >0)
@@ -558,9 +560,16 @@ public class ExpressionToWorkflow {
 						AdditiveSplitter splitter = new AdditiveSplitter(result);
 						SOCConfiguration conf = new SOCConfiguration();
 						Location loc_split1 = conf.getRandomCloud();
-						Location loc_split2;
-						while ((loc_split2 = conf.getRandomCloud()) != loc_split1)
-							;
+						// Location loc_split2;
+						// while ((loc_split2 = conf.getRandomCloud()) != loc_split1)	;
+
+						Location loc_split2 = conf.getRandomCloud();
+
+						//For remote testing
+						//while (loc_split2.getIP().equals(loc_split1.getIP()))
+						//loc_split2= conf.getRandomCloud();
+						/////////////////////////////////////
+
 						// splitter.Split(loc_split1, loc_split2);
 						result.addLocation(loc_split1);
 						result.addLocation(loc_split2);
@@ -607,39 +616,10 @@ public class ExpressionToWorkflow {
 
 				int input = var_counter;
 				exp_wf.addMessageVariable("var" + input, "ns2:addRequest"); // reading
-				// variable
-				// type
-				// may
-				// be
-				// done
-				// from
-				// parsing
-				// the
-				// additive
-				// splitting
-				// bpel
-				// file
-				// and
-				// getting
-				// the
-				// variable
-				// type
-				// but
-				// this
-				// would
-				// be
-				// complicated
-				// and
-				// would
-				// take
-				// time,
-				// while
-				// they
-				// are
-				// not
-				// supposed
-				// to
-				// change
+				// variable type may be done from parsing the additive splitting bpel
+				// file and getting the variable type but this would be complicated
+				// and would take time while they are not supposed to change
+
 				exp_wf.addAssign("Assign" + assign_counter, request_str, "var"
 						+ input);
 
@@ -688,8 +668,17 @@ public class ExpressionToWorkflow {
 				if (current_flow > 0)
 					exp_wf.connectToFlow(flow_stack.get(current_flow - 1),
 							"Callback" + receive_counter);
+				else if (current_flow ==0 && flow_stack.size()==0)
+				{
+
+					exp_wf.updateLastNode("Callback" + receive_counter);
+				}
+
 				else
+				{
+					exp_wf.updateLastNode("Callback" + receive_counter);
 					exp_wf.connectToEnd("Callback" + receive_counter);
+				}
 
 				assign_counter++;
 				invoke_counter++;

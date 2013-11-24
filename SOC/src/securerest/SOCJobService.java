@@ -105,7 +105,7 @@ import java.util.concurrent.TimeUnit;
 public class SOCJobService {
 
 	protected final static ObjectMapper defaultMapper = new ObjectMapper();
-	
+
 	private ServiceClientUtil _client;
 
 	@POST
@@ -129,7 +129,7 @@ public class SOCJobService {
 		stat.setJobStatus("Job in progress..");
 		jobOnBroker.setStatus(stat);
 
-		
+
 		//save data in the metadata store
 		MetadataStoreConnection conn;
 		try {
@@ -189,7 +189,8 @@ public class SOCJobService {
 							}
 
 						}
-conn.close();
+						conn.close();
+						
 						ExpressionToWorkflow workflow_generator = new ExpressionToWorkflow(translator);
 						logfile.write("Workflow generation for job " + job_to_start.getJob_Id()+" has been started ...");
 						workflow_generator.initialise();
@@ -268,54 +269,54 @@ conn.close();
 								org.apache.axiom.soap.SOAPEnvelope response = inMsgtCtx.getEnvelope();
 								String xml = new String(response.toStringWithConsume());
 								System.out.println(xml); 
-	
+
 								String response_job_id=null;
 								String response_instance_id=null;
-								
+
 								/*System.out.println(response); 
 								Iterator i = response.getBody().getChildElements();
-								
+
 								OMElement elem = (OMElement)i.next();
 								response_job_id= new String(elem.getText());
 								elem = (OMElement)i.next();
-								
+
 								response_instance_id= new String(elem.getText());
-*/
+								 */
 								DocumentBuilderFactory factory =
 										DocumentBuilderFactory.newInstance();
-										DocumentBuilder parser;
-										Document doc;
-										try {
-										parser = factory.newDocumentBuilder();
-										
-										InputSource is = new InputSource();
-										is.setCharacterStream(new StringReader(xml));
-										doc = parser.parse(is);
-										
-										NodeList nodes = doc.getElementsByTagName(job_to_start.getJob_Id()+"Response");
+								DocumentBuilder parser;
+								Document doc;
+								try {
+									parser = factory.newDocumentBuilder();
 
-										Element element = (Element) nodes.item(0);
+									InputSource is = new InputSource();
+									is.setCharacterStream(new StringReader(xml));
+									doc = parser.parse(is);
 
-										NodeList name = element.getElementsByTagName("tns:jobID");
-										Element line = (Element) name.item(0);
-										response_job_id = new String(((org.w3c.dom.CharacterData)line.getFirstChild()).getData());
-										
-										NodeList name2 = element.getElementsByTagName("tns:instanceID");
-										Element line2 = (Element) name.item(0);
-										response_instance_id = new String(((org.w3c.dom.CharacterData)line.getFirstChild()).getData());
-										
-										} catch(ParserConfigurationException e) {
-										// problem with parser
-										e.printStackTrace();
-										} catch(SAXException ex) {
-										// problem parsing
-										ex.printStackTrace();
-										} 
-										
+									NodeList nodes = doc.getElementsByTagName(job_to_start.getJob_Id()+"Response");
+
+									Element element = (Element) nodes.item(0);
+
+									NodeList name = element.getElementsByTagName("tns:jobID");
+									Element line = (Element) name.item(0);
+									response_job_id = new String(((org.w3c.dom.CharacterData)line.getFirstChild()).getData());
+
+									NodeList name2 = element.getElementsByTagName("tns:instanceID");
+									Element line2 = (Element) name.item(0);
+									response_instance_id = new String(((org.w3c.dom.CharacterData)line.getFirstChild()).getData());
+
+								} catch(ParserConfigurationException e) {
+									// problem with parser
+									e.printStackTrace();
+								} catch(SAXException ex) {
+									// problem parsing
+									ex.printStackTrace();
+								} 
+
 								job_to_start.setBpel_instanceID(response_instance_id);
 								_messageContext.getTransportOut().getSender().cleanup(_messageContext);
 								job_to_start.getStatus().setJobStatus("Job in progress ....");
-								
+
 								conn = new MetadataStoreConnection(SOCConfiguration.METADATA_STORE_URL);
 								conn.updateSOCJob(job_to_start);
 								conn.close();
@@ -388,77 +389,77 @@ conn.close();
 		return null;
 
 	}
-	
-	
+
+
 	@GET
 	@Path("/status/{jobID}") //+job_id
 	@Produces(MediaType.APPLICATION_JSON)
 	public SOCJobStatus getJobStatus(@PathParam("jobID") String jobID) {
 
-	SOCConfiguration conf = new SOCConfiguration();
-	MetadataStoreConnection conn;
-	SOCJob job = null;
-	try {
-		conn = new MetadataStoreConnection(SOCConfiguration.METADATA_STORE_URL);
-		String job_json = conn.getSOCJob(jobID);
-		
-		Gson gson = new Gson();
-		job = gson.fromJson(job_json, SOCJob.class);
-		
-		String instanceID =null; //should be get from the metadataStore
-
-		if(job !=null)
-			instanceID = job.getBpel_instanceID();
-		else
-			return new SOCJobStatus("No job instance with this ID is found!!");
-
-		if(instanceID == null)
-			return new SOCJobStatus(job.getStatus());
-		String duration = null;
-		_client = new ServiceClientUtil();
-		OMElement root = _client.buildMessage("getInstanceInfo", new String[] {"iid"}, new String[] {instanceID});
-		OMElement result =null;
-		Date sDate = null;
-		Date eDate =null;
+		SOCConfiguration conf = new SOCConfiguration();
+		MetadataStoreConnection conn;
+		SOCJob job = null;
 		try {
+			conn = new MetadataStoreConnection(SOCConfiguration.METADATA_STORE_URL);
+			String job_json = conn.getSOCJob(jobID);
 
-			result = sendToIM(root);
-			String[] response = parseXML(result.toStringWithConsume());
-			DateFormat xsdDF = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
-			//Date format: 2013-04-01T22:50:38.877-07:00
-			//<axis2ns363:getInstanceInfoResponse xmlns:axis2ns363="http://www.apache.org/ode/pmapi"><instance-info><ns:iid xmlns:ns="http://www.apache.org/ode/pmapi/types/2006/08/02/">26451</ns:iid><ns:pid xmlns:ns="http://www.apache.org/ode/pmapi/types/2006/08/02/">{http://matrix.bpelprocess}WF_Process-28</ns:pid><ns:process-name xmlns:ns="http://www.apache.org/ode/pmapi/types/2006/08/02/" xmlns:mat="http://matrix.bpelprocess">mat:WF_Process</ns:process-name><ns:root-scope xmlns:ns="http://www.apache.org/ode/pmapi/types/2006/08/02/" siid="26501" status="ACTIVE" name="__PROCESS_SCOPE:WF_Process" modelId="76" /><ns:status xmlns:ns="http://www.apache.org/ode/pmapi/types/2006/08/02/">ACTIVE</ns:status><ns:dt-started xmlns:ns="http://www.apache.org/ode/pmapi/types/2006/08/02/">2013-04-01T22:50:38.877-07:00</ns:dt-started><ns:dt-last-active xmlns:ns="http://www.apache.org/ode/pmapi/types/2006/08/02/">2013-04-01T22:50:41.098-07:00</ns:dt-last-active> .....
-			sDate = xsdDF.parse(response[1]); 
-			eDate= xsdDF.parse(response[2]);
+			Gson gson = new Gson();
+			job = gson.fromJson(job_json, SOCJob.class);
 
-			job.setJobCompletionDate(eDate);
-			job.getStatus().setJobStatus(response[0]);
-	//		long diffInMillies = eDate.getTime() - sDate.getTime();
-    //		long difference = TimeUnit.SECONDS.convert(diffInMillies,TimeUnit.MILLISECONDS);
+			String instanceID =null; //should be get from the metadataStore
 
-			long diffInMillies = eDate.getTime() - job.getStatus().getJobSubmissionDate().getTime();
-			long difference = TimeUnit.SECONDS.convert(diffInMillies,TimeUnit.MILLISECONDS);
+			if(job !=null)
+				instanceID = job.getBpel_instanceID();
+			else
+				return new SOCJobStatus("No job instance with this ID is found!!");
 
-			duration = String.valueOf(difference);
+			if(instanceID == null)
+				return new SOCJobStatus(job.getStatus());
+			String duration = null;
+			_client = new ServiceClientUtil();
+			OMElement root = _client.buildMessage("getInstanceInfo", new String[] {"iid"}, new String[] {instanceID});
+			OMElement result =null;
+			Date sDate = null;
+			Date eDate =null;
+			try {
 
-			conn.updateSOCJob(job);
-			conn.close();
-			
-			return job.getStatus();
-		} catch (AxisFault | XMLStreamException  e) {
-			// TODO Auto-generated catch block
+				result = sendToIM(root);
+				String[] response = parseXML(result.toStringWithConsume());
+				DateFormat xsdDF = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+				//Date format: 2013-04-01T22:50:38.877-07:00
+				//<axis2ns363:getInstanceInfoResponse xmlns:axis2ns363="http://www.apache.org/ode/pmapi"><instance-info><ns:iid xmlns:ns="http://www.apache.org/ode/pmapi/types/2006/08/02/">26451</ns:iid><ns:pid xmlns:ns="http://www.apache.org/ode/pmapi/types/2006/08/02/">{http://matrix.bpelprocess}WF_Process-28</ns:pid><ns:process-name xmlns:ns="http://www.apache.org/ode/pmapi/types/2006/08/02/" xmlns:mat="http://matrix.bpelprocess">mat:WF_Process</ns:process-name><ns:root-scope xmlns:ns="http://www.apache.org/ode/pmapi/types/2006/08/02/" siid="26501" status="ACTIVE" name="__PROCESS_SCOPE:WF_Process" modelId="76" /><ns:status xmlns:ns="http://www.apache.org/ode/pmapi/types/2006/08/02/">ACTIVE</ns:status><ns:dt-started xmlns:ns="http://www.apache.org/ode/pmapi/types/2006/08/02/">2013-04-01T22:50:38.877-07:00</ns:dt-started><ns:dt-last-active xmlns:ns="http://www.apache.org/ode/pmapi/types/2006/08/02/">2013-04-01T22:50:41.098-07:00</ns:dt-last-active> .....
+				sDate = xsdDF.parse(response[1]); 
+				eDate= xsdDF.parse(response[2]);
+
+				job.setJobCompletionDate(eDate);
+				job.getStatus().setJobStatus(response[0]);
+				//		long diffInMillies = eDate.getTime() - sDate.getTime();
+				//		long difference = TimeUnit.SECONDS.convert(diffInMillies,TimeUnit.MILLISECONDS);
+
+				long diffInMillies = eDate.getTime() - job.getStatus().getJobSubmissionDate().getTime();
+				long difference = TimeUnit.SECONDS.convert(diffInMillies,TimeUnit.MILLISECONDS);
+
+				duration = String.valueOf(difference);
+
+				conn.updateSOCJob(job);
+				conn.close();
+
+				return job.getStatus();
+			} catch (AxisFault | XMLStreamException  e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		} catch (Exception e) {
 			e.printStackTrace();
+			return new SOCJobStatus(job.getStatus());
+			// TODO Auto-generated catch block
+
+
 		}
-	
-	} catch (Exception e) {
-		e.printStackTrace();
-		return new SOCJobStatus(job.getStatus());
-		// TODO Auto-generated catch block
-		
-		
+
+		return new SOCJobStatus("No job instance with this ID is found!!");
 	}
-	
-	return new SOCJobStatus("No job instance with this ID is found!!");
-}
 	private  String[] parseXML(String result)
 	{
 		DocumentBuilder db;
@@ -485,7 +486,7 @@ conn.close();
 				NodeList secondPath = element.getElementsByTagName("ns:dt-last-active");
 				line = (Element) secondPath.item(0);
 				String end_date=new String(((CharacterData)line.getFirstChild()).getData());
-				
+
 				String[] response = new String[4];
 				//response[0] = new String(duration);
 				response[0] = new String(status);
@@ -537,7 +538,7 @@ public void deleteResource(@PathParam("resourceID") String resourceID)
 }
 	 */
 
-/*
+	/*
 	@POST
 	@Path("/job")
 	@Consumes(MediaType.APPLICATION_JSON) //Job description
@@ -575,7 +576,7 @@ public void deleteResource(@PathParam("resourceID") String resourceID)
 	{
 		return new MatrixOP();
 	}
-*/
+	 */
 	private OMElement sendToIM(OMElement msg) throws AxisFault {
 		System.out.println("Calling ODE service ...." );
 		return _client.send(msg, SOCConfiguration.BROKER_URL+"/ode/processes/InstanceManagement/getInstanceInfo");

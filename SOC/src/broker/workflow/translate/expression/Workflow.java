@@ -38,6 +38,7 @@ import org.unify_framework.instances.bpel.BpelImport;
 import org.unify_framework.instances.bpel.BpelInvokeActivity;
 import org.unify_framework.instances.bpel.BpelPartnerLink;
 import org.unify_framework.instances.bpel.BpelProcess;
+import org.unify_framework.instances.bpel.BpelReceiveActivity;
 import org.unify_framework.instances.bpel.BpelReplyActivity;
 import org.unify_framework.instances.bpel.BpelScope;
 import org.unify_framework.instances.bpel.BpelScopeActivity;
@@ -731,7 +732,7 @@ public class Workflow {
 	}
 	public void connectToScopeStart(String activ1_name, String scope_name)
 	{
-		
+		 	
 		Node activ2 =(BpelScopeActivity)bpelCompositeActivity.getChild(scope_name);
 		Node activ1 = ((BpelScopeActivity)activ2).getChild(activ1_name);
 		
@@ -827,7 +828,7 @@ public class Workflow {
 			
 				bpelCompositeActivity.connect(((BpelAndJoin)bpelCompositeActivity.getChild(last_node)).getControlOutputPort(),((BpelAssignActivity)bpelCompositeActivity.getChild(node_name)).getControlInputPort());
 			else if(bpelCompositeActivity.getChild(node_name).getClass() == BpelScopeActivity.class)
-				bpelCompositeActivity.connect(((BpelAndJoin)bpelCompositeActivity.getChild(last_node)).getControlOutputPort(),((BpelScopeActivity)bpelCompositeActivity.getChild(node_name)).getEndEvent().getControlInputPort());
+				bpelCompositeActivity.connect(((BpelAndJoin)bpelCompositeActivity.getChild(last_node)).getControlOutputPort(),((BpelScopeActivity)bpelCompositeActivity.getChild(node_name)).getControlInputPort());
 		}
 		else if (bpelCompositeActivity.getChild(last_node).getClass() == BpelAndSplit.class )
 		{
@@ -839,6 +840,29 @@ public class Workflow {
 			else if(bpelCompositeActivity.getChild(node_name).getClass() == BpelScopeActivity.class)
 				bpelCompositeActivity.connect(((BpelAndSplit)bpelCompositeActivity.getChild(last_node)).getNewControlOutputPort(),((BpelScopeActivity)bpelCompositeActivity.getChild(node_name)).getControlInputPort());
 		}
+		else if(bpelCompositeActivity.getChild(last_node).getClass() == BpelScopeActivity.class )
+		{
+	
+			if(bpelCompositeActivity.getChild(node_name).getClass() == BpelAssignActivity.class )
+				
+				bpelCompositeActivity.connect(((BpelScopeActivity)bpelCompositeActivity.getChild(last_node)).getControlOutputPort(),((BpelAssignActivity)bpelCompositeActivity.getChild(node_name)).getControlInputPort());
+			
+			else if(bpelCompositeActivity.getChild(node_name).getClass() == BpelInvokeActivity.class)
+				bpelCompositeActivity.connect(((BpelScopeActivity)bpelCompositeActivity.getChild(last_node)).getControlOutputPort(),((BpelInvokeActivity)bpelCompositeActivity.getChild(node_name)).getControlInputPort());
+			
+			else if(bpelCompositeActivity.getChild(node_name).getClass() == BpelCompositeReceiveActivity.class)
+				bpelCompositeActivity.connect(((BpelScopeActivity)bpelCompositeActivity.getChild(last_node)).getControlOutputPort(),((BpelCompositeReceiveActivity)bpelCompositeActivity.getChild(node_name)).getControlInputPort());
+			
+			else if(bpelCompositeActivity.getChild(node_name).getClass() == BpelScopeActivity.class)
+				bpelCompositeActivity.connect(((BpelScopeActivity)bpelCompositeActivity.getChild(last_node)).getControlOutputPort(),((BpelScopeActivity)bpelCompositeActivity.getChild(node_name)).getEndEvent().getControlInputPort());
+		}
+		
+		else if(bpelCompositeActivity.getChild(last_node).getClass() == BpelCompositeReplyActivity.class)
+		{
+			bpelCompositeActivity.connect(bpelCompositeActivity.getChild(last_node),bpelCompositeActivity.getChild(node_name));
+		}
+
+			
 	}
 	
 	public void serialize()
@@ -846,6 +870,7 @@ public class Workflow {
 		//just for testing
 		//bpelCompositeActivity.connect(initial_receive, bpelCompositeActivity.getChild("Assign0"));
 		//bpelCompositeActivity.connect(bpelCompositeActivity.getChild("Callback0"), bpelCompositeActivity.getEndEvent());
+		bpelCompositeActivity.connect(bpelCompositeActivity.getChild(last_node), bpelCompositeActivity.getEndEvent());
 		///////////////////////////////////
 		System.out.println(getFolder_Path());
 		System.out.println(wf_name);

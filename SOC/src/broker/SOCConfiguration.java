@@ -36,7 +36,7 @@ public class SOCConfiguration {
  
 			while ((sCurrentLine = br.readLine()) != null) {
 				StringTokenizer tokenizer = new StringTokenizer(sCurrentLine);
-				System.out.println(sCurrentLine);
+				//System.out.println(sCurrentLine);
 				String variable = tokenizer.nextToken("="); variable = variable.trim();
 				String path = tokenizer.nextToken(); path  = path.trim();
 			
